@@ -22,6 +22,9 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import AddInvoices from "./adminpage/scenes/invoices/addinvoices";
 import AddClient from "./adminpage/scenes/addclient/addclient";
+import Client from "./adminpage/scenes/client";
+import Appointment from "./adminpage/scenes/Appointment";
+import Appointmentform from "./adminpage/scenes/Appointment/appointmentform";
 import {
   GavelOutlined,
   HomeMaxOutlined,
@@ -98,6 +101,9 @@ const App = () => {
               <Route path="bar" element={<Bar />} />
               <Route path="invoices" element={<Invoices />} />
               <Route path="addclient" element={<AddClient />} />
+              <Route path="client" element={<Client />} />
+              <Route path="appointment" element={<Appointment />} />
+              <Route path="appointmentform" element={<Appointmentform />} />
             </Route>
             <Route path="/admin/*" element={<Admin />}>
               {/* Add the default route to /admin/dashboard */}
