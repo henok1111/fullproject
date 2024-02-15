@@ -3,9 +3,11 @@ import cors from 'cors';
 import mysql from 'mysql';
 import bodyParser from 'body-parser';
 import bcrypt from 'bcrypt';
-
+import jwt from 'jsonwebtoken';
 const app = express();
 const PORT = 8081;
+import * as crypto from 'crypto';
+
 
 app.use(cors());
 app.use(bodyParser.json()); // Parse JSON requests
@@ -21,11 +23,30 @@ const db = mysql.createConnection({
 db.connect((err) => {
   if (err) {
     console.error('Database connection failed: ', err);
+    return res.status(500).json({ error: 'Database Connection Error' });
   } else {
     console.log('Connected to the database');
   }
 });
+const generateToken = (userData) => {
+  return jwt.sign(userData, SECRET_KEY, { expiresIn: '1h' });
+};
+// Middleware to verify JWT token
+const verifyToken = (req, res, next) => {
+  const token = req.header('Authorization');
 
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(403).json({ message: 'Invalid token' });
+  }
+};
 // POST endpoint for receiving form data
 app.post('/api/createUser', async (req, res) => {
   const userData = req.body;
@@ -76,8 +97,11 @@ app.post('/api/login', async (req, res) => {
         const isPasswordMatch = await bcrypt.compare(password, user.password);
 
         if (isPasswordMatch) {
-          // Passwords match, send the user information back to the client
+          // Passwords match, generate a JWT token
+          const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, '139bbe98c5f479524fff9b4c132ed50d6b816c3b209a735a0d2bfdc5416d5295', { expiresIn: '1h' });
+          // Send the token back to the client
           res.json({
+            token,
             id: user.id,
             email: user.email,
             role: user.role,
@@ -93,6 +117,7 @@ app.post('/api/login', async (req, res) => {
     }
   });
 });
+
 
 // POST endpoint for handling edit user requests
 app.post('/api/editUser', async (req, res) => {
@@ -167,6 +192,26 @@ app.get('/api/getUsers', (req, res) => {
       }
     }
   );
+});
+
+app.get('/api/userDetails/:userId', (req, res) => {
+  const userId = req.params.userId;
+
+  // Query the database to fetch user details
+  const query = 'SELECT first_name FROM users WHERE id = ?';
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching user details from database:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+      if (results.length === 0) {
+        res.status(404).json({ error: 'User not found' });
+      } else {
+        const user = results[0];
+        res.json({ firstName: user.first_name }); // Wrap the result in a JSON object
+      }
+    }
+  });
 });
 
 app.listen(PORT, () => {

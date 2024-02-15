@@ -39,7 +39,7 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
   );
 };
 
-const Sidebar = ({ role, name, privateImage }) => {
+const Sidebar = ({ role, name, privateImage, userId }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -67,6 +67,34 @@ const Sidebar = ({ role, name, privateImage }) => {
       localStorage.setItem("imagePath", defaultImagePath);
     }
   }, []);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await fetch(`/api/userDetails/${userId}`);
+        
+        if (!response.ok) {
+          throw new Error(`Error fetching user details: ${response.status} ${response.statusText}`);
+        }
+  
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          setName(data.firstName);
+        } else {
+          throw new Error("Invalid response format. Expected JSON.");
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error.message);
+        // Handle the error here, e.g., set default values or show an error message
+      }
+    };
+  
+    fetchUserDetails();
+  }, [userId]);
+  
+
+  const [firstName, setName] = useState(name);
 
   const handleChoosePicture = () => {
     const input = document.createElement("input");
@@ -194,7 +222,7 @@ const Sidebar = ({ role, name, privateImage }) => {
                 ml="15px"
               >
                 <Typography variant="h3" color={colors.grey[100]}>
-                  ADMINIS
+                  {role.toUpperCase()}
                 </Typography>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuOutlinedIcon />
@@ -222,7 +250,7 @@ const Sidebar = ({ role, name, privateImage }) => {
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
-                  {name}
+                  {firstName}
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
                   {role === "admin" ? "Administrator" : ""}
