@@ -120,7 +120,6 @@ const Sidebar = ({ role, name, privateImage }) => {
         to: "calendar",
         icon: <CalendarTodayOutlinedIcon />,
       },
-      { title: "FAQ Page", to: "faq", icon: <HelpOutlineOutlinedIcon /> },
     ],
     registrar: [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
@@ -147,11 +146,6 @@ const Sidebar = ({ role, name, privateImage }) => {
         to: "calendar",
         icon: <CalendarTodayOutlinedIcon />,
       },
-      { title: "FAQ Page", to: "faq", icon: <HelpOutlineOutlinedIcon /> },
-      { title: "Bar Chart", to: "bar", icon: <BarChartOutlined /> },
-      { title: "Pie Chart", to: "pie", icon: <PieChartOutlined /> },
-      { title: "Line Chart", to: "line", icon: <ViewTimelineOutlined /> },
-      { title: "Geography Chart", to: "geography", icon: <MapsUgcOutlined /> },
     ],
   };
 

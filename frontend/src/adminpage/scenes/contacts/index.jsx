@@ -42,19 +42,19 @@ const Contacts = () => {
     try {
       const response = await fetch("http://localhost:8081/api/getUsers");
       const data = await response.json();
-  
+
       // Update the status property based on the backend data
-      const updatedData = data.map((user) => ({
+      const updatedData = data.map((user, index) => ({
         ...user,
         status: user.status === "Activated",
+        id: index + 1, // Add this line to start the ID from 1
       }));
-  
+
       setUserData(updatedData);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
-  
 
   useEffect(() => {
     fetchUsers();
@@ -112,7 +112,7 @@ const Contacts = () => {
   const handleSwitchChange = async (userId, newStatus) => {
     try {
       const backendStatus = newStatus ? "Activated" : "Deactivated";
-  
+
       const response = await fetch("http://localhost:8081/api/editUserStatus", {
         method: "POST",
         headers: {
@@ -120,17 +120,17 @@ const Contacts = () => {
         },
         body: JSON.stringify({ id: userId, status: backendStatus }),
       });
-  
+
       if (response.ok) {
         console.log(`User with ID ${userId} status updated successfully!`);
-  
+
         // Immediately update the local state with the new status
         setUserData((prevData) =>
           prevData.map((user) =>
             user.id === userId ? { ...user, status: newStatus } : user
           )
         );
-  
+
         setOpenSnackbar(true);
       } else {
         console.error(`Error updating user status with ID ${userId}`);
@@ -139,7 +139,6 @@ const Contacts = () => {
       console.error("Error updating user status:", error);
     }
   };
-  
 
   const handleCancelEdit = () => {
     setEditFormData({
@@ -282,7 +281,9 @@ const Contacts = () => {
             onClose={() => setAnchorEl(null)}
           >
             <MenuItem onClick={() => handleEditClick(params)}>Edit</MenuItem>
-            <MenuItem onClick={() => handleDeleteClick(params)}>Delete</MenuItem>
+            <MenuItem onClick={() => handleDeleteClick(params)}>
+              Delete
+            </MenuItem>
           </Menu>
         </>
       ),
@@ -291,7 +292,10 @@ const Contacts = () => {
 
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
-      <Header title="CONTACTS" subtitle="List of Contacts for Future Reference" />
+      <Header
+        title="CONTACTS"
+        subtitle="List of Contacts for Future Reference"
+      />
       <Box
         m="40px 0 0 0"
         height="115vh"
@@ -322,7 +326,11 @@ const Contacts = () => {
           },
         }}
       >
-        <DataGrid rows={userData} columns={columns} components={{ Toolbar: GridToolbar }} />
+        <DataGrid
+          rows={userData}
+          columns={columns}
+          components={{ Toolbar: GridToolbar }}
+        />
       </Box>
 
       <Box
@@ -426,7 +434,11 @@ const Contacts = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: "100%" }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
           User edited successfully!
         </Alert>
       </Snackbar>

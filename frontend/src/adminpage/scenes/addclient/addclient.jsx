@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Button, TextField } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { tokens } from "../../../theme"; // Ensure this import is correct
 import { useTheme } from "@mui/material";
 import Header from "../../components/Header";
@@ -16,7 +15,6 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 
 const Addclient = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
   const colors = tokens(theme.palette.mode);
   const [rowCount, setRowCount] = useState(1);
 
@@ -37,7 +35,7 @@ const Addclient = () => {
     setRowCount((prevRowCount) => prevRowCount - 1);
   };
   return (
-    <Box padding="20px"  backgroundColor={colors.blueAccent[900]}>
+    <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Client Management" subtitle="Add Client" />
       <Formik
         onSubmit={handleFormSubmit}

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { Box, Button, TextField, MenuItem, Snackbar } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import MuiAlert from '@mui/material/Alert';
+import MuiAlert from "@mui/material/Alert";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
@@ -12,11 +12,18 @@ const Form = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [roles, setRoles] = useState(["Admin", "Judge", "Registrar","Proscuter","Invoice_Clerk","Court_Manager"]);
+  const [roles, setRoles] = useState([
+    "Admin",
+    "Judge",
+    "Registrar",
+    "Proscuter",
+    "Invoice_Clerk",
+    "Court_Manager",
+  ]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
 
@@ -35,56 +42,55 @@ const Form = () => {
   };
 
   // Updated handleFormSubmit to send a POST request to the server
-const handleFormSubmit = async (values, { resetForm }) => {
-  try {
-    // Log form values
-    console.log(values);
+  const handleFormSubmit = async (values, { resetForm }) => {
+    try {
+      // Log form values
+      console.log(values);
 
-    // Create an object based on the form data
-    const userObject = {
-      first_name: values.first_name,
-      last_name: values.last_name,
-      email: values.email,
-      phone_number: values.phone_number,
-      address: values.address,
-      password: values.password,
-      confirm_password: values.confirm_password,
-      role: values.role,
-    };
+      // Create an object based on the form data
+      const userObject = {
+        first_name: values.first_name,
+        last_name: values.last_name,
+        email: values.email,
+        phone_number: values.phone_number,
+        address: values.address,
+        password: values.password,
+        confirm_password: values.confirm_password,
+        role: values.role,
+      };
 
-    // Log the created object
-    console.log(userObject);
+      // Log the created object
+      console.log(userObject);
 
-    // Update roles state with the new role
-    setRoles((prevRoles) => [...prevRoles, values.role]);
+      // Update roles state with the new role
+      setRoles((prevRoles) => [...prevRoles, values.role]);
 
-    // Sending a POST request to the server
-    const response = await fetch('http://localhost:8081/api/createUser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userObject),
-    });
+      // Sending a POST request to the server
+      const response = await fetch("http://localhost:8081/api/createUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userObject),
+      });
 
-    if (response.ok) {
-      const responseData = await response.json();
-      console.log(responseData);
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData);
 
-      // Show success notification
-      setOpenSnackbar(true);
+        // Show success notification
+        setOpenSnackbar(true);
 
-      // Reset the form after successful submission
-      resetForm(initialValues);
-    } else {
-      // Handle errors
-      console.error('Failed to create user');
+        // Reset the form after successful submission
+        resetForm(initialValues);
+      } else {
+        // Handle errors
+        console.error("Failed to create user");
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
-
+  };
 
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
@@ -204,45 +210,62 @@ const handleFormSubmit = async (values, { resetForm }) => {
                 helperText={touched.confirm_password && errors.confirm_password}
                 sx={{ gridColumn: "span 4" }}
               />
-             <TextField
-  fullWidth
-  variant="filled"
-  type="text"
-  label="Role"
-  select
-  onBlur={handleBlur}
-  onChange={handleChange}
-  value={values.role}
-  name="role"
-  error={!!touched.role && !!errors.role}
-  helperText={touched.role && errors.role}
-  sx={{ gridColumn: "span 4" }}
->
-  {roles.map((role, index) => (
-    <MenuItem key={index} value={role}>
-      {role}
-    </MenuItem>
-  ))}
-</TextField>
-
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Role"
+                select
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.role}
+                name="role"
+                error={!!touched.role && !!errors.role}
+                helperText={touched.role && errors.role}
+                sx={{ gridColumn: "span 4" }}
+              >
+                {roles.map((role, index) => (
+                  <MenuItem key={index} value={role}>
+                    {role}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Box>
             <Box display="flex" justifyContent="space-between" mt="20px">
-              <Button type="button" color="secondary" variant="contained" onClick={() => resetForm(initialValues)}>
+              <Button
+                type="button"
+                color="secondary"
+                variant="contained"
+                onClick={() => resetForm(initialValues)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" color="secondary" variant="contained" sx={{ marginLeft: '10px' }}>
+              <Button
+                type="submit"
+                color="secondary"
+                variant="contained"
+                sx={{ marginLeft: "10px" }}
+              >
                 Create New User
               </Button>
             </Box>
           </form>
         )}
       </Formik>
-      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-  <MuiAlert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
-    User created successfully!
-  </MuiAlert>
-</Snackbar>
-
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          User created successfully!
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };
@@ -254,9 +277,10 @@ const validationSchema = yup.object().shape({
   phone_number: yup.string().required("Phone Number is required"),
   address: yup.string().required("Address is required"),
   password: yup.string().required("Password is required"),
-  confirm_password: yup.string()
-    .oneOf([yup.ref('password'), null], 'Passwords must match')
-    .required('Confirm Password is required'),
+  confirm_password: yup
+    .string()
+    .oneOf([yup.ref("password"), null], "Passwords must match")
+    .required("Confirm Password is required"),
   role: yup.string().required("Role is required"),
 });
 
