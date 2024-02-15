@@ -1,4 +1,3 @@
-/* eslint-disable no-lone-blocks */
 import React, { useContext, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -87,21 +86,25 @@ const LoginForm = () => {
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (response.ok) {
-        const user = await response.json();
-  
-        // Navigate based on user role
-        switch (user.role) {
+        const { token, id, role } = await response.json();
+
+        // Store the received token, user ID, and role securely
+        localStorage.setItem('token', token);
+        localStorage.setItem('userId', id);
+        localStorage.setItem('userRole', role);
+
+        // Navigate based on user role and user ID
+        switch (role) {
           case 'Admin':
-            navigate('/admin');
+            navigate(`/admin/${id}`);
             break;
           case 'Judge':
-            // For Judges, navigate to the Judge's private page including the ID
-            navigate(`/judge`);
+            navigate(`/judge/${id}`);
             break;
           case 'Registrar':
-            navigate('/registrar');
+            navigate(`/registrar/${id}`);
             break;
           // Add cases for other roles as needed
           default:
@@ -116,7 +119,7 @@ const LoginForm = () => {
       console.error('Error:', error);
     }
   };
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
 

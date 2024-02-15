@@ -22,15 +22,13 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import AddInvoices from "./adminpage/scenes/invoices/addinvoices";
 import AddClient from "./adminpage/scenes/addclient/addclient";
-import {
-  GavelOutlined,
-  HomeMaxOutlined,
-  PendingActionsRounded,
-} from "@mui/icons-material";
+import { GavelOutlined, HomeMaxOutlined, PendingActionsRounded } from "@mui/icons-material";
 import AddCase from "./adminpage/scenes/addcase/addcase";
 import Caseform from "./adminpage/scenes/form/caseform";
+
 const App = () => {
   const [theme, colorMode] = useMode();
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
@@ -40,7 +38,9 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/judge/*" element={<Admins />}>
+
+            {/* Routes for /judge/:userId */}
+            <Route path="/judge/:userId/*" element={<Admins />}>
               <Route
                 index
                 element={
@@ -83,7 +83,9 @@ const App = () => {
               <Route path="pie" element={<Pie />} />
               <Route path="geography" element={<Geography />} />
             </Route>
-            <Route path="/registrar/*" element={<Adminss />}>
+
+            {/* Routes for /registrar/:userId */}
+            <Route path="/registrar/:userId/*" element={<Adminss />}>
               <Route path="caseform" element={<Caseform />} />
               <Route path="addinvoices" element={<AddInvoices />} />
               <Route index element={<Dashboard />} />
@@ -99,8 +101,9 @@ const App = () => {
               <Route path="invoices" element={<Invoices />} />
               <Route path="addclient" element={<AddClient />} />
             </Route>
-            <Route path="/admin/*" element={<Admin />}>
-              {/* Add the default route to /admin/dashboard */}
+
+            {/* Routes for /admin/:userId */}
+            <Route path="/admin/:userId/*" element={<Admin />}>
               <Route index element={<Dashboard />} />
               <Route path="team" element={<Team />} />
               <Route path="contacts" element={<Contacts />} />
@@ -112,7 +115,8 @@ const App = () => {
               <Route path="pie" element={<Pie />} />
               <Route path="line" element={<Line />} />
               <Route path="geography" element={<Geography />} />
-              <Route path="addcase" element={<addcase />} />
+              <Route path="addcase" element={<AddCase />} />
+              {/* Add other routes for /admin/:userId as needed */}
             </Route>
           </Routes>
         </Router>
