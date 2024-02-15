@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import express from "express";
 import cors from "cors";
 import mysql from "mysql2";
@@ -6,18 +5,9 @@ import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
 import bluebird from "bluebird";
 
-=======
-import express from 'express';
-import cors from 'cors';
-import mysql from 'mysql';
-import bodyParser from 'body-parser';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
->>>>>>> henok
 const app = express();
 const PORT = 8081;
-import * as crypto from 'crypto';
-
+import * as crypto from "crypto";
 
 app.use(cors());
 app.use(bodyParser.json()); // Parse JSON requests
@@ -33,25 +23,20 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-<<<<<<< HEAD
     console.error("Database connection failed: ", err);
-=======
-    console.error('Database connection failed: ', err);
-    return res.status(500).json({ error: 'Database Connection Error' });
->>>>>>> henok
   } else {
     console.log("Connected to the database");
   }
 });
 const generateToken = (userData) => {
-  return jwt.sign(userData, SECRET_KEY, { expiresIn: '1h' });
+  return jwt.sign(userData, SECRET_KEY, { expiresIn: "1h" });
 };
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
-  const token = req.header('Authorization');
+  const token = req.header("Authorization");
 
   if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
@@ -59,7 +44,7 @@ const verifyToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(403).json({ message: 'Invalid token' });
+    return res.status(403).json({ message: "Invalid token" });
   }
 };
 // POST endpoint for receiving form data
@@ -103,7 +88,6 @@ app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   // Fetch the user from the database based on the provided email
-<<<<<<< HEAD
   db.query(
     "SELECT * FROM users WHERE email = ?",
     [email],
@@ -111,33 +95,6 @@ app.post("/api/login", async (req, res) => {
       if (error) {
         console.error("Error fetching user:", error);
         res.status(500).json({ error: "Internal Server Error" });
-=======
-  db.query('SELECT * FROM users WHERE email = ?', [email], async (error, results) => {
-    if (error) {
-      console.error('Error fetching user:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    } else {
-      if (results.length > 0) {
-        const user = results[0];
-
-        // Compare the provided password with the hashed password from the database
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-        if (isPasswordMatch) {
-          // Passwords match, generate a JWT token
-          const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, '139bbe98c5f479524fff9b4c132ed50d6b816c3b209a735a0d2bfdc5416d5295', { expiresIn: '1h' });
-          // Send the token back to the client
-          res.json({
-            token,
-            id: user.id,
-            email: user.email,
-            role: user.role,
-          });
-        } else {
-          // Passwords do not match
-          res.status(400).json({ message: 'Invalid email or password' });
-        }
->>>>>>> henok
       } else {
         if (results.length > 0) {
           const user = results[0];
@@ -164,7 +121,6 @@ app.post("/api/login", async (req, res) => {
     }
   );
 });
-
 
 // POST endpoint for handling edit user requests
 app.post("/api/editUser", async (req, res) => {
@@ -245,18 +201,18 @@ app.get("/api/getUsers", (req, res) => {
   );
 });
 
-app.get('/api/userDetails/:userId', (req, res) => {
+app.get("/api/userDetails/:userId", (req, res) => {
   const userId = req.params.userId;
 
   // Query the database to fetch user details
-  const query = 'SELECT first_name FROM users WHERE id = ?';
+  const query = "SELECT first_name FROM users WHERE id = ?";
   db.query(query, [userId], (err, results) => {
     if (err) {
-      console.error('Error fetching user details from database:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error fetching user details from database:", err);
+      res.status(500).json({ error: "Internal Server Error" });
     } else {
       if (results.length === 0) {
-        res.status(404).json({ error: 'User not found' });
+        res.status(404).json({ error: "User not found" });
       } else {
         const user = results[0];
         res.json({ firstName: user.first_name }); // Wrap the result in a JSON object
