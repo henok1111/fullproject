@@ -11,14 +11,7 @@ import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import {
-  BarChartOutlined,
-  MapsUgcOutlined,
-  PieChartOutlined,
-  ViewTimelineOutlined,
-} from "@mui/icons-material";
 import GavelIcon from "@mui/icons-material/Gavel";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
@@ -156,8 +149,13 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
       { title: "Case Management", to: "addcase", icon: <GavelIcon /> },
       {
         title: "Client Management",
-        to: "addclient",
+        to: "client",
         icon: <PersonOutlinedIcon />,
+      },
+      {
+        title: "Appointment",
+        to: "appointment",
+        icon: <ReceiptOutlinedIcon />,
       },
       {
         title: "Invoices Balances",

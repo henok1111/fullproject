@@ -22,7 +22,18 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import AddInvoices from "./adminpage/scenes/invoices/addinvoices";
 import AddClient from "./adminpage/scenes/addclient/addclient";
+<<<<<<< HEAD
 import { GavelOutlined, HomeMaxOutlined, PendingActionsRounded } from "@mui/icons-material";
+=======
+import Client from "./adminpage/scenes/client";
+import Appointment from "./adminpage/scenes/Appointment";
+import Appointmentform from "./adminpage/scenes/Appointment/appointmentform";
+import {
+  GavelOutlined,
+  HomeMaxOutlined,
+  PendingActionsRounded,
+} from "@mui/icons-material";
+>>>>>>> ced5f3e27a65fafc02b26895ef4d66b471a2328a
 import AddCase from "./adminpage/scenes/addcase/addcase";
 import Caseform from "./adminpage/scenes/form/caseform";
 
@@ -100,6 +111,9 @@ const App = () => {
               <Route path="bar" element={<Bar />} />
               <Route path="invoices" element={<Invoices />} />
               <Route path="addclient" element={<AddClient />} />
+              <Route path="client" element={<Client />} />
+              <Route path="appointment" element={<Appointment />} />
+              <Route path="appointmentform" element={<Appointmentform />} />
             </Route>
 
             {/* Routes for /admin/:userId */}
