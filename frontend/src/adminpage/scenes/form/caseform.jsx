@@ -69,12 +69,12 @@ const Caseform = () => {
   };
   const handlebackbuttonClick = () => {
     // Navigate to another page (e.g., '/other-page')
-    navigate("/registrar/addcase");
+    navigate("/:userId/registrar/addcase");
   };
 
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
-      <Box display="flex" justifyContent="flex-end" mt="20px" >
+      <Box display="flex" justifyContent="flex-end" mt="20px">
         <Button
           type="button"
           variant="contained"
@@ -85,7 +85,7 @@ const Caseform = () => {
           Back
         </Button>
       </Box>
-      <Header title="Add Case" subtitle=""  />
+      <Header title="Add Case" subtitle="" />
       <Formik
         onSubmit={handleFormSubmit}
         initialValues={initialValues}
@@ -101,12 +101,16 @@ const Caseform = () => {
           setFieldValue,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <Box display="grid" gridRow="span 10" gap="2px"  padding="20px" >
-              <Box sx={{ backgroundColor: `${colors.primary[400]}75` }} borderRadius="20px" padding="30px">
+            <Box display="grid" gridRow="span 10" gap="2px" padding="20px">
+              <Box
+                sx={{ backgroundColor: `${colors.primary[400]}75` }}
+                borderRadius="20px"
+                padding="30px"
+              >
                 <Typography color={colors.greenAccent[500]} variant="h3">
                   Client Detail
                 </Typography>
-                <Grid container spacing={2}   >
+                <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <Autocomplete
                       value={value}
@@ -205,7 +209,9 @@ const Caseform = () => {
                 </Box>
               </Box>
               <Box
-                sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75`   }} borderRadius="15px" padding="30px"
+                sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
+                borderRadius="15px"
+                padding="30px"
               >
                 <Typography color={colors.greenAccent[500]} variant="h3">
                   Case Detail
@@ -368,7 +374,8 @@ const Caseform = () => {
               </Box>
               <Box
                 sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
-                borderRadius="15px" padding="30px"
+                borderRadius="15px"
+                padding="30px"
               >
                 <Typography color={colors.greenAccent[500]} variant="h3">
                   FIR Detail
@@ -405,7 +412,8 @@ const Caseform = () => {
               </Box>
               <Box
                 sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
-                borderRadius="15px" padding="30px"
+                borderRadius="15px"
+                padding="30px"
               >
                 <Typography color={colors.greenAccent[500]} variant="h3">
                   Assign To

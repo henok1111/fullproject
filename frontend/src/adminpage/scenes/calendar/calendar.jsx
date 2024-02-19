@@ -51,7 +51,7 @@ const Calendar = () => {
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Appointment Calendar" subtitle="Full Calendar" />
 
-      <Box display="flex" justifyContent="space-between">
+      <Box sx={{ mb: "30px" }} display="flex" justifyContent="space-between">
         {/* CALENDAR SIDEBAR */}
         <Box
           flex="1 1 20%"

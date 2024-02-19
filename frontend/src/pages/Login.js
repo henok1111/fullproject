@@ -7,6 +7,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, tokens } from "../theme";
 import { useTheme } from "@mui/material";
 import Ap from "../image/court/ff.png";
+import { UseTokenUpdate } from "../usetoken";
 
 const Logo = () => (
   <div
@@ -35,6 +36,7 @@ const LoginForm = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode) || {};
   const colorMode = useContext(ColorModeContext);
+  const tokenUpdate = UseTokenUpdate();
 
   const styles = {
     container: {
@@ -79,44 +81,51 @@ const LoginForm = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://localhost:8081/api/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8081/api/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        const { token, id, role } = await response.json();
+        const { token, id } = await response.json();
 
-        // Store the received token, user ID, and role securely
-        localStorage.setItem('token', token);
-        localStorage.setItem('userId', id);
-        localStorage.setItem('userRole', role);
+        console.log("Token:", token);
+        console.log("User ID:", id);
 
-        // Navigate based on user role and user ID
-        switch (role) {
-          case 'Admin':
-            navigate(`/admin/${id}`);
-            break;
-          case 'Judge':
-            navigate(`/judge/${id}`);
-            break;
-          case 'Registrar':
-            navigate(`/registrar/${id}`);
-            break;
-          // Add cases for other roles as needed
-          default:
-            // Handle unknown roles or navigate to a default page
-            navigate('/');
+        // Store the received token and user ID securely
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", id);
+
+        // Update the token state using the hook
+        tokenUpdate(token);
+
+        // Fetch the role based on the user ID
+        const roleResponse = await fetch(
+          `http://localhost:8081/api/getRole/${id}`
+        );
+        if (roleResponse.ok) {
+          const { role } = await roleResponse.json();
+
+          console.log("Role:", role);
+
+          // Store the role securely
+          localStorage.setItem("userRole", role);
+
+          // Navigate based on the user role
+          navigate(`/${id}/${role}`);
+        } else {
+          const errorData = await roleResponse.json();
+          setErrors({ role: errorData.message });
         }
       } else {
         const errorData = await response.json();
         setErrors({ email: errorData.message, password: errorData.message });
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
   };
 

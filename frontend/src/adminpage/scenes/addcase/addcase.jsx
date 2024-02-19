@@ -25,7 +25,7 @@ const AddCase = () => {
   };
 
   const handleClick = () => {
-    navigate("/registrar/caseform");
+    navigate("/:userId/registrar/caseform");
   };
 
   const columns = [
@@ -46,7 +46,7 @@ const AddCase = () => {
   ];
 
   return (
-    <Box padding="20px" backgroundColor= {colors.blueAccent[900]}>
+    <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Case Management" subtitle="" />
       <Box display="flex" justifyContent="end" mt="10px">
         <Button
@@ -78,7 +78,7 @@ const AddCase = () => {
           handleSubmit,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <Box display="flex" mt={"20px"} >
+            <Box display="flex" mt={"20px"}>
               {/* First search bar */}
               <TextField
                 id="search-bar-case-number"
