@@ -36,6 +36,7 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("");
   const [imagePath, setImagePath] = useState("");
+  const [firstName, setFirstName] = useState(name);
 
   useEffect(() => {
     // Retrieve the image path from local storage when the component is mounted
@@ -62,27 +63,32 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch(`/api/userDetails/${userId}`);
+        const response = await fetch("/api/userDetails/:userId");
 
         if (!response.ok) {
-          throw new Error(`Error fetching user details: ${response.status} ${response.statusText}`);
+          throw new Error(
+            `Error fetching user details: ${response.status} ${response.statusText}`
+          );
         }
-
+  
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
-          setName(data.firstName);
+          setFirstName(data.firstName);
         } else {
-          throw new Error("Invalid response format. Expected JSON.");
+          console.warn("Received a non-JSON response. Using default values.");
+          setFirstName("Default Name");
         }
       } catch (error) {
-        console.error('Error fetching user details:', error.message);
-        // Handle the error here, e.g., set default values or show an error message
+        console.error("Error fetching user details:", error.message);
+        setFirstName("Error Fetching User Details");
       }
     };
-
+  
     fetchUserDetails();
   }, [userId]);
+  
+
   const [firstName, setName] = useState(name);
 
   const handleChoosePicture = () => {

@@ -18,7 +18,12 @@ const RegistrarDashboard = () => {
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       {/* HEADER */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Box
+        sx={{ mb: "100px" }}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
         <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
 
         <Box>

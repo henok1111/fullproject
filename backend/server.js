@@ -1,36 +1,44 @@
 import express from "express";
 import cors from "cors";
-import mysql from "mysql";
+import mysql from "mysql2/promise";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
+import bluebird from "bluebird";
+import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = 8081;
 import * as crypto from "crypto";
 
+const SECRET_KEY = crypto.randomBytes(32).toString("hex");
+
 app.use(cors());
 app.use(bodyParser.json()); // Parse JSON requests
 
 // MySQL Connection
-const db = mysql.createConnection({
+const pool = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "",
   database: "cims",
+  promise:bluebird
 });
 
-db.connect((err) => {
+pool.getConnection((err, connection) => {
   if (err) {
     console.error("Database connection failed: ", err);
   } else {
     console.log("Connected to the database");
+    global.pool = pool.promise(); // This line creates a promise-based pool
+    connection.release();
   }
 });
-const generateToken = (userData) => {
-  return jwt.sign(userData, SECRET_KEY, { expiresIn: "1h" });
+
+const GenerateToken = (userData, expiresIn = "1h") => {
+  return jwt.sign(userData, SECRET_KEY, { expiresIn });
 };
 // Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
+const VerifyToken = async (req, res, next) => {
   const token = req.header("Authorization");
 
   if (!token) {
@@ -101,18 +109,18 @@ app.post("/api/login", async (req, res) => {
           const isPasswordMatch = await bcrypt.compare(password, user.password);
 
           if (isPasswordMatch) {
-            // Passwords match, send the user information back to the client
-            res.json({
+            // Passwords match, generate and send the token back to the client
+            const token = GenerateToken({
               id: user.id,
               email: user.email,
               role: user.role,
             });
+
+            res.json({ token, id: user.id, role: user.role });
           } else {
-            // Passwords do not match
             res.status(400).json({ message: "Invalid email or password" });
           }
         } else {
-          // User with the provided email not found
           res.status(400).json({ message: "Invalid email or password" });
         }
       }
@@ -199,21 +207,43 @@ app.get("/api/getUsers", (req, res) => {
   );
 });
 
-app.get("/api/userDetails/:userId", (req, res) => {
+app.get("/api/userDetails/:userId", async (req, res) => {
   const userId = req.params.userId;
 
-  // Query the database to fetch user details
-  const query = "SELECT first_name FROM users WHERE id = ?";
-  db.query(query, [userId], (err, results) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT first_name FROM users WHERE id = ?",
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      res.status(404).json({ error: "User not found" });
+    } else {
+      const user = rows[0];
+      res.setHeader("Content-Type", "application/json");
+      res.json({ firstName: user.first_name });
+    }
+  } catch (err) {
+    console.error("Error fetching user details from database:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/getRole/:id", (req, res) => {
+  const { id } = req.params;
+
+  // Query the database to fetch the user's role based on the provided ID
+  const query = "SELECT role FROM users WHERE id = ?";
+  db.query(query, [id], (err, results) => {
     if (err) {
-      console.error("Error fetching user details from database:", err);
+      console.error("Error fetching role from database:", err);
       res.status(500).json({ error: "Internal Server Error" });
     } else {
-      if (results.length === 0) {
-        res.status(404).json({ error: "User not found" });
+      if (results.length > 0) {
+        const role = results[0].role;
+        res.json({ role });
       } else {
-        const user = results[0];
-        res.json({ firstName: user.first_name }); // Wrap the result in a JSON object
+        res.status(404).json({ error: "User not found" });
       }
     }
   });

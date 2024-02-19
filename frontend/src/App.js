@@ -47,7 +47,7 @@ const App = () => {
             <Route path="/login" element={<Login />} />
 
             {/* Routes for /judge/:userId */}
-            <Route path="/judge/:userId/*" element={<Admins />}>
+            <Route path="/:userId/judge/*" element={<Admins />}>
               <Route
                 index
                 element={
@@ -92,7 +92,7 @@ const App = () => {
             </Route>
 
             {/* Routes for /registrar/:userId */}
-            <Route path="/registrar:userId/*" element={<Adminss />}>
+            <Route path="/:userId/registrar/*" element={<Adminss />}>
               <Route path="caseform" element={<Caseform />} />
               <Route path="addinvoices" element={<AddInvoices />} />
               <Route index element={<Dashboard />} />
@@ -113,7 +113,7 @@ const App = () => {
             </Route>
 
             {/* Routes for /admin/:userId */}
-            <Route path="/admin/:userId/*" element={<Admin />}>
+            <Route path="/:userId/admin/*" element={<Admin />}>
               <Route index element={<Dashboard />} />
               <Route path="team" element={<Team />} />
               <Route path="contacts" element={<Contacts />} />

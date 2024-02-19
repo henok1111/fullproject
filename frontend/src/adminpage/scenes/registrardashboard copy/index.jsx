@@ -12,7 +12,12 @@ import StatBox from "../../components/StatBox";
 import ProgressCircle from "../../components/ProgressCircle";
 import { GavelOutlined } from "@mui/icons-material";
 
-const RegistrarDashboard = ({ showRecentTransactions, showCampaign, showCalendar, statBoxes }) => {
+const RegistrarDashboard = ({
+  showRecentTransactions,
+  showCampaign,
+  showCalendar,
+  statBoxes,
+}) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -81,7 +86,11 @@ const RegistrarDashboard = ({ showRecentTransactions, showCampaign, showCalendar
               colors={colors.grey[100]}
               p="15px"
             >
-              <Typography color={colors.grey[100]} variant="h5" fontWeight="600">
+              <Typography
+                color={colors.grey[100]}
+                variant="h5"
+                fontWeight="600"
+              >
                 Recent Transactions
               </Typography>
             </Box>
@@ -157,7 +166,7 @@ const RegistrarDashboard = ({ showRecentTransactions, showCampaign, showCalendar
             gridColumn="span 12"
             gridRow="span 4"
             backgroundColor={colors.primary[400]}
-            sx={{ marginBottom: "30px" }}
+            padding="20px"
           >
             <Calendar />
           </Box>
