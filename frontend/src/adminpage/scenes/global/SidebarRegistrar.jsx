@@ -13,7 +13,6 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import GavelIcon from "@mui/icons-material/Gavel";
-
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -31,7 +30,6 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
     </MenuItem>
   );
 };
-
 const Sidebar = ({ role, name, privateImage, userId }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -65,11 +63,11 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
     const fetchUserDetails = async () => {
       try {
         const response = await fetch(`/api/userDetails/${userId}`);
-        
+
         if (!response.ok) {
           throw new Error(`Error fetching user details: ${response.status} ${response.statusText}`);
         }
-  
+
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
@@ -82,11 +80,9 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
         // Handle the error here, e.g., set default values or show an error message
       }
     };
-  
+
     fetchUserDetails();
   }, [userId]);
-  
-
   const [firstName, setName] = useState(name);
 
   const handleChoosePicture = () => {

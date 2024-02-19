@@ -92,7 +92,7 @@ const App = () => {
             </Route>
 
             {/* Routes for /registrar/:userId */}
-            <Route path="/registrar/:userId/*" element={<Adminss />}>
+            <Route path="/registrar:userId/*" element={<Adminss />}>
               <Route path="caseform" element={<Caseform />} />
               <Route path="addinvoices" element={<AddInvoices />} />
               <Route index element={<Dashboard />} />

@@ -1,9 +1,8 @@
 import express from "express";
 import cors from "cors";
-import mysql from "mysql2";
+import mysql from "mysql";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
-import bluebird from "bluebird";
 
 const app = express();
 const PORT = 8081;
@@ -16,9 +15,8 @@ app.use(bodyParser.json()); // Parse JSON requests
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "1234",
-  database: "court",
-  Promise: bluebird,
+  password: "",
+  database: "cims",
 });
 
 db.connect((err) => {
