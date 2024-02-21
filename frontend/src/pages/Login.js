@@ -8,6 +8,7 @@ import { ColorModeContext, tokens } from "../theme";
 import { useTheme } from "@mui/material";
 import Ap from "../image/court/ff.png";
 import { UseTokenUpdate } from "../usetoken";
+import axios from "axios";
 
 const Logo = () => (
   <div
@@ -81,33 +82,37 @@ const LoginForm = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://localhost:8081/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await axios.post(
+        "http://localhost:8081/api/login",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (response.ok) {
-        const { token, id } = await response.json();
+      if (response.status === 200) {
+        const { token, id, first_name } = response.data;
 
         console.log("Token:", token);
         console.log("User ID:", id);
+        console.log("first_name:", first_name);
 
         // Store the received token and user ID securely
         localStorage.setItem("token", token);
         localStorage.setItem("userId", id);
+        localStorage.setItem("firstName", first_name);
 
         // Update the token state using the hook
         tokenUpdate(token);
 
         // Fetch the role based on the user ID
-        const roleResponse = await fetch(
+        const roleResponse = await axios.get(
           `http://localhost:8081/api/getRole/${id}`
         );
-        if (roleResponse.ok) {
-          const { role } = await roleResponse.json();
+        if (roleResponse.status === 200) {
+          const { role } = roleResponse.data;
 
           console.log("Role:", role);
 
@@ -117,11 +122,11 @@ const LoginForm = () => {
           // Navigate based on the user role
           navigate(`/${id}/${role}`);
         } else {
-          const errorData = await roleResponse.json();
+          const errorData = roleResponse.data;
           setErrors({ role: errorData.message });
         }
       } else {
-        const errorData = await response.json();
+        const errorData = response.data;
         setErrors({ email: errorData.message, password: errorData.message });
       }
     } catch (error) {

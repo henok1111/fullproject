@@ -71,8 +71,8 @@ const App = () => {
                         icon: <HomeMaxOutlined />,
                       },
                       {
-                        title: "Henok",
-                        subtitle: "Basazn",
+                        title: "Fuck",
+                        subtitle: "Henok",
                         progress: "0.75",
                         increase: "+15%",
                         icon: <PendingActionsRounded />,

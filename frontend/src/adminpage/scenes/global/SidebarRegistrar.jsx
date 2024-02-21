@@ -65,20 +65,31 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch("/api/userDetails/:userId");
+        // Retrieve the first name from local storage
+        const storedFirstName = localStorage.getItem("firstName");
 
-        if (!response.ok) {
-          throw new Error(
-            `Error fetching user details: ${response.status} ${response.statusText}`
-          );
-        }
-
-        if (response.headers.get("content-type").includes("application/json")) {
-          const data = await response.json();
-          setFirstName(data.firstName);
+        if (storedFirstName) {
+          // Display the stored first name
+          setFirstName(storedFirstName);
         } else {
-          console.warn("Received a non-JSON response. Using default values.");
-          setFirstName("Default Name");
+          // If first name is not found in local storage, fetch it from the server
+          const response = await fetch(`/api/userDetails/:userId`);
+
+          if (!response.ok) {
+            throw new Error(
+              `Error fetching user details: ${response.status} ${response.statusText}`
+            );
+          }
+
+          if (
+            response.headers.get("content-type").includes("application/json")
+          ) {
+            const data = await response.json();
+            setFirstName(data.firstName);
+          } else {
+            console.warn("Received a non-JSON response. Using default values.");
+            setFirstName("Default Name");
+          }
         }
       } catch (error) {
         console.error("Error fetching user details:", error.message);
@@ -88,7 +99,7 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
 
     // Make sure to call fetchUserDetails somewhere in your component, for example, in useEffect
     fetchUserDetails();
-  }, [userId]);
+  }, [userId]); // Include userId in the dependency array if you're using it inside the useEffect
 
   const handleChoosePicture = () => {
     const input = document.createElement("input");
