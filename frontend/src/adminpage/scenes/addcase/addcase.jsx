@@ -9,6 +9,8 @@ import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import {  useParams } from "react-router-dom"; // Import Outlet and useParams
+   // Use useParams to get userId from the route
 
 const initialValues = {};
 
@@ -19,13 +21,13 @@ const AddCase = () => {
   const navigate = useNavigate();
   const colors = tokens(theme.palette.mode);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const { userId } = useParams();
   const handleFormSubmit = (values) => {
     console.log(values);
   };
 
   const handleClick = () => {
-    navigate("/:userId/registrar/caseform");
+    navigate(`/:userId/registrar/${userId}/caseform`);
   };
 
   const columns = [

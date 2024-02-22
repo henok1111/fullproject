@@ -13,7 +13,6 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import GavelIcon from "@mui/icons-material/Gavel";
-
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -31,7 +30,6 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
     </MenuItem>
   );
 };
-
 const Sidebar = ({ role, name, privateImage, userId }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -97,7 +95,6 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
       }
     };
 
-    // Make sure to call fetchUserDetails somewhere in your component, for example, in useEffect
     fetchUserDetails();
   }, [userId]); // Include userId in the dependency array if you're using it inside the useEffect
 
