@@ -1,11 +1,4 @@
-import {
-  Box,
-  Typography,
-  useTheme,
-  Button,
-  TextField,
-  IconButton,
-} from "@mui/material";
+import { Box, useTheme, Button, TextField, IconButton } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../../theme";
 import Header from "../../components/Header";
@@ -60,7 +53,7 @@ const Invoices = () => {
 
   const handleaddinvoicesbuttonClick = () => {
     // Navigate to another page (e.g., '/other-page')
-    navigate("/:userId/registrar/addinvoices");
+    navigate("/registrar/addinvoices");
   };
 
   return (

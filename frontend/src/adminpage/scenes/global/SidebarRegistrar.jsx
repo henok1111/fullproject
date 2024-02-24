@@ -64,7 +64,7 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
     const fetchUserDetails = async () => {
       try {
         // Retrieve the first name from local storage
-        const storedFirstName = localStorage.getItem("firstName");
+        const storedFirstName = localStorage.getItem("accesstoken");
 
         if (storedFirstName) {
           // Display the stored first name

@@ -3,8 +3,9 @@ import { useState } from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "../theme";
 import Topbar from "./scenes/global/Topbar";
-import { Outlet, useParams } from "react-router-dom"; // Import Outlet and useParams
+import { Outlet, useParams, Route, Routes } from "react-router-dom"; // Import Outlet and useParams
 import Sidebar from "./scenes/global/SidebarRegistrar";
+import RegistrarDashboard from "./scenes/dashboard";
 
 export default function Admin() {
   const { userId } = useParams(); // Use useParams to get userId from the route
@@ -19,13 +20,14 @@ export default function Admin() {
           <Sidebar
             isSidebar={isSidebar}
             role="admin"
-            name="Henok"
             privateImage="./scenes/global/hena.jpg"
             userId={userId} // Pass userId to the Sidebar component
           />
           <div style={{ flexGrow: 1, overflow: "hidden" }}>
             <Topbar setIsSidebar={setIsSidebar} />
-            {/* Nested content will be rendered here */}
+            <Routes>
+              <Route index element={<RegistrarDashboard />} />
+            </Routes>
             <Outlet />
           </div>
         </div>

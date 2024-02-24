@@ -9,8 +9,8 @@ import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import {  useParams } from "react-router-dom"; // Import Outlet and useParams
-   // Use useParams to get userId from the route
+import { useParams } from "react-router-dom"; // Import Outlet and useParams
+// Use useParams to get userId from the route
 
 const initialValues = {};
 
@@ -27,7 +27,7 @@ const AddCase = () => {
   };
 
   const handleClick = () => {
-    navigate(`/:userId/registrar/${userId}/caseform`);
+    navigate(`/registrar/caseform`);
   };
 
   const columns = [

@@ -23,7 +23,7 @@ const Client = () => {
   };
 
   const handleClick = () => {
-    navigate("/:userId/registrar/addclient");
+    navigate("/registrar/addclient");
   };
 
   const columns = [

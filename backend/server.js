@@ -8,11 +8,26 @@ import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = 8081;
-import * as crypto from "crypto";
+const SECRET_KEY = "k0PJbIobltNQ4zlgiu_Gtpo0iZVQ9IytOsjR7so9CoM";
 
-const SECRET_KEY = crypto.randomBytes(32).toString("hex");
-
-app.use(cors());
+app.use(bodyParser.json());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["POST", "GET", "DELETE"],
+    allowedHeaders: [
+      "Content-Type",
+      "Origin",
+      "X-Requested-With",
+      "Accept",
+      "x-client-key",
+      "x-client-token",
+      "x-client-secret",
+      "Authorization",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json()); // Parse JSON requests
 
 // MySQL Connection
@@ -35,21 +50,27 @@ db.getConnection()
   .catch((err) => {
     console.error("Database connection failed: ", err);
   });
-
-const GenerateToken = (userData, expiresIn = "1h") => {
-  return jwt.sign(userData, SECRET_KEY, { expiresIn });
-};
 // Middleware to verify JWT token
 const VerifyToken = async (req, res, next) => {
-  const token = req.header("Authorization");
+  const authHeader = req.header("Authorization");
 
-  if (!token) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Unauthorized" });
   }
+
+  const token = authHeader.substring(7); // Remove "Bearer " prefix
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     req.user = decoded;
+
+    // Check if the user's role is allowed for the requested page
+    const allowedRoles = getRolesForRoute(req.path); // Implement this function
+    if (!allowedRoles.includes(decoded.role)) {
+      // Redirect to unauthorized page
+      return res.redirect("/unauthorized");
+    }
+
     next();
   } catch (error) {
     console.error("Error verifying token:", error);
@@ -91,102 +112,54 @@ app.post("/api/createUser", async (req, res) => {
 
 // POST endpoint for handling login requests
 app.post("/api/login", async (req, res) => {
-  const { email, password } = req.body;
-
   try {
-    // Fetch the user from the database based on the provided email
-    const [results] = await db.query(
-      "SELECT id, email, first_name, role, password FROM users WHERE email = ?",
-      [email]
+    const { email, password } = req.body;
+
+    // Check if the user exists with the provided email
+    const userQuery = "SELECT * FROM users WHERE email = ?";
+
+    const [userResults] = await db.query(userQuery, [email]);
+
+    if (userResults.length === 0) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
+    }
+
+    // Compare the provided password with the hashed password in the database
+    const isValidPassword = await bcrypt.compare(
+      password,
+      userResults[0].password
     );
 
-    if (results.length > 0) {
-      const user = results[0];
-
-      // Compare the provided password with the hashed password from the database
-      const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-      if (isPasswordMatch) {
-        // Passwords match, generate and send the token back to the client
-        const token = GenerateToken({
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          first_name: user.first_name,
-        });
-
-        res.json({
-          token,
-          id: user.id,
-          email: user.email,
-          first_name: user.first_name, // Include first name in the response
-          role: user.role,
-        });
-      } else {
-        res.status(400).json({ message: "Invalid email or password" });
-      }
-    } else {
-      res.status(400).json({ message: "Invalid email or password" });
+    if (!isValidPassword) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid password" });
     }
+
+    // Extract user information
+    const { id, first_name, role } = userResults[0];
+
+    // If role_name is null, assign it as 'student'
+    const userRole = role;
+
+    // Generate a JWT token for authentication with additional user information
+    const token = jwt.sign(
+      { userId: id, first_name, email, role_name: userRole },
+      SECRET_KEY,
+      { expiresIn: "30m" }
+    );
+
+    // Send the token as a response to the client along with user information
+    res.status(200).json({
+      success: true,
+      token,
+      user: { id, first_name, email, role_name: userRole },
+    });
   } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// POST endpoint for handling edit user requests
-app.post("/api/editUser", VerifyToken, async (req, res) => {
-  const editedUserData = req.body;
-
-  try {
-    // Update the user in the database based on the provided ID
-    await db.query("UPDATE users SET ? WHERE id = ?", [
-      {
-        first_name: editedUserData.first_name,
-        last_name: editedUserData.last_name,
-        email: editedUserData.email,
-        phone_number: editedUserData.phone_number,
-        address: editedUserData.address,
-        role: editedUserData.role,
-      },
-      editedUserData.id,
-    ]);
-
-    res.json({ message: "User edited successfully" });
-  } catch (error) {
-    console.error("Error editing user: ", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// POST endpoint for handling edit user status requests
-// POST endpoint for handling edit user status requests
-app.post("/api/editUserStatus", VerifyToken, async (req, res) => {
-  const { id, status } = req.body;
-
-  try {
-    // Update the user status in the database based on the provided ID
-    await db.query("UPDATE users SET status = ? WHERE id = ?", [status, id]);
-
-    res.json({ message: "User status updated successfully" });
-  } catch (error) {
-    console.error("Error updating user status: ", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// POST endpoint for handling delete user requests
-app.post("/api/deleteUser", async (req, res) => {
-  const userIdToDelete = req.body.id;
-
-  try {
-    // Delete the user from the database based on the provided ID
-    await db.query("DELETE FROM users WHERE id = ?", [userIdToDelete]);
-
-    res.json({ message: "User deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting user: ", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error in login route:", error);
+    res.status(500).json({ success: false, message: "Login failed" });
   }
 });
 
@@ -194,18 +167,6 @@ app.post("/api/deleteUser", async (req, res) => {
 app.get("/api/getUsers", async (req, res) => {
   try {
     const [results] = await global.pool.query(
-      "SELECT id, first_name, last_name, email, phone_number, address, role, status FROM users"
-    );
-    res.json(results);
-  } catch (error) {
-    console.error("Error fetching users: ", error);
-    res.status(500).json({ error: error.message || "Internal Server Error" });
-  }
-});
-
-app.get("/api/getUsers", async (req, res) => {
-  try {
-    const [results] = await pool.query(
       "SELECT id, first_name, last_name, email, phone_number, address, role, status FROM users"
     );
     res.json(results);

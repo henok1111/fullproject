@@ -8,14 +8,40 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { Navigate } from "react-router-dom";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Topbar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      // Clear the token on the client side
+      localStorage.removeItem("accessToken");
+
+      // Make a request to the logout endpoint on the server
+      await axios.post("http://localhost:8081/api/logout");
+
+      // Redirect the user to the root directory
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+      // Handle logout failure, e.g., show an error message
+    }
+  };
 
   return (
-    <Box display="flex" justifyContent="space-between" p={2}  backgroundColor={colors.blueAccent[900]}>
+    <Box
+      display="flex"
+      justifyContent="space-between"
+      p={2}
+      backgroundColor={colors.blueAccent[900]}
+    >
       {/* SEARCH BAR */}
       <Box
         display="flex"
@@ -45,6 +71,9 @@ const Topbar = () => {
         </IconButton>
         <IconButton>
           <PersonOutlinedIcon />
+        </IconButton>
+        <IconButton onClick={handleLogout}>
+          <LogoutIcon />
         </IconButton>
       </Box>
     </Box>

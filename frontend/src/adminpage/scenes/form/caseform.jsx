@@ -69,7 +69,7 @@ const Caseform = () => {
   };
   const handlebackbuttonClick = () => {
     // Navigate to another page (e.g., '/other-page')
-    navigate("/:userId/registrar/addcase");
+    navigate("/registrar/addcase");
   };
 
   return (

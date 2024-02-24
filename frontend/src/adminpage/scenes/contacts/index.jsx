@@ -18,6 +18,7 @@ import { tokens } from "../../../theme";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import axios from "axios";
 
 const Contacts = () => {
   const theme = useTheme();
@@ -159,23 +160,33 @@ const Contacts = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8081/api/editUser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editFormData),
-      });
+      const token = localStorage.getItem("token");
 
-      if (response.ok) {
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const response = await axios.post(
+        "http://localhost:8081/api/editUser",
+        editFormData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
         console.log("User edited successfully!");
         setOpenSnackbar(true);
         fetchUsers();
       } else {
-        console.error("Error editing user");
+        console.error("Error editing user:", response.statusText);
       }
     } catch (error) {
-      console.error("Error editing user:", error);
+      console.error("Error editing user:", error.message);
     }
 
     setEditFormData({
@@ -397,7 +408,7 @@ const Contacts = () => {
             <Select
               label="Role"
               name="role"
-              value={editFormData.role}
+              value={editFormData.role || ""}
               onChange={handleEditFormChange}
             >
               <MenuItem value="Admin">Admin</MenuItem>

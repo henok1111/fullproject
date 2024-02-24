@@ -7,8 +7,8 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, tokens } from "../theme";
 import { useTheme } from "@mui/material";
 import Ap from "../image/court/ff.png";
-import { UseTokenUpdate } from "../usetoken";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Logo = () => (
   <div
@@ -37,7 +37,6 @@ const LoginForm = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode) || {};
   const colorMode = useContext(ColorModeContext);
-  const tokenUpdate = UseTokenUpdate();
 
   const styles = {
     container: {
@@ -80,57 +79,61 @@ const LoginForm = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
     try {
+      // Make a request to your login endpoint
       const response = await axios.post(
         "http://localhost:8081/api/login",
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        formData
       );
 
-      if (response.status === 200) {
-        const { token, id, first_name } = response.data;
+      // Handle the response, e.g., store user information in state or context
+      toast.success("Login successful", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
 
-        console.log("Token:", token);
-        console.log("User ID:", id);
-        console.log("first_name:", first_name);
+      // Extract user ID from the response
 
-        // Store the received token and user ID securely
-        localStorage.setItem("token", token);
-        localStorage.setItem("userId", id);
-        localStorage.setItem("firstName", first_name);
+      // Store the token in local storage
+      localStorage.setItem("accessToken", response.data.token);
 
-        // Update the token state using the hook
-        tokenUpdate(token);
+      // Set a timer to clear the token after one minute
+      setTimeout(() => {
+        localStorage.removeItem("accessToken");
+        toast.error("Session expired, Please login again", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        window.location.reload();
+      }, 3600000);
 
-        // Fetch the role based on the user ID
-        const roleResponse = await axios.get(
-          `http://localhost:8081/api/getRole/${id}`
-        );
-        if (roleResponse.status === 200) {
-          const { role } = roleResponse.data;
-
-          console.log("Role:", role);
-
-          // Store the role securely
-          localStorage.setItem("userRole", role);
-
-          // Navigate based on the user role
-          navigate(`/${id}/${role}`);
-        } else {
-          const errorData = roleResponse.data;
-          setErrors({ role: errorData.message });
-        }
-      } else {
-        const errorData = response.data;
-        setErrors({ email: errorData.message, password: errorData.message });
-      }
+      const getUserRoleFromToken = (token) => {
+        const decodedToken = JSON.parse(atob(token.split(".")[1]));
+        return decodedToken.role_name;
+      };
+      const token = localStorage.getItem("accessToken");
+      const role_name = getUserRoleFromToken(token);
+      const role = role_name.toLowerCase();
+      // Redirect to the user-specific route
+      setTimeout(() => {
+        navigate(`/${role}`);
+      }, 6000);
     } catch (error) {
-      console.error("Error:", error);
+      // Handle login failure, e.g., show an error message
+      if (error.response) {
+        toast.error(`Login failed: ${error.response.data.message}`);
+      } else {
+        toast.error(`Login failed: ${error.message}`);
+      }
     }
   };
 
