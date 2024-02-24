@@ -9,6 +9,7 @@ import { useTheme } from "@mui/material";
 import Ap from "../image/court/ff.png";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Clock from "../components/clock";
 
 const Logo = () => (
   <div
@@ -55,6 +56,7 @@ const LoginForm = () => {
       boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
       backgroundColor: colors.primary ? colors.blueAccent[900] : "#000",
       color: colors.primary[100],
+      marginLeft: "30%",
     },
   };
 
@@ -162,6 +164,7 @@ const LoginForm = () => {
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
+          <Clock />
           <div style={{ ...styles.container }}>
             <form
               style={{

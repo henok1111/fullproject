@@ -62,6 +62,7 @@ const Topbar = () => {
               fontSize: "1.8rem",
               fontFamily: '"Trirong", serif',
               fontWeight: 700,
+              ml: "10px",
             }}
           >
             Court Information System
@@ -70,7 +71,7 @@ const Topbar = () => {
 
         {/* Right side */}
         <Box display="flex" alignItems="center">
-          <Button component={Link} to="/" sx={{ ...buttonStyle }}>
+          {/* <Button component={Link} to="/" sx={{ ...buttonStyle }}>
             <HomeRoundedIcon sx={{ fontSize: 30 }} />
             Home
           </Button>
@@ -83,7 +84,7 @@ const Topbar = () => {
           <Button component={Link} to="/login" sx={{ ...buttonStyle }}>
             <LoginRoundedIcon sx={{ fontSize: 30 }} />
             Login
-          </Button>
+          </Button> */}
           <Button
             onClick={colorMode.toggleColorMode}
             sx={{ ...buttonStyle, marginRight: "10px" }}
