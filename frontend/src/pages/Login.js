@@ -88,7 +88,12 @@ const LoginForm = () => {
         "http://localhost:8081/api/login",
         formData
       );
-
+  
+      // Log the access token to the console
+      const accessToken = response.data.token;
+      console.log("Access Token:", accessToken);
+      localStorage.setItem("accessToken", accessToken);
+      console.log("Token stored:", localStorage.getItem("accessToken"));
       // Handle the response, e.g., store user information in state or context
       toast.success("Login successful", {
         position: "top-right",
@@ -98,12 +103,12 @@ const LoginForm = () => {
         pauseOnHover: true,
         draggable: true,
       });
-
+  
       // Extract user ID from the response
-
+  
       // Store the token in local storage
-      localStorage.setItem("accessToken", response.data.token);
-
+      localStorage.setItem("accessToken", accessToken);
+  
       // Set a timer to clear the token after one minute
       setTimeout(() => {
         localStorage.removeItem("accessToken");
@@ -117,7 +122,7 @@ const LoginForm = () => {
         });
         window.location.reload();
       }, 3600000);
-
+  
       const getUserRoleFromToken = (token) => {
         const decodedToken = JSON.parse(atob(token.split(".")[1]));
         return decodedToken.role_name;
@@ -125,19 +130,22 @@ const LoginForm = () => {
       const token = localStorage.getItem("accessToken");
       const role_name = getUserRoleFromToken(token);
       const role = role_name.toLowerCase();
+  
       // Redirect to the user-specific route
       setTimeout(() => {
         navigate(`/${role}`);
       }, 6000);
+  
     } catch (error) {
       // Handle login failure, e.g., show an error message
       if (error.response) {
         toast.error(`Login failed: ${error.response.data.message}`);
-      } else {
+      } else { 
         toast.error(`Login failed: ${error.message}`);
       }
     }
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
