@@ -1,17 +1,12 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
 const SECRET_KEY = "k0PJbIobltNQ4zlgiu_Gtpo0iZVQ9IytOsjR7so9CoM";
-
 export default async function Login(db, req, res) {
   try {
     const { email, password } = req.body;
-
     // Check if the user exists with the provided email
     const userQuery = "SELECT * FROM users WHERE email = ?";
-
     const [userResults] = await db.query(userQuery, [email]);
-
     if (userResults.length === 0) {
       return res
         .status(401)
