@@ -24,6 +24,7 @@ import AddClient from "./adminpage/scenes/addclient/addclient";
 import Appointmentform from "./adminpage/scenes/Appointment/appointmentform";
 import Appointment from "./adminpage/scenes/Appointment";
 import Client from "./adminpage/scenes/client";
+import ProfilePage from "./adminpage/scenes/profile";
 import {
   GavelOutlined,
   HomeMaxOutlined,
@@ -129,6 +130,7 @@ const RegistrarRoutes = () => {
         <Route path="/client" element={<Client />} />
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/appointmentform" element={<Appointmentform />} />
+        <Route path="/registrarprofile" element={<ProfilePage />} />
       </Route>
     </Routes>
   );

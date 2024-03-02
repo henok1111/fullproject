@@ -9,31 +9,42 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Navigate } from "react-router-dom";
+import { Navigate, Routes } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Button, Popover, Typography } from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
 
 const Topbar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      // Clear the token on the client side
-      localStorage.removeItem("accessToken");
-
-      // Make a request to the logout endpoint on the server
-      await axios.post("http://localhost:8081/api/logout");
-
-      // Redirect the user to the root directory
-      navigate("/");
-    } catch (error) {
-      console.error("Logout failed:", error.message);
-      // Handle logout failure, e.g., show an error message
-    }
+  const handleLogout = () => {
+    // Remove the token from local storage
+    localStorage.removeItem("accessToken");
+    // Redirect to the login page (or any other appropriate action)
+    // window.location.reload()
+    window.location.href = "/login";
   };
+
+  const handleclickprofilebutton = () => {
+    navigate("/registrar/registrarprofile");
+  };
+
+  const handleSettingsClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePopover = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "settings-popover" : undefined;
 
   return (
     <Box
@@ -66,15 +77,42 @@ const Topbar = () => {
         <IconButton>
           <NotificationsOutlinedIcon />
         </IconButton>
-        <IconButton>
-          <SettingsOutlinedIcon />
+        <IconButton onClick={handleSettingsClick}>
+          <PersonIcon />
         </IconButton>
-        <IconButton>
-          <PersonOutlinedIcon />
-        </IconButton>
-        <IconButton onClick={handleLogout}>
-          <LogoutIcon />
-        </IconButton>
+        <Popover
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClosePopover}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <Box p={1}>
+            <Button
+              startIcon={<PersonOutlinedIcon />}
+              onClick={handleclickprofilebutton}
+              variant="outlines"
+            >
+              Profile
+            </Button>
+          </Box>
+          <Box p={1}>
+            <Button
+              startIcon={<LogoutIcon />}
+              variant="outlines"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </Box>
+        </Popover>
       </Box>
     </Box>
   );

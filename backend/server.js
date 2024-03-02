@@ -2,13 +2,23 @@ import express from "express";
 import cors from "cors";
 import mysql from "mysql2/promise";
 import bodyParser from "body-parser";
-import bcrypt from "bcrypt";
 import bluebird from "bluebird";
 import jwt from "jsonwebtoken";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { promisify } from "util";
+
+import AddUser from "./component/adduser.js";
+import Login from "./login.js";
+import Getuser from "./component/getuser.js";
+import Getrole from "./component/getrole.js";
+import router from "./component/userroutes.js";
 
 const app = express();
 const PORT = 8081;
-const SECRET_KEY = "k0PJbIobltNQ4zlgiu_Gtpo0iZVQ9IytOsjR7so9CoM";
 
 app.use(bodyParser.json());
 app.use(
@@ -29,6 +39,8 @@ app.use(
   })
 );
 app.use(express.json()); // Parse JSON requests
+app.use(express.static("uploads"));
+app.use(express.urlencoded({ extended: true }));
 
 // MySQL Connection
 const db = mysql.createPool({
@@ -50,158 +62,149 @@ db.getConnection()
   .catch((err) => {
     console.error("Database connection failed: ", err);
   });
-// Middleware to verify JWT token
-const VerifyToken = async (req, res, next) => {
-  const authHeader = req.header("Authorization");
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const uploadFolder = path.join(__dirname, "uploads");
+    // Create the 'uploads' folder if it doesn't exist
+    if (!fs.existsSync(uploadFolder)) {
+      fs.mkdirSync(uploadFolder);
+    }
+    cb(null, uploadFolder);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
 
-  const token = authHeader.substring(7); // Remove "Bearer " prefix
-
+const saveProfilePicture = async (userId, profilePicture) => {
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded;
-
-    // Check if the user's role is allowed for the requested page
-    const allowedRoles = getRolesForRoute(req.path); // Implement this function
-    if (!allowedRoles.includes(decoded.role)) {
-      // Redirect to unauthorized page
-      return res.redirect("/unauthorized");
+    // Check if userId and profilePicture are defined
+    if (userId === undefined || profilePicture === undefined) {
+      throw new Error("userId and profilePicture must be defined");
     }
 
-    next();
+    const [result] = await db.execute(
+      "UPDATE users SET profile_picture_url = ? WHERE id = ?",
+      [profilePicture, userId]
+    );
+
+    return result;
   } catch (error) {
-    console.error("Error verifying token:", error);
-    return res.status(403).json({ message: "Invalid token" });
+    console.error("Error updating user profile:", error);
+    throw error; // Propagate the error to the calling function
   }
 };
 
-// POST endpoint for receiving form data
-app.post("/api/createUser", async (req, res) => {
-  const userData = req.body;
+const upload = multer({ storage });
 
-  try {
-    // Hash the password before storing it in the database
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
+app.post(
+  "/api/upload",
+  upload.single("profilePicture"),
+  async (db, req, res) => {
+    try {
+      // console.log('Received update request:', req.body);
 
-    // Do not store 'confirm_password' in the database
+      const { id, first_name, email } = req.body;
+      const role_name = req.body.role;
+      //console.log(role_name)
+      const image = req.file ? req.file.filename : null;
 
-    // Update the query to use the hashed password
-    const [results] = await db.query("INSERT INTO users SET ?", {
-      first_name: userData.first_name,
-      last_name: userData.last_name,
-      email: userData.email,
-      phone_number: userData.phone_number,
-      address: userData.address,
-      password: hashedPassword,
-      role: userData.role,
-      status: "activated", // Assuming the default status is activated for a new user
-    });
+      // Use the MySQL connection pool to execute queries
+      const query = promisify(db.query).bind(db);
+      const currentImageResult = await query(
+        "SELECT profile_picture_url FROM users WHERE user_id = ?",
+        [user_id]
+      );
+      const currentImage = currentImageResult[0]
+        ? currentImageResult[0].image
+        : null;
 
-    res.json({
-      message: "User created successfully",
-      userId: results.insertId,
-    });
-  } catch (error) {
-    console.error("Error creating user: ", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// POST endpoint for handling login requests
-app.post("/api/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Check if the user exists with the provided email
-    const userQuery = "SELECT * FROM users WHERE email = ?";
-
-    const [userResults] = await db.query(userQuery, [email]);
-
-    if (userResults.length === 0) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password" });
-    }
-
-    // Compare the provided password with the hashed password in the database
-    const isValidPassword = await bcrypt.compare(
-      password,
-      userResults[0].password
-    );
-
-    if (!isValidPassword) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid password" });
-    }
-
-    // Extract user information
-    const { id, first_name, role } = userResults[0];
-
-    // If role_name is null, assign it as 'student'
-    const userRole = role;
-
-    // Generate a JWT token for authentication with additional user information
-    const token = jwt.sign(
-      { userId: id, first_name, email, role_name: userRole },
-      SECRET_KEY,
-      { expiresIn: "30m" }
-    );
-
-    // Send the token as a response to the client along with user information
-    res.status(200).json({
-      success: true,
-      token,
-      user: { id, first_name, email, role_name: userRole },
-    });
-  } catch (error) {
-    console.error("Error in login route:", error);
-    res.status(500).json({ success: false, message: "Login failed" });
-  }
-});
-
-// GET endpoint to retrieve users
-app.get("/api/getUsers", async (req, res) => {
-  try {
-    const [results] = await global.pool.query(
-      "SELECT id, first_name, last_name, email, phone_number, address, role, status FROM users"
-    );
-    res.json(results);
-  } catch (error) {
-    console.error("Error fetching users: ", error);
-    res.status(500).json({ error: error.message || "Internal Server Error" });
-  }
-});
-
-app.get("/api/getRole/:id", (req, res) => {
-  const { id } = req.params;
-
-  // Parse the id to ensure it is a valid integer
-  const userId = parseInt(id, 10);
-
-  if (isNaN(userId)) {
-    return res.status(400).json({ error: "Invalid user ID" });
-  }
-
-  // Query the database to fetch the user's role based on the provided ID
-  const query = "SELECT role FROM users WHERE id = ?";
-
-  db.query(query, [userId])
-    .then(([results]) => {
-      if (results.length > 0) {
-        const role = results[0].role;
-        res.json({ role });
-      } else {
-        res.status(404).json({ error: "User not found" });
+      // Update the user record
+      await query(
+        "UPDATE users SET profile_picture_url = IFNULL(?, profile_picture_url) WHERE user_id = ?",
+        [email, first_name, role_name, image, id]
+      );
+      console.log(role_name);
+      if (role_name === "Student") {
+        // If the role is changed to 'Instructor', delete from students table and insert into instructors table
+        await query("DELETE FROM instructors WHERE user_id = ?", [user_id]);
+        await query("INSERT INTO students (user_id) VALUES (?)", [user_id]);
       }
-    })
-    .catch((err) => {
-      console.error("Error fetching role from database:", err);
-      res.status(500).json({ error: "Internal Server Error" });
+
+      res.status(200).json({ message: "User data updated successfully" });
+    } catch (error) {
+      //console.error('Error updating user profile:', error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while updating user profile" });
+    }
+  }
+);
+
+app.post("/api/createUser", async (req, res) => {
+  await AddUser(db, req, res);
+}),
+  app.post("/api/login", async (req, res) => {
+    await Login(db, req, res);
+  });
+
+app.get("/api/getUsers", async (req, res) => {
+  await Getuser(req, res);
+});
+
+app.get("/api/getRole/:id", async (req, res) => {
+  await Getrole(req, res);
+});
+
+app.use("/api/user", router);
+
+app.get("/api/user/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const [rows] = await pool.query("SELECT * FROM users WHERE id = ?", [
+      userId,
+    ]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    const user = rows[0];
+    res.json({
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      // Add other fields as needed
     });
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch user details" });
+  }
+});
+
+// New route for updating user details
+app.put("/api/user/update/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const updatedUser = req.body;
+
+    // Perform the update in the database
+    await pool.query("UPDATE users SET ? WHERE id = ?", [updatedUser, userId]);
+
+    res.json({ success: true, message: "User details updated successfully" });
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update user details" });
+  }
 });
 
 app.listen(PORT, () => {
