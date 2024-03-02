@@ -15,10 +15,10 @@ import AddUser from "./component/adduser.js";
 import Login from "./login.js";
 import Getuser from "./component/getuser.js";
 import Getrole from "./component/getrole.js";
-import router from "./component/userroutes.js";
 
 const app = express();
 const PORT = 8081;
+const router = express.Router();
 
 app.use(bodyParser.json());
 app.use(
@@ -157,54 +157,6 @@ app.get("/api/getUsers", async (req, res) => {
 
 app.get("/api/getRole/:id", async (req, res) => {
   await Getrole(req, res);
-});
-
-app.use("/api/user", router);
-
-app.get("/api/user/:id", async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const [rows] = await pool.query("SELECT * FROM users WHERE id = ?", [
-      userId,
-    ]);
-
-    if (rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    const user = rows[0];
-    res.json({
-      id: user.id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      // Add other fields as needed
-    });
-  } catch (error) {
-    console.error("Error fetching user details:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch user details" });
-  }
-});
-
-// New route for updating user details
-app.put("/api/user/update/:id", async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const updatedUser = req.body;
-
-    // Perform the update in the database
-    await pool.query("UPDATE users SET ? WHERE id = ?", [updatedUser, userId]);
-
-    res.json({ success: true, message: "User details updated successfully" });
-  } catch (error) {
-    console.error("Error updating user details:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to update user details" });
-  }
 });
 
 app.listen(PORT, () => {
