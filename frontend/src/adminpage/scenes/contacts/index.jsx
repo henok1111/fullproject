@@ -78,27 +78,28 @@ const Contacts = () => {
 
   const handleDeleteClick = async (params) => {
     try {
-      const response = await fetch("http://localhost:8081/api/deleteUser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: params.id }),
-      });
+        const response = await fetch("http://localhost:8081/api/deleteUser", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id: params.id }),
+        });
 
-      if (response.ok) {
-        console.log(`User with ID ${params.id} deleted successfully!`);
-        setOpenSnackbar(true);
-        fetchUsers();
-      } else {
-        console.error(`Error deleting user with ID ${params.id}`);
-      }
+        if (response.ok) {
+            console.log(`User with ID ${params.id} deleted successfully!`);
+            setOpenSnackbar(true);
+            fetchUsers(); // Fetch users after successful deletion
+        } else {
+            console.error(`Error deleting user with ID ${params.id}`);
+        }
     } catch (error) {
-      console.error("Error deleting user:", error);
+        console.error("Error deleting user:", error);
     }
 
     setAnchorEl(null);
-  };
+};
+
 
   const handleEditFormChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -112,34 +113,32 @@ const Contacts = () => {
 
   const handleSwitchChange = async (userId, newStatus) => {
     try {
-      const backendStatus = newStatus ? "Activated" : "Deactivated";
+        const backendStatus = newStatus ? "Activated" : "Deactivated";
 
-      const response = await fetch("http://localhost:8081/api/editUserStatus", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: userId, status: backendStatus }),
-      });
+        const response = await fetch("http://localhost:8081/api/editUserStatus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id: userId, status: backendStatus }),
+        });
 
-      if (response.ok) {
-        console.log(`User with ID ${userId} status updated successfully!`);
-
-        // Immediately update the local state with the new status
-        setUserData((prevData) =>
-          prevData.map((user) =>
-            user.id === userId ? { ...user, status: newStatus } : user
-          )
-        );
-
-        setOpenSnackbar(true);
-      } else {
-        console.error(`Error updating user status with ID ${userId}`);
-      }
+        if (response.ok) {
+            console.log(`User with ID ${userId} status updated successfully!`);
+            setUserData((prevData) =>
+                prevData.map((user) =>
+                    user.id === userId ? { ...user, status: newStatus } : user
+                )
+            );
+            setOpenSnackbar(true);
+        } else {
+            console.error(`Error updating user status with ID ${userId}`);
+        }
     } catch (error) {
-      console.error("Error updating user status:", error);
+        console.error("Error updating user status:", error);
     }
-  };
+};
+
 
   const handleCancelEdit = () => {
     setEditFormData({

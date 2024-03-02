@@ -34,7 +34,7 @@ app.use(express.json()); // Parse JSON requests
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "1234",
+  password: "",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
@@ -111,6 +111,7 @@ app.post("/api/createUser", async (req, res) => {
 });
 
 // POST endpoint for handling login requests
+// POST endpoint for handling login requests
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -139,14 +140,14 @@ app.post("/api/login", async (req, res) => {
     }
 
     // Extract user information
-    const { id, first_name, role } = userResults[0];
+    const { id, first_name, role, status } = userResults[0];
 
     // If role_name is null, assign it as 'student'
     const userRole = role;
 
     // Generate a JWT token for authentication with additional user information
     const token = jwt.sign(
-      { userId: id, first_name, email, role_name: userRole },
+      { userId: id, first_name, email, role_name: userRole, status },
       SECRET_KEY,
       { expiresIn: "30m" }
     );
@@ -155,13 +156,14 @@ app.post("/api/login", async (req, res) => {
     res.status(200).json({
       success: true,
       token,
-      user: { id, first_name, email, role_name: userRole },
+      user: { id, first_name, email, role_name: userRole, status },
     });
   } catch (error) {
     console.error("Error in login route:", error);
     res.status(500).json({ success: false, message: "Login failed" });
   }
 });
+
 
 // GET endpoint to retrieve users
 app.get("/api/getUsers", async (req, res) => {
@@ -202,6 +204,81 @@ app.get("/api/getRole/:id", (req, res) => {
       console.error("Error fetching role from database:", err);
       res.status(500).json({ error: "Internal Server Error" });
     });
+});
+
+
+// Endpoint to edit user
+app.post("/api/editUser", async (req, res) => {
+  try {
+    const userData = req.body;
+
+    // Log the received user information
+    console.log("Received edit user request with data:", userData);
+
+    // Your existing logic for editing the user
+    const [result] = await global.pool.query(
+      "UPDATE users SET first_name = ?, last_name = ?, email = ?, phone_number = ?, address = ?, role = ? WHERE id = ?",
+      [
+        userData.first_name,
+        userData.last_name,
+        userData.email,
+        userData.phone_number,
+        userData.address,
+        userData.role,
+        userData.id,
+      ]
+    );
+
+    res.status(200).json({ message: "User edited successfully!" });
+  } catch (error) {
+    console.error("Error editing user: ", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+// Endpoint to delete user
+app.post("/api/deleteUser", async (req, res) => {
+  try {
+    const userId = req.body.id;
+
+    // Log the received user ID
+    console.log(`Received delete request for user ID: ${userId}`);
+
+    // Your existing logic for deleting the user
+    const [result] = await global.pool.query(
+      "DELETE FROM users WHERE id = ?",
+      [userId]
+    );
+
+    res.json({ message: `User with ID ${userId} deleted successfully!` });
+  } catch (error) {
+    console.error("Error deleting user: ", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+// Endpoint to edit user status
+app.post("/api/editUserStatus", async (req, res) => {
+  try {
+    const userId = req.body.id;
+    const newStatus = req.body.status;
+
+    // Log the received user ID and new status
+    console.log(`Received edit user status request for user ID ${userId} with new status: ${newStatus}`);
+
+    // Your existing logic for editing user status
+    const [result] = await global.pool.query(
+      "UPDATE users SET status = ? WHERE id = ?",
+      [newStatus, userId]
+    );
+
+    res.json({ message: `User with ID ${userId} status updated successfully!` });
+  } catch (error) {
+    console.error("Error updating user status: ", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 app.listen(PORT, () => {

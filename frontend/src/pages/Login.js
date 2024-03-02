@@ -1,15 +1,26 @@
-import React, { useContext, useState } from "react";
+import React, { useState, useContext } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import MainNavbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { ColorModeContext, tokens } from "../theme";
-import { useTheme } from "@mui/material";
-import Ap from "../image/court/ff.png";
 import axios from "axios";
 import { toast } from "react-toastify";
+import MainNavbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import Clock from "../components/clock";
+import { CssBaseline, ThemeProvider, useTheme } from "@mui/material";
+import { ColorModeContext, tokens } from "../theme";
+import Ap from "../image/court/ff.png";
+
+// Function to extract user role from the token
+const getUserRoleFromToken = (token) => {
+  const decodedToken = JSON.parse(atob(token.split(".")[1]));
+  return decodedToken.role_name;
+};
+
+// Function to extract user status from the token
+const getUserStatusFromToken = (token) => {
+  const decodedToken = JSON.parse(atob(token.split(".")[1]));
+  return decodedToken.status;
+};
 
 const Logo = () => (
   <div
@@ -72,6 +83,17 @@ const LoginForm = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 4;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -81,20 +103,34 @@ const LoginForm = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
+  const logTokenInfo = () => {
+    const token = localStorage.getItem("accessToken");
+
+    if (token) {
+      console.log("Token:", token);
+
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      console.log("Decoded Token:", decodedToken);
+    } else {
+      console.log("Token not found in localStorage");
+    }
+  };
+
   const handleLogin = async (e) => {
     try {
-      // Make a request to your login endpoint
+      setLoading(true); // Set loading to true when login starts
+
       const response = await axios.post(
         "http://localhost:8081/api/login",
         formData
       );
-  
-      // Log the access token to the console
+
       const accessToken = response.data.token;
-      console.log("Access Token:", accessToken);
       localStorage.setItem("accessToken", accessToken);
-      console.log("Token stored:", localStorage.getItem("accessToken"));
-      // Handle the response, e.g., store user information in state or context
+
+      // Call the function to log token information
+      logTokenInfo();
+
       toast.success("Login successful", {
         position: "top-right",
         autoClose: 3000,
@@ -103,61 +139,69 @@ const LoginForm = () => {
         pauseOnHover: true,
         draggable: true,
       });
-  
-      // Extract user ID from the response
-  
-      // Store the token in local storage
-      localStorage.setItem("accessToken", accessToken);
-  
-      // Set a timer to clear the token after one minute
-      setTimeout(() => {
-        localStorage.removeItem("accessToken");
-        toast.error("Session expired, Please login again", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        window.location.reload();
-      }, 3600000);
-  
-      const getUserRoleFromToken = (token) => {
-        const decodedToken = JSON.parse(atob(token.split(".")[1]));
-        return decodedToken.role_name;
-      };
+
+      // Get user role and status from the token
       const token = localStorage.getItem("accessToken");
       const role_name = getUserRoleFromToken(token);
       const role = role_name.toLowerCase();
-  
-      // Redirect to the user-specific route
-      setTimeout(() => {
+
+      // Get user status directly from the token and convert to lowercase
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      const userStatus = decodedToken.status.toLowerCase();
+
+      // Log the user role and status for debugging
+      console.log("User Role:", role);
+      console.log("User Status:", userStatus);
+
+      // Perform additional checks based on the user's status
+      if (userStatus === "activated") {
+        // User is activated, proceed with navigation based on the role
         navigate(`/${role}`);
-      }, 6000);
-  
+      } else {
+        // User is deactivated, navigate to /deactivated
+        navigate("/deactivated");
+      }
+
+      // Set loading to false after a delay (2000 milliseconds)
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
     } catch (error) {
-      // Handle login failure, e.g., show an error message
+      // Set loading to false when login fails
+      setLoading(false);
+
       if (error.response) {
         toast.error(`Login failed: ${error.response.data.message}`);
-      } else { 
+        if (error.response?.status === 401) {
+          setErrors({
+            email: "Invalid email or password",
+            password: "",
+          });
+        }
+      } else {
         toast.error(`Login failed: ${error.message}`);
       }
     }
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     // Validation logic
     const newErrors = {};
+
     if (formData.email === "") {
       newErrors.email = "Email is required";
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = "Invalid email format";
     }
+
     if (formData.password === "") {
       newErrors.password = "Password is required";
+    } else if (!validatePassword(formData.password)) {
+      newErrors.password = "Password should be at least 4 characters";
     }
+
     setErrors(newErrors);
 
     // If there are no errors, proceed with login
@@ -174,12 +218,7 @@ const LoginForm = () => {
           <CssBaseline />
           <Clock />
           <div style={{ ...styles.container }}>
-            <form
-              style={{
-                ...styles.form,
-              }}
-              onSubmit={handleSubmit}
-            >
+            <form style={{ ...styles.form }} onSubmit={handleSubmit}>
               <div
                 style={{
                   display: "flex",
@@ -196,30 +235,34 @@ const LoginForm = () => {
 
               <div style={{ marginBottom: "15px" }}>
                 <label htmlFor="email">Email</label>
-                <input
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    boxSizing: "border-box",
-                    backgroundColor: colors.primary[700],
-                    color: colors.primary[200],
-                    borderRadius: "5px",
-                  }}
-                  type="text"
-                  id="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-                <div style={{ color: "red", marginTop: "5px" }}>
-                  {errors.email}
+                <div>
+                  <input
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      boxSizing: "border-box",
+                      backgroundColor: colors.primary[700],
+                      color: colors.primary[200],
+                      borderRadius: "5px",
+                    }}
+                    type="text"
+                    id="email"
+                    name="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                  {errors.email && (
+                    <div style={{ color: "red", marginTop: "5px" }}>
+                      {errors.email}
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div style={{ marginBottom: "15px" }}>
                 <label htmlFor="password">Password</label>
-                <div style={{ position: "relative" }}>
+                <div>
                   <input
                     style={{
                       width: "100%",
@@ -237,32 +280,11 @@ const LoginForm = () => {
                     value={formData.password}
                     onChange={handleChange}
                   />
-                  {showPassword ? (
-                    <FaEyeSlash
-                      style={{
-                        position: "absolute",
-                        right: "10px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                      }}
-                      onClick={handleTogglePassword}
-                    />
-                  ) : (
-                    <FaEye
-                      style={{
-                        position: "absolute",
-                        right: "10px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                      }}
-                      onClick={handleTogglePassword}
-                    />
+                  {errors.password && (
+                    <div style={{ color: "red", marginTop: "5px" }}>
+                      {errors.password}
+                    </div>
                   )}
-                </div>
-                <div style={{ color: "red", marginTop: "5px" }}>
-                  {errors.password}
                 </div>
               </div>
 

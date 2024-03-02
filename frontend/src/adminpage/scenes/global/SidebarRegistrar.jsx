@@ -12,29 +12,6 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import GavelIcon from "@mui/icons-material/Gavel";
-import jwt from 'jsonwebtoken';
-
-const decodeToken = () => {
-  // Replace 'yourSecretKey' with the actual secret key used for signing the token on the server
-  const secretKey = 'yourSecretKey';
-
-  // Replace 'yourAccessToken' with the actual access token received during login
-  const accessToken = localStorage.getItem('accesstoken');
-
-  try {
-    if (accessToken) {
-      const decodedToken = jwt.verify(accessToken, secretKey);
-      return decodedToken;
-    } else {
-      console.error('Error: Access token not found.');
-      return null;
-    }
-  } catch (error) {
-    console.error('Error decoding access token:', error.message);
-    return null;
-  }
-};
-
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -52,7 +29,6 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
     </MenuItem>
   );
 };
-
 const Sidebar = ({ role, name, privateImage, userId }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -86,35 +62,31 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        // Decode the token to get user ID
-        const decodedToken = decodeToken();
+        // Retrieve the first name from local storage
+        const storedFirstName = localStorage.getItem("accesstoken");
 
-        console.log("Decoded Token:", decodedToken);
-
-        // Ensure that the decoded token has the user ID
-        if (!decodedToken || !decodedToken.userId) {
-          console.error("Error: User ID not found in the decoded token.");
-          return;
-        }
-
-        console.log("Fetching user details for user ID:", decodedToken.userId);
-
-        // Fetch the first name from the server using the decoded user ID
-        const response = await fetch(`/api/userDetails/${decodedToken.userId}`);
-
-        if (!response.ok) {
-          throw new Error(
-            `Error fetching user details: ${response.status} ${response.statusText}`
-          );
-        }
-
-        if (response.headers.get("content-type").includes("application/json")) {
-          const data = await response.json();
-          console.log("User Details:", data);
-          setFirstName(data.firstName);
+        if (storedFirstName) {
+          // Display the stored first name
+          setFirstName(storedFirstName);
         } else {
-          console.warn("Received a non-JSON response. Using default values.");
-          setFirstName("Default Name");
+          // If first name is not found in local storage, fetch it from the server
+          const response = await fetch(`/api/userDetails/:userId`);
+
+          if (!response.ok) {
+            throw new Error(
+              `Error fetching user details: ${response.status} ${response.statusText}`
+            );
+          }
+
+          if (
+            response.headers.get("content-type").includes("application/json")
+          ) {
+            const data = await response.json();
+            setFirstName(data.firstName);
+          } else {
+            console.warn("Received a non-JSON response. Using default values.");
+            setFirstName("Default Name");
+          }
         }
       } catch (error) {
         console.error("Error fetching user details:", error.message);
@@ -123,7 +95,7 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
     };
 
     fetchUserDetails();
-  }, []); // No need to include userId in the dependency array
+  }, [userId]); // Include userId in the dependency array if you're using it inside the useEffect
 
   const handleChoosePicture = () => {
     const input = document.createElement("input");
@@ -306,5 +278,4 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
     </Box>
   );
 };
-
 export default Sidebar;

@@ -38,6 +38,7 @@
     "react-router-dom": "^6.20.1",
     "react-scripts": "^5.0.1",
     "react-scroll": "^1.9.0",
+    "react-toastify": "^10.0.4",
     "reactstrap": "^9.2.1",
     "redux": "^5.0.1",
     "slider": "^1.0.4",
