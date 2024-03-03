@@ -5,9 +5,7 @@ const AddUser = async (db, req, res) => {
   try {
     // Hash the password before storing it in the database
     const hashedPassword = await bcrypt.hash(userData.password, 10);
-
     // Do not store 'confirm_password' in the database
-
     // Update the query to use the hashed password
     const [results] = await db.query("INSERT INTO users SET ?", {
       first_name: userData.first_name,

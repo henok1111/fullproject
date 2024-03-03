@@ -15,7 +15,9 @@ import AddUser from "./component/adduser.js";
 import Login from "./login.js";
 import Getuser from "./component/getuser.js";
 import Getrole from "./component/getrole.js";
-
+import EditUser from "./component/EditUser.js";
+import DeleteUser from "./component/deleteUser.js";
+import EditUserStatus from "./component/EditUserStatus.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -158,7 +160,17 @@ app.get("/api/getUsers", async (req, res) => {
 app.get("/api/getRole/:id", async (req, res) => {
   await Getrole(req, res);
 });
+app.post("/api/editUserStatus", async (req, res) => {
+  await EditUserStatus(db, req, res);
+});
 
+app.post("/api/editUser", async (req, res) => {
+  await EditUser(db, req, res);
+});
+
+app.post("/api/deleteUser", async (req, res) => {
+  await DeleteUser(db, req, res);
+});
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

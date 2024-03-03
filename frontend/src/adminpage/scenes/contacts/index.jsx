@@ -43,19 +43,19 @@ const Contacts = () => {
     try {
       const response = await fetch("http://localhost:8081/api/getUsers");
       const data = await response.json();
-
+  
       // Update the status property based on the backend data
-      const updatedData = data.map((user, index) => ({
+      const updatedData = data.map((user) => ({
         ...user,
         status: user.status === "Activated",
-        id: index + 1, // Add this line to start the ID from 1
       }));
-
+  
       setUserData(updatedData);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchUsers();
