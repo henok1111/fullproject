@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import {
   Box,
@@ -17,6 +17,7 @@ import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const validationSchema = yup.object().shape({
   firstName: yup.string().required("First Name is required"),
@@ -57,40 +58,59 @@ const AddClient = () => {
     };
   };
 
-  // Updated handleSubmit function
+  // Function to add a new reference field
+  const handleAddReference = () => {
+    formik.setFieldValue("references", [
+      ...formik.values.references,
+      { referenceName: "", referenceMobile: "" },
+    ]);
+  };
+
+  // Function to remove a reference field
+  const handleRemoveReference = (index) => {
+    const updatedReferences = [...formik.values.references];
+    updatedReferences.splice(index, 1);
+    formik.setFieldValue("references", updatedReferences);
+  };
+
+  // Create the formik instance
   const handleSubmit = async (values, formik) => {
     try {
+      console.log("Form submitted");
       // Log form values
-      console.log(values);
+      console.log("Formik Values:", values);
 
       // Create the user object
       const userObject = createUserObject(values);
 
       // Log the created object
-      console.log(userObject);
+      console.log("User Object:", userObject);
 
       // Simulate the API call (replace this with your actual API endpoint)
-      const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userObject),
-      });
+      const response = await fetch(
+        "http://localhost:8081/api/addclient",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userObject),
+        }
+      );
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log(responseData);
+        console.log("API Response:", responseData);
         // Show success notification if needed
 
         // Reset the form after successful submission
         formik.resetForm();
       } else {
         // Handle errors
-        console.error('Failed to submit form data');
+        console.error("Failed to submit form data");
       }
     } catch (error) {
-      console.error('Error submitting form data:', error);
+      console.error("Error submitting form data:", error);
     }
   };
 
@@ -101,7 +121,7 @@ const AddClient = () => {
       firstName: "",
       middleName: "",
       lastName: "",
-      gender: "",
+      gender: "male",
       email: "",
       mobileNumber: "",
       alternateNumber: "",
@@ -111,11 +131,15 @@ const AddClient = () => {
     onSubmit: (values) => handleSubmit(values, formik),
   });
 
+  // Updated useEffect to log formik values on component mount
+  useEffect(() => {
+    console.log("Initial Formik Values:", formik.values);
+  }, [formik.values]);
+
   const handleCancel = () => {
     // Use resetForm directly from the formik instance
     formik.resetForm();
   };
-
 
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
@@ -144,7 +168,9 @@ const AddClient = () => {
                 onChange={formik.handleChange}
                 value={formik.values.firstName}
                 error={formik.touched.firstName && !!formik.errors.firstName}
-                helperText={formik.touched.firstName && formik.errors.firstName}
+                helperText={
+                  formik.touched.firstName && formik.errors.firstName
+                }
               />
               <TextField
                 name="middleName"
@@ -154,8 +180,12 @@ const AddClient = () => {
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 value={formik.values.middleName}
-                error={formik.touched.middleName && !!formik.errors.middleName}
-                helperText={formik.touched.middleName && formik.errors.middleName}
+                error={
+                  formik.touched.middleName && !!formik.errors.middleName
+                }
+                helperText={
+                  formik.touched.middleName && formik.errors.middleName
+                }
               />
               <TextField
                 name="lastName"
@@ -211,8 +241,13 @@ const AddClient = () => {
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 value={formik.values.mobileNumber}
-                error={formik.touched.mobileNumber && !!formik.errors.mobileNumber}
-                helperText={formik.touched.mobileNumber && formik.errors.mobileNumber}
+                error={
+                  formik.touched.mobileNumber &&
+                  !!formik.errors.mobileNumber
+                }
+                helperText={
+                  formik.touched.mobileNumber && formik.errors.mobileNumber
+                }
               />
             </Box>
             <Box sx={{ display: "flex", mt: "20px", gap: "20px" }}>
@@ -248,6 +283,7 @@ const AddClient = () => {
                     name={`references[${index}].referenceName`}
                     label="Reference Name"
                     variant="outlined"
+                    fullWidth
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
                     value={reference.referenceName}
@@ -256,15 +292,48 @@ const AddClient = () => {
                     name={`references[${index}].referenceMobile`}
                     label="Reference Mobile"
                     variant="outlined"
+                    fullWidth
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
                     value={reference.referenceMobile}
                   />
+                  {/* Remove Reference Button */}
+                  <Button
+                    type="button"
+                    color="secondary"
+                    variant="contained"
+                    onClick={() => handleRemoveReference(index)}
+                    startIcon={<DeleteOutlineIcon />}
+                    sx={{
+                      ml: "10px",
+                      width: "150px",
+                      height: "40px",
+                      backgroundColor: "gainsboro",
+                    }}
+                  >
+                    Remove
+                  </Button>
                 </Box>
               ))}
+              {/* Add Reference Button */}
+              <Button
+                type="button"
+                color="secondary"
+                variant="contained"
+                onClick={handleAddReference}
+                sx={{ mt: "10px" }}
+              >
+                Add Reference
+              </Button>
             </Box>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "20px" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              mt: "20px",
+            }}
+          >
             <Button
               type="button"
               color="secondary"
@@ -286,9 +355,9 @@ const AddClient = () => {
         </Box>
       </form>
       <Snackbar
-        open={false}  // Replace with your own state variable for Snackbar
+        open={false} // Replace with your own state variable for Snackbar
         autoHideDuration={6000}
-        onClose={() => {}}  // Replace with your own function to handle Snackbar close
+        onClose={() => {}} // Replace with your own function to handle Snackbar close
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       />
     </Box>
