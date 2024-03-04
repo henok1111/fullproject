@@ -31,7 +31,7 @@ function Deactive() {
               <ArrowBack fontSize="large" color="secondary" />
             </IconButton>
             <Typography variant="h3" paddingTop={35} color={colors.redAccent[500]} gutterBottom align="center">
-            Your account has been deactivated by the administrator !!
+            Your account has been deactivated by the administrator!!
             </Typography>
           </Box>
           <Footer />
