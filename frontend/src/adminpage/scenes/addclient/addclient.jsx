@@ -39,30 +39,26 @@ const AddClient = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  // Create the formik instance
-  const formik = useFormik({
-    validationSchema,
-    initialValues: {
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      gender: "",
-      email: "",
-      mobileNumber: "",
-      alternateNumber: "",
-      address: "",
-      references: [{ referenceName: "", referenceMobile: "" }],
-    },
-    onSubmit: handleSubmit,
-  });
-
-  const handleCancel = () => {
-    // Use resetForm directly from the formik instance
-    formik.resetForm();
+  // Function to create the user object
+  const createUserObject = (values) => {
+    return {
+      first_name: values.firstName,
+      middle_name: values.middleName,
+      last_name: values.lastName,
+      gender: values.gender,
+      email: values.email,
+      mobile_number: values.mobileNumber,
+      alternate_number: values.alternateNumber,
+      address: values.address,
+      references: values.references.map((reference) => ({
+        reference_name: reference.referenceName,
+        reference_mobile: reference.referenceMobile,
+      })),
+    };
   };
 
   // Updated handleSubmit function
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, formik) => {
     try {
       // Log form values
       console.log(values);
@@ -98,23 +94,28 @@ const AddClient = () => {
     }
   };
 
-  // Function to create the user object
-  const createUserObject = (values) => {
-    return {
-      first_name: values.firstName,
-      middle_name: values.middleName,
-      last_name: values.lastName,
-      gender: values.gender,
-      email: values.email,
-      mobile_number: values.mobileNumber,
-      alternate_number: values.alternateNumber,
-      address: values.address,
-      references: values.references.map((reference) => ({
-        reference_name: reference.referenceName,
-        reference_mobile: reference.referenceMobile,
-      })),
-    };
+  // Create the formik instance
+  const formik = useFormik({
+    validationSchema,
+    initialValues: {
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      gender: "",
+      email: "",
+      mobileNumber: "",
+      alternateNumber: "",
+      address: "",
+      references: [{ referenceName: "", referenceMobile: "" }],
+    },
+    onSubmit: (values) => handleSubmit(values, formik),
+  });
+
+  const handleCancel = () => {
+    // Use resetForm directly from the formik instance
+    formik.resetForm();
   };
+
 
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
