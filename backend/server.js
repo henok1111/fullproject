@@ -18,9 +18,12 @@ import Getrole from "./component/getrole.js";
 import EditUser from "./component/EditUser.js";
 import DeleteUser from "./component/deleteUser.js";
 import EditUserStatus from "./component/EditUserStatus.js";
+import updateProfileProfile from "./component/editProfilePicture.js";
+
 const app = express();
 const PORT = 8081;
 const router = express.Router();
+const SECRET_KEY = "k0PJbIobltNQ4zlgiu_Gtpo0iZVQ9IytOsjR7so9CoM";
 
 app.use(bodyParser.json());
 app.use(
@@ -48,7 +51,7 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "1234",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
@@ -64,6 +67,47 @@ db.getConnection()
   .catch((err) => {
     console.error("Database connection failed: ", err);
   });
+
+const decodeTokenMiddleware = (req, res, next) => {
+  // Check if 'Authorization' header exists
+  if (!req.headers.authorization) {
+    console.error("Authorization header missing");
+    return res
+      .status(401)
+      .json({ status: "error", message: "Authorization header missing" });
+  }
+
+  // Extract the token from the 'Authorization' header
+  const token = req.headers.authorization.split(" ")[1];
+  console.log("Token on the Backend:", token);
+
+  try {
+    // Decode the token and extract user information
+    const decodedToken = jwt.verify(token, SECRET_KEY);
+
+    if (decodedToken && decodedToken.userId) {
+      req.user = {
+        userId: decodedToken.userId,
+        name: decodedToken.name,
+        email: decodedToken.email,
+        // Add any other user information you need
+      };
+
+      next(); // Move to the next middleware or route handler
+    } else {
+      console.log("Failed to decode token or extract user information");
+      return res.status(401).json({
+        status: "error",
+        message: "Failed to decode token or extract user information",
+      });
+    }
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return res
+      .status(401)
+      .json({ status: "error", message: "Error decoding token" });
+  }
+};
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -81,77 +125,19 @@ const storage = multer.diskStorage({
   },
 });
 
-const saveProfilePicture = async (userId, profilePicture) => {
-  try {
-    // Check if userId and profilePicture are defined
-    if (userId === undefined || profilePicture === undefined) {
-      throw new Error("userId and profilePicture must be defined");
-    }
-
-    const [result] = await db.execute(
-      "UPDATE users SET profile_picture_url = ? WHERE id = ?",
-      [profilePicture, userId]
-    );
-
-    return result;
-  } catch (error) {
-    console.error("Error updating user profile:", error);
-    throw error; // Propagate the error to the calling function
-  }
-};
-
 const upload = multer({ storage });
 
 app.post(
   "/api/upload",
-  upload.single("profilePicture"),
-  async (db, req, res) => {
-    try {
-      // console.log('Received update request:', req.body);
-
-      const { id, first_name, email } = req.body;
-      const role_name = req.body.role;
-      //console.log(role_name)
-      const image = req.file ? req.file.filename : null;
-
-      // Use the MySQL connection pool to execute queries
-      const query = promisify(db.query).bind(db);
-      const currentImageResult = await query(
-        "SELECT profile_picture_url FROM users WHERE user_id = ?",
-        [user_id]
-      );
-      const currentImage = currentImageResult[0]
-        ? currentImageResult[0].image
-        : null;
-
-      // Update the user record
-      await query(
-        "UPDATE users SET profile_picture_url = IFNULL(?, profile_picture_url) WHERE user_id = ?",
-        [email, first_name, role_name, image, id]
-      );
-      console.log(role_name);
-      if (role_name === "Student") {
-        // If the role is changed to 'Instructor', delete from students table and insert into instructors table
-        await query("DELETE FROM instructors WHERE user_id = ?", [user_id]);
-        await query("INSERT INTO students (user_id) VALUES (?)", [user_id]);
-      }
-
-      res.status(200).json({ message: "User data updated successfully" });
-    } catch (error) {
-      //console.error('Error updating user profile:', error);
-      res
-        .status(500)
-        .json({ error: "An error occurred while updating user profile" });
-    }
+  decodeTokenMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    await updateProfileProfile(db, req, res);
   }
 );
-
-app.post("/api/createUser", async (req, res) => {
-  await AddUser(db, req, res);
-}),
-  app.post("/api/login", async (req, res) => {
-    await Login(db, req, res);
-  });
+app.post("/api/login", async (req, res) => {
+  await Login(db, req, res);
+});
 
 app.get("/api/getUsers", async (req, res) => {
   await Getuser(req, res);

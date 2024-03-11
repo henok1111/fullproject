@@ -1,7 +1,7 @@
 const Getuser = async (req, res) => {
   try {
     const [results] = await global.pool.query(
-      "SELECT id, first_name, last_name, email, phone_number, address, role, status FROM users"
+      "SELECT id, first_name, last_name, email, phone_number, address, role, status, image FROM users"
     );
     res.json(results);
   } catch (error) {
