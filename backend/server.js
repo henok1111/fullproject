@@ -10,7 +10,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { promisify } from "util";
-
+import AddClient from "./component/addclient.js";
 import AddUser from "./component/adduser.js";
 import Login from "./login.js";
 import Getuser from "./component/getuser.js";
@@ -18,11 +18,14 @@ import Getrole from "./component/getrole.js";
 import EditUser from "./component/EditUser.js";
 import DeleteUser from "./component/deleteUser.js";
 import EditUserStatus from "./component/EditUserStatus.js";
+import { checkEmail } from "./component/checkemail.js";
+import getJoinedClientData from "./component/getJoinedClientData.js";
+import deleteClient from "./component/deleteClient.js";
+import editClient from "./component/editclient.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
-
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -40,9 +43,13 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json()); // Parse JSON requests
+ // Parse JSON requests
 app.use(express.static("uploads"));
 app.use(express.urlencoded({ extended: true }));
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
 
 // MySQL Connection
 const db = mysql.createPool({
@@ -117,9 +124,10 @@ app.post(
       // Use the MySQL connection pool to execute queries
       const query = promisify(db.query).bind(db);
       const currentImageResult = await query(
-        "SELECT profile_picture_url FROM users WHERE user_id = ?",
-        [user_id]
+        "SELECT profile_picture_url FROM users WHERE id = ?",
+        [id]
       );
+      
       const currentImage = currentImageResult[0]
         ? currentImageResult[0].image
         : null;
@@ -168,8 +176,27 @@ app.post("/api/editUser", async (req, res) => {
   await EditUser(db, req, res);
 });
 
+
+app.post("/api/addclient", async (req, res) => {
+  await AddClient(db,req, res);
+});
+app.get("/api/getJoinedClientData", async (req, res) => {
+  await getJoinedClientData(db, req, res);
+});
+
+
+app.get("/api/checkemail", async (req, res) => {
+  await checkEmail(db, req, res);
+});
+
+app.post("/api/deleteClient", async (req, res) => {
+  await deleteClient( db,req, res);
+});
 app.post("/api/deleteUser", async (req, res) => {
   await DeleteUser(db, req, res);
+});
+app.post("/api/editClient", async (req, res) => {
+  await editClient(db, req, res);
 });
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -15,7 +15,6 @@ import * as yup from "yup";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
-import SaveIcon from "@mui/icons-material/Save";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
@@ -36,85 +35,37 @@ const validationSchema = yup.object().shape({
   ),
 });
 
+const isEmailUnique = async (email) => {
+  try {
+    const response = await fetch(`http://localhost:8081/api/checkemail?email=${email}`);
+    const data = await response.json();
+    return data.isUnique;
+  } catch (error) {
+    console.error("Error checking email uniqueness:", error);
+    return false;
+  }
+};
+const createUserObject = (values) => {
+  return {
+    first_name: values.firstName,
+    middle_name: values.middleName,
+    last_name: values.lastName,
+    gender: values.gender,
+    email: values.email,
+    mobile_number: values.mobileNumber,
+    alternate_number: values.alternateNumber,
+    address: values.address,
+    references: values.references.map((reference) => ({
+      reference_name: reference.referenceName,
+      reference_mobile: reference.referenceMobile,
+    })),
+  };
+};
+
 const AddClient = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  // Function to create the user object
-  const createUserObject = (values) => {
-    return {
-      first_name: values.firstName,
-      middle_name: values.middleName,
-      last_name: values.lastName,
-      gender: values.gender,
-      email: values.email,
-      mobile_number: values.mobileNumber,
-      alternate_number: values.alternateNumber,
-      address: values.address,
-      references: values.references.map((reference) => ({
-        reference_name: reference.referenceName,
-        reference_mobile: reference.referenceMobile,
-      })),
-    };
-  };
-
-  // Function to add a new reference field
-  const handleAddReference = () => {
-    formik.setFieldValue("references", [
-      ...formik.values.references,
-      { referenceName: "", referenceMobile: "" },
-    ]);
-  };
-
-  // Function to remove a reference field
-  const handleRemoveReference = (index) => {
-    const updatedReferences = [...formik.values.references];
-    updatedReferences.splice(index, 1);
-    formik.setFieldValue("references", updatedReferences);
-  };
-
-  // Create the formik instance
-  const handleSubmit = async (values, formik) => {
-    try {
-      console.log("Form submitted");
-      // Log form values
-      console.log("Formik Values:", values);
-
-      // Create the user object
-      const userObject = createUserObject(values);
-
-      // Log the created object
-      console.log("User Object:", userObject);
-
-      // Simulate the API call (replace this with your actual API endpoint)
-      const response = await fetch(
-        "http://localhost:8081/api/addclient",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userObject),
-        }
-      );
-
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log("API Response:", responseData);
-        // Show success notification if needed
-
-        // Reset the form after successful submission
-        formik.resetForm();
-      } else {
-        // Handle errors
-        console.error("Failed to submit form data");
-      }
-    } catch (error) {
-      console.error("Error submitting form data:", error);
-    }
-  };
-
-  // Create the formik instance
   const formik = useFormik({
     validationSchema,
     initialValues: {
@@ -131,13 +82,85 @@ const AddClient = () => {
     onSubmit: (values) => handleSubmit(values, formik),
   });
 
-  // Updated useEffect to log formik values on component mount
+  const handleAddReference = () => {
+    formik.setFieldValue("references", [
+      ...formik.values.references,
+      { referenceName: "", referenceMobile: "" },
+    ]);
+  };
+
+  const handleRemoveReference = (index) => {
+    const updatedReferences = [...formik.values.references];
+    updatedReferences.splice(index, 1);
+    formik.setFieldValue("references", updatedReferences);
+  };
+
+  const handleSubmit = async (values, formik) => {
+    try {
+      // Check if the email is unique
+      const isEmailValid = await isEmailUnique(values.email);
+  
+      if (!isEmailValid) {
+        formik.setErrors({
+          email: "This email is already in use. Please use a different one.",
+        });
+        return;
+      }
+  
+      // Continue with the rest of your form submission logic
+      console.log("Form submitted");
+      console.log("Formik Values:", values);
+  
+      const userObject = createUserObject(values);
+  
+      console.log("User Object:", userObject);
+  
+      try {
+        JSON.parse(JSON.stringify(userObject));
+        console.log("User Object is a valid JSON");
+      } catch (error) {
+        console.error("User Object is not a valid JSON:", error);
+        return;
+      }
+  
+      console.log("Sending request to:", "http://localhost:8081/api/addclient");
+  
+      let response;
+  
+      try {
+        response = await fetch("http://localhost:8081/api/addclient", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userObject),
+        });
+  
+        console.log("Response Status:", response.status);
+        console.log("Response OK:", response.ok);
+      } catch (error) {
+        console.error("Error during fetch:", error);
+        return;
+      }
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("API Response:", responseData);
+        formik.resetForm();
+      } else {
+        console.error("Failed to submit form data");
+      }
+    } catch (error) {
+      console.error("Error submitting form data:", error);
+    }
+  };
+  
+
   useEffect(() => {
     console.log("Initial Formik Values:", formik.values);
   }, [formik.values]);
 
   const handleCancel = () => {
-    // Use resetForm directly from the formik instance
     formik.resetForm();
   };
 
@@ -297,7 +320,6 @@ const AddClient = () => {
                     onChange={formik.handleChange}
                     value={reference.referenceMobile}
                   />
-                  {/* Remove Reference Button */}
                   <Button
                     type="button"
                     color="secondary"
@@ -315,7 +337,6 @@ const AddClient = () => {
                   </Button>
                 </Box>
               ))}
-              {/* Add Reference Button */}
               <Button
                 type="button"
                 color="secondary"
@@ -355,9 +376,9 @@ const AddClient = () => {
         </Box>
       </form>
       <Snackbar
-        open={false} // Replace with your own state variable for Snackbar
+        open={false}
         autoHideDuration={6000}
-        onClose={() => {}} // Replace with your own function to handle Snackbar close
+        onClose={() => {}}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       />
     </Box>

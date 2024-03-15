@@ -14,6 +14,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import GavelIcon from "@mui/icons-material/Gavel";
+import { jwtDecode } from "jwt-decode";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -86,35 +87,25 @@ const Sidebar = ({ role, name, userId }) => {
       console.error("Error updating user profile:", error.message);
     }
   };
-
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        // Retrieve the first name from local storage
-        const storedFirstName = localStorage.getItem("accesstoken");
+        // Retrieve the access token from local storage
+        const accessToken = localStorage.getItem("accessToken");
 
-        if (storedFirstName) {
-          // Display the stored first name
-          setFirstName(storedFirstName);
+        if (accessToken) {
+          // Decode the token to get the user details
+          const decodedToken = jwtDecode(accessToken);
+
+          // Log all values inside the decoded t
+          // Extract the first_name from the decoded token
+          const userFirstName = decodedToken.name;
+
+          // Set the first_name state with the extracted value
+          setFirstName(userFirstName);
         } else {
-          // If the first name is not found in local storage, fetch it from the server
-          const response = await fetch(`/api/userDetails/${userId}`);
-
-          if (!response.ok) {
-            throw new Error(
-              `Error fetching user details: ${response.status} ${response.statusText}`
-            );
-          }
-
-          if (
-            response.headers.get("content-type").includes("application/json")
-          ) {
-            const data = await response.json();
-            setFirstName(data.firstName);
-          } else {
-            console.warn("Received a non-JSON response. Using default values.");
-            setFirstName("Default Name");
-          }
+          console.warn("Access token not found in local storage");
+          setFirstName("Default Name");
         }
       } catch (error) {
         console.error("Error fetching user details:", error.message);
@@ -123,7 +114,8 @@ const Sidebar = ({ role, name, userId }) => {
     };
 
     fetchUserDetails();
-  }, [userId]); // Include userId in the dependency array if you're using it inside the useEffect
+  }, [])// Empty dependency array to run the effect only once on component mount
+  
 
   // Define different items for admin, judge, and registrar
   const sidebarItems = {

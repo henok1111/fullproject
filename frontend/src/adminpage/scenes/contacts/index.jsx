@@ -12,6 +12,10 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../../theme";
@@ -19,6 +23,8 @@ import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import axios from "axios";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const Contacts = () => {
   const theme = useTheme();
@@ -32,36 +38,51 @@ const Contacts = () => {
     phone_number: "",
     address: "",
     role: "Judge",
-    status: false,
   });
 
   const [userData, setUserData] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [selectedUserToDelete, setSelectedUserToDelete] = useState(null);
 
   const fetchUsers = async () => {
     try {
       const response = await fetch("http://localhost:8081/api/getUsers");
       const data = await response.json();
-  
+
       // Update the status property based on the backend data
       const updatedData = data.map((user) => ({
         ...user,
         status: user.status === "Activated",
       }));
-  
+
       setUserData(updatedData);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
-  
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    // Update the form data when editFormData changes
+    setEditFormData((prevData) => ({
+      ...prevData,
+      id: editFormData.id,
+      first_name: editFormData.first_name,
+      last_name: editFormData.last_name,
+      email: editFormData.email,
+      phone_number: editFormData.phone_number,
+      address: editFormData.address,
+      role: editFormData.role,
+    }));
+  }, [editFormData]);
+
   const handleEditClick = (params) => {
+    console.log("Clicked Edit for ID:", params.id);
     setEditFormData({
       id: params.id,
       first_name: params.first_name,
@@ -70,34 +91,44 @@ const Contacts = () => {
       phone_number: params.phone_number,
       address: params.address,
       role: params.role,
-      status: params.status,
     });
+  
+    setAnchorEl(null);
+  };
+  
 
+  const handleDeleteClick = (params) => {
+    setSelectedUserToDelete(params);
+    setDeleteConfirmationOpen(true);
     setAnchorEl(null);
   };
 
-  const handleDeleteClick = async (params) => {
+  const handleConfirmDelete = async () => {
     try {
       const response = await fetch("http://localhost:8081/api/deleteUser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: params.id }),
+        body: JSON.stringify({ id: selectedUserToDelete.id }),
       });
 
       if (response.ok) {
-        console.log(`User with ID ${params.id} deleted successfully!`);
+        console.log(`User with ID ${selectedUserToDelete.id} deleted successfully!`);
         setOpenSnackbar(true);
         fetchUsers();
       } else {
-        console.error(`Error deleting user with ID ${params.id}`);
+        console.error(`Error deleting user with ID ${selectedUserToDelete.id}`);
       }
     } catch (error) {
       console.error("Error deleting user:", error);
     }
 
-    setAnchorEl(null);
+    setDeleteConfirmationOpen(false);
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmationOpen(false);
   };
 
   const handleEditFormChange = (e) => {
@@ -141,19 +172,8 @@ const Contacts = () => {
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditFormData({
-      id: null,
-      first_name: "",
-      last_name: "",
-      email: "",
-      phone_number: "",
-      address: "",
-      role: "",
-      status: false,
-    });
-
-    setAnchorEl(null);
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   const handleEditFormSubmit = async (e) => {
@@ -197,67 +217,33 @@ const Contacts = () => {
       phone_number: "",
       address: "",
       role: "",
-      status: false,
     });
 
     setAnchorEl(null);
   };
 
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
+  const handleCancelEdit = () => {
+    setEditFormData({
+      id: null,
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone_number: "",
+      address: "",
+      role: "",
+    });
+
+    setAnchorEl(null);
   };
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
-    {
-      field: "first_name",
-      headerName: "First Name",
-      flex: 1,
-    },
-    {
-      field: "last_name",
-      headerName: "Last Name",
-      flex: 1,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      flex: 1,
-    },
-    {
-      field: "phone_number",
-      headerName: "Phone Number",
-      flex: 1,
-    },
-    {
-      field: "address",
-      headerName: "Address",
-      flex: 1,
-    },
-    {
-      field: "role",
-      headerName: "Role",
-      flex: 1,
-      renderCell: (params) => (
-        <Box
-          width="60%"
-          m="0 auto"
-          p="5px"
-          display="flex"
-          justifyContent="center"
-          backgroundColor={
-            params.value === "admin"
-              ? colors.greenAccent[600]
-              : params.value === "manager"
-              ? colors.greenAccent[700]
-              : colors.greenAccent[700]
-          }
-          borderRadius="4px"
-        >
-          {params.value}
-        </Box>
-      ),
-    },
+    { field: "first_name", headerName: "First Name", flex: 1 },
+    { field: "last_name", headerName: "Last Name", flex: 1 },
+    { field: "email", headerName: "Email", flex: 1 },
+    { field: "phone_number", headerName: "Phone Number", flex: 1 },
+    { field: "address", headerName: "Address", flex: 1 },
+    { field: "role", headerName: "Role", flex: 1 },
     {
       field: "status",
       headerName: "Status",
@@ -273,29 +259,17 @@ const Contacts = () => {
       ),
     },
     {
-      field: "action",
-      headerName: "Action",
+      field: "actions",
+      headerName: "Actions",
       flex: 0.5,
       renderCell: (params) => (
         <>
-          <IconButton
-            aria-controls="action-menu"
-            aria-haspopup="true"
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-          >
-            <MoreVertIcon />
+          <IconButton aria-label="edit" onClick={() => handleEditClick(params)}>
+            <EditIcon  style={{ color: "yellowgreen" }}/>
           </IconButton>
-          <Menu
-            id="action-menu"
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={() => setAnchorEl(null)}
-          >
-            <MenuItem onClick={() => handleEditClick(params)}>Edit</MenuItem>
-            <MenuItem onClick={() => handleDeleteClick(params)}>
-              Delete
-            </MenuItem>
-          </Menu>
+          <IconButton aria-label="delete" onClick={() => handleDeleteClick(params)}>
+            <DeleteIcon style={{ color: "rgba(255, 0, 0, 0.9)" }}/>
+          </IconButton>
         </>
       ),
     },
@@ -343,6 +317,29 @@ const Contacts = () => {
           components={{ Toolbar: GridToolbar }}
         />
       </Box>
+
+      <Dialog
+        open={deleteConfirmationOpen}
+        onClose={handleCancelDelete}
+        sx={{
+          "& .MuiDialog-paper": {
+            backgroundColor: `${colors.blueAccent[900]}`, // Set your preferred background color
+          },
+        }}
+      >
+     
+        <DialogContent color="red">
+          Are you sure you want to delete this user?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="success">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Box
         position="fixed"
@@ -433,6 +430,7 @@ const Contacts = () => {
             color="secondary"
             onClick={handleCancelEdit}
             sx={{ marginTop: "10px" }}
+            
           >
             Cancel
           </Button>
