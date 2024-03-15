@@ -100,7 +100,7 @@ const App = () => {
               </>
             )}
 
-            <Route path="/deactive"  element={<Deactive/>}/>
+            <Route path="/deactive" element={<Deactive />} />
             <Route path="*" element={<p color="black">Page Not Found</p>} />
             <Route
               path="/unauthorized"

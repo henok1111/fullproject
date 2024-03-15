@@ -44,13 +44,42 @@ const Sidebar = ({ role, name, userId }) => {
   const [firstName, setFirstName] = useState(name);
   const [profilePicture, setProfilePicture] = useState(null);
   const fileInputRef = useRef(null);
+  const [files, setFiles] = useState();
 
   const handleChoosePicture = () => {
+    const token = localStorage.getItem("accessToken"); // Replace with your actual storage method
+
     if (fileInputRef.current) {
+      fileInputRef.current.onchange = (event) => {
+        const selectedFile = event.target.files[0];
+
+        if (selectedFile) {
+          const formData = new FormData();
+          formData.append("image", selectedFile);
+
+          axios
+            .post("http://localhost:8081/api/upload", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((res) => {
+              if (res.data && res.data.Status === "success") {
+                console.log("Success");
+              } else {
+                console.log("Failed");
+              }
+            })
+            .catch((err) => console.log(err));
+        }
+      };
+
       fileInputRef.current.click();
     }
   };
 
+<<<<<<< HEAD
   const handleProfilePictureChange = (event) => {
     const file = event.target.files[0];
 
@@ -87,6 +116,8 @@ const Sidebar = ({ role, name, userId }) => {
       console.error("Error updating user profile:", error.message);
     }
   };
+=======
+>>>>>>> 4fb2d8a0c7022d34ffa149eccf0930f22c4f8d4b
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -230,14 +261,13 @@ const Sidebar = ({ role, name, userId }) => {
                   type="file"
                   style={{ display: "none" }}
                   ref={fileInputRef}
-                  onChange={handleChange}
                 />
                 <label htmlFor="fileInput">
                   <img
                     alt="profile-user"
                     width="100px"
                     height="100px"
-                    src={imagePath}
+                    // src={`http://localhost:8081/${user.image}`}
                     style={{ cursor: "pointer", borderRadius: "50%" }}
                     onClick={handleChoosePicture}
                   />
