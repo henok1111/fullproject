@@ -1,221 +1,388 @@
-import React from "react";
-import { Box, Button, TextField } from "@mui/material";
-import { tokens } from "../../../theme"; // Ensure this import is correct
-import { useTheme } from "@mui/material";
+import React, { useEffect } from "react";
+import { useFormik } from "formik";
+import {
+  Box,
+  Button,
+  TextField,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  Snackbar,
+  FormControl,
+  FormLabel,
+} from "@mui/material";
+import * as yup from "yup";
 import Header from "../../components/Header";
-import { Form, Formik } from "formik";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-import { useState } from "react";
-import SaveIcon from "@mui/icons-material/Save";
+import { tokens } from "../../../theme";
+import { useTheme } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-const Addclient = () => {
+const validationSchema = yup.object().shape({
+  firstName: yup.string().required("First Name is required"),
+  middleName: yup.string().required("Middle Name is required"),
+  lastName: yup.string().required("Last Name is required"),
+  gender: yup.string().required("Gender is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  mobileNumber: yup.string().required("Mobile Number is required"),
+  alternateNumber: yup.string(),
+  address: yup.string().required("Address is required"),
+  references: yup.array().of(
+    yup.object().shape({
+      referenceName: yup.string(),
+      referenceMobile: yup.string(),
+    })
+  ),
+});
+
+const isEmailUnique = async (email) => {
+  try {
+    const response = await fetch(`http://localhost:8081/api/checkemail?email=${email}`);
+    const data = await response.json();
+    return data.isUnique;
+  } catch (error) {
+    console.error("Error checking email uniqueness:", error);
+    return false;
+  }
+};
+const createUserObject = (values) => {
+  return {
+    first_name: values.firstName,
+    middle_name: values.middleName,
+    last_name: values.lastName,
+    gender: values.gender,
+    email: values.email,
+    mobile_number: values.mobileNumber,
+    alternate_number: values.alternateNumber,
+    address: values.address,
+    references: values.references.map((reference) => ({
+      reference_name: reference.referenceName,
+      reference_mobile: reference.referenceMobile,
+    })),
+  };
+};
+
+const AddClient = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [rowCount, setRowCount] = useState(1);
 
-  const handleAddRow = () => {
-    setRowCount((prevCount) => prevCount + 1);
+  const formik = useFormik({
+    validationSchema,
+    initialValues: {
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      gender: "male",
+      email: "",
+      mobileNumber: "",
+      alternateNumber: "",
+      address: "",
+      references: [{ referenceName: "", referenceMobile: "" }],
+    },
+    onSubmit: (values) => handleSubmit(values, formik),
+  });
+
+  const handleAddReference = () => {
+    formik.setFieldValue("references", [
+      ...formik.values.references,
+      { referenceName: "", referenceMobile: "" },
+    ]);
   };
 
-  const initialValues = {
-    respondentDetails: [{ name: "", advocate: "" }],
+  const handleRemoveReference = (index) => {
+    const updatedReferences = [...formik.values.references];
+    updatedReferences.splice(index, 1);
+    formik.setFieldValue("references", updatedReferences);
   };
 
-  const handleFormSubmit = (values) => {
-    console.log(values);
-    // Perform form submission logic here
+  const handleSubmit = async (values, formik) => {
+    try {
+      // Check if the email is unique
+      const isEmailValid = await isEmailUnique(values.email);
+  
+      if (!isEmailValid) {
+        formik.setErrors({
+          email: "This email is already in use. Please use a different one.",
+        });
+        return;
+      }
+  
+      // Continue with the rest of your form submission logic
+      console.log("Form submitted");
+      console.log("Formik Values:", values);
+  
+      const userObject = createUserObject(values);
+  
+      console.log("User Object:", userObject);
+  
+      try {
+        JSON.parse(JSON.stringify(userObject));
+        console.log("User Object is a valid JSON");
+      } catch (error) {
+        console.error("User Object is not a valid JSON:", error);
+        return;
+      }
+  
+      console.log("Sending request to:", "http://localhost:8081/api/addclient");
+  
+      let response;
+  
+      try {
+        response = await fetch("http://localhost:8081/api/addclient", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userObject),
+        });
+  
+        console.log("Response Status:", response.status);
+        console.log("Response OK:", response.ok);
+      } catch (error) {
+        console.error("Error during fetch:", error);
+        return;
+      }
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("API Response:", responseData);
+        formik.resetForm();
+      } else {
+        console.error("Failed to submit form data");
+      }
+    } catch (error) {
+      console.error("Error submitting form data:", error);
+    }
+  };
+  
+
+  useEffect(() => {
+    console.log("Initial Formik Values:", formik.values);
+  }, [formik.values]);
+
+  const handleCancel = () => {
+    formik.resetForm();
   };
 
-  const handleRemove = (index) => {
-    setRowCount((prevRowCount) => prevRowCount - 1);
-  };
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Client Management" subtitle="Add Client" />
-      <Formik
-        onSubmit={handleFormSubmit}
-        initialValues={initialValues}
-        validationSchema={[]}
-      >
-        {({
-          values,
-          errors,
-          touched,
-          handleBlur,
-          handleChange,
-          handleSubmit,
-          setFieldValue,
-        }) => (
-          <Form onSubmit={handleSubmit}>
-            <Box
-              padding="20px"
-              backgroundColor={colors.blueAccent[900]}
-              sx={{ mb: "150px" }}
-            >
-              <Box
-                sx={{
-                  backgroundColor: `${colors.primary[400]}75`,
-                }}
-                padding="30px"
-                borderRadius="10px"
-                margin="5px"
-              >
-                <Box sx={{ display: "flex", gap: "20px" }}>
+      <form onSubmit={formik.handleSubmit}>
+        <Box
+          padding="20px"
+          backgroundColor={colors.blueAccent[900]}
+          sx={{ mb: "150px" }}
+        >
+          <Box
+            sx={{
+              backgroundColor: `${colors.primary[400]}75`,
+            }}
+            padding="30px"
+            borderRadius="10px"
+            margin="5px"
+          >
+            <Box sx={{ display: "flex", gap: "20px" }}>
+              <TextField
+                name="firstName"
+                label="First Name"
+                variant="outlined"
+                fullWidth
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.firstName}
+                error={formik.touched.firstName && !!formik.errors.firstName}
+                helperText={
+                  formik.touched.firstName && formik.errors.firstName
+                }
+              />
+              <TextField
+                name="middleName"
+                label="Middle Name"
+                variant="outlined"
+                fullWidth
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.middleName}
+                error={
+                  formik.touched.middleName && !!formik.errors.middleName
+                }
+                helperText={
+                  formik.touched.middleName && formik.errors.middleName
+                }
+              />
+              <TextField
+                name="lastName"
+                label="Last Name"
+                variant="outlined"
+                fullWidth
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.lastName}
+                error={formik.touched.lastName && !!formik.errors.lastName}
+                helperText={formik.touched.lastName && formik.errors.lastName}
+              />
+            </Box>
+            <Box sx={{ display: "flex", mt: "20px", gap: "20px" }}>
+              <FormControl component="fieldset">
+                <FormLabel component="legend">Gender</FormLabel>
+                <RadioGroup
+                  name="gender"
+                  value={formik.values.gender || "male"}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  row
+                >
+                  <FormControlLabel
+                    value="female"
+                    control={<Radio color="default" />}
+                    label="Female"
+                  />
+                  <FormControlLabel
+                    value="male"
+                    control={<Radio color="default" />}
+                    label="Male"
+                  />
+                </RadioGroup>
+              </FormControl>
+              <TextField
+                name="email"
+                label="Email"
+                variant="outlined"
+                fullWidth
+                type="email"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.email}
+                error={formik.touched.email && !!formik.errors.email}
+                helperText={formik.touched.email && formik.errors.email}
+              />
+              <TextField
+                name="mobileNumber"
+                label="Mobile Number"
+                variant="outlined"
+                fullWidth
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.mobileNumber}
+                error={
+                  formik.touched.mobileNumber &&
+                  !!formik.errors.mobileNumber
+                }
+                helperText={
+                  formik.touched.mobileNumber && formik.errors.mobileNumber
+                }
+              />
+            </Box>
+            <Box sx={{ display: "flex", mt: "20px", gap: "20px" }}>
+              <TextField
+                name="alternateNumber"
+                label="Alternate Number"
+                variant="outlined"
+                fullWidth
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.alternateNumber}
+              />
+              <TextField
+                name="address"
+                label="Address"
+                variant="outlined"
+                fullWidth
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.address}
+                error={formik.touched.address && !!formik.errors.address}
+                helperText={formik.touched.address && formik.errors.address}
+              />
+            </Box>
+            <Box sx={{ mt: "20px" }}>
+              <FormLabel component="legend">References</FormLabel>
+              {formik.values.references.map((reference, index) => (
+                <Box
+                  key={index}
+                  sx={{ display: "flex", gap: "20px", alignItems: "center" }}
+                >
                   <TextField
-                    name="First Name"
-                    label="First Name"
+                    name={`references[${index}].referenceName`}
+                    label="Reference Name"
                     variant="outlined"
                     fullWidth
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
+                    value={reference.referenceName}
                   />
                   <TextField
-                    name="Middle Name"
-                    label="Middle Name"
+                    name={`references[${index}].referenceMobile`}
+                    label="Reference Mobile"
                     variant="outlined"
                     fullWidth
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
+                    value={reference.referenceMobile}
                   />
-                  <TextField
-                    name="Last Name"
-                    label="Last Name"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Box>
-                <Box sx={{ display: "flex", mt: "20px", gap: "20px" }}>
-                  <FormControl sx={{ ml: "20px" }} fullWidth>
-                    <FormLabel
-                      id="gender-row-radio-buttons-group-label"
-                      variant="h2"
-                      sx={{ fontSize: "1.1rem" }}
-                    >
-                      Gender
-                    </FormLabel>
-                    <RadioGroup
-                      row
-                      aria-labelledby="gender-row-radio-buttons-group"
-                      name="gender-radio-buttons-group"
-                    >
-                      <FormControlLabel
-                        value="female"
-                        control={<Radio />}
-                        label="Female"
-                      />
-                      <FormControlLabel
-                        value="male"
-                        control={<Radio />}
-                        label="Male"
-                      />
-                    </RadioGroup>
-                  </FormControl>
-                  <TextField
-                    name="Email"
-                    label="Email"
-                    type="email"
-                    fullWidth
-                  />
-                  <TextField
-                    name="Mobile Number"
-                    label="Mobile No"
-                    type="tele"
-                    fullWidth
-                  />
-                </Box>
-                <Box sx={{ display: "flex", mt: "20px", gap: "20px" }}>
-                  <TextField
-                    name="Alternate number"
-                    label="Altenate No"
-                    type="tele"
-                    sx={{ width: "500px" }}
-                  />
-                  <TextField
-                    name="Address"
-                    label="Address"
-                    type="outlined"
-                    multiline
-                    fullWidth
-                  />
-                </Box>
-                {[...Array(rowCount)].map((_, index) => (
-                  <Box
-                    key={index}
-                    sx={{ display: "flex", mt: "20px", gap: "20px" }}
-                  >
-                    <TextField
-                      name="Reference Name"
-                      label="Reference Name"
-                      type="outlined"
-                      fullWidth
-                    />
-                    <TextField
-                      name="Reference mobile"
-                      label="Reference mobile"
-                      type="tele"
-                      fullWidth
-                    />
-                    {index > 0 && (
-                      <Button
-                        type="button"
-                        variant="contained"
-                        color="error"
-                        onClick={() => handleRemove(index)}
-                        sx={{
-                          marginTop: "12px",
-                          mb: "17px",
-                          mr: "5px",
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </Box>
-                ))}
-                <Box sx={{ display: "flex", mt: "20px", gap: "20px" }}>
                   <Button
+                    type="button"
                     color="secondary"
                     variant="contained"
-                    startIcon={<AddOutlinedIcon />}
-                    onClick={handleAddRow}
+                    onClick={() => handleRemoveReference(index)}
+                    startIcon={<DeleteOutlineIcon />}
+                    sx={{
+                      ml: "10px",
+                      width: "150px",
+                      height: "40px",
+                      backgroundColor: "gainsboro",
+                    }}
                   >
-                    Add More Reference
+                    Remove
                   </Button>
                 </Box>
-                <Box
-                  sx={{
-                    mt: "30px",
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    mb: "50px",
-                  }}
-                >
-                  <Button
-                    type="button"
-                    variant="contained"
-                    color="error"
-                    sx={{ mt: "10px" }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="contained"
-                    color="success"
-                    sx={{ mt: "10px", ml: "10px" }}
-                    startIcon={<SaveIcon />}
-                  >
-                    Save
-                  </Button>
-                </Box>
-              </Box>
+              ))}
+              <Button
+                type="button"
+                color="secondary"
+                variant="contained"
+                onClick={handleAddReference}
+                sx={{ mt: "10px" }}
+              >
+                Add Reference
+              </Button>
             </Box>
-          </Form>
-        )}
-      </Formik>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              mt: "20px",
+            }}
+          >
+            <Button
+              type="button"
+              color="secondary"
+              variant="contained"
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              color="secondary"
+              variant="contained"
+              startIcon={<AddOutlinedIcon />}
+              sx={{ marginLeft: "10px" }}
+            >
+              Add Client
+            </Button>
+          </Box>
+        </Box>
+      </form>
+      <Snackbar
+        open={false}
+        autoHideDuration={6000}
+        onClose={() => {}}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      />
     </Box>
   );
 };
 
-export default Addclient;
+export default AddClient;

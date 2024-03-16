@@ -9,6 +9,7 @@ import Clock from "../components/clock";
 import { CssBaseline, ThemeProvider, useTheme } from "@mui/material";
 import { ColorModeContext, tokens } from "../theme";
 import Ap from "../image/court/ff.png";
+<<<<<<< HEAD
 
 // Function to extract user role from the token
 const getUserRoleFromToken = (token) => {
@@ -20,6 +21,43 @@ const getUserRoleFromToken = (token) => {
 const getUserStatusFromToken = (token) => {
   const decodedToken = JSON.parse(atob(token.split(".")[1]));
   return decodedToken.status;
+=======
+import Lottie from "react-lottie";
+import animationData from "../a.json";
+import { TextField, Button , InputLabel } from "@mui/material";
+import newAnimationData from "./newAnimationData.json";
+
+// Background animation component with fixed positioning and higher z-index
+const BackgroundAnimation = () => {
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "2vw",
+        height: "2vh",
+        zIndex: -1, // Set a higher z-index to ensure it covers other elements
+      }}
+    >
+      <Lottie
+        options={defaultOptions}
+        height={750}
+        width={1800}
+        isClickToPauseDisabled
+      />
+    </div>
+  );
+>>>>>>> master
 };
 
 const Logo = () => (
@@ -35,38 +73,46 @@ const Logo = () => (
       alt="Logo"
       style={{
         width: "299px",
-        height: "167px",
-        marginBottom: "10px",
-        borderRadius: "5px",
+        height: "187px",
+        marginBottom: "5px",
+        borderRadius: "10px",
       }}
     />
-    <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Login</h1>
+    <h1 style={{ textAlign: "center", marginBottom: "3px", }}>Login</h1>
   </div>
 );
+const getUserRoleFromToken = (token) => {
+  const decodedToken = JSON.parse(atob(token.split(".")[1]));
+  return decodedToken.role_name;
+};
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode) || {};
   const colorMode = useContext(ColorModeContext);
+  const [loadingButton, setLoadingButton] = useState(false);
+  const [newAnimationDataState, setNewAnimationDataState] = useState(newAnimationData);
 
   const styles = {
     container: {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      height: "85vh",
+      height: "85%",
+      width: "100%", // Ensure container fills the viewport width
       marginTop: "0px",
-      backgroundColor: colors.primary ? colors.primary[700] : "#000",
+      // Remove background color to allow animation to fill the space
     },
     form: {
       padding: "20px",
       borderRadius: "8px",
-      maxWidth: "400px",
+      maxWidth: "380px",
       width: "100%",
-      boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-      backgroundColor: colors.primary ? colors.blueAccent[900] : "#000",
-      color: colors.primary[100],
+      boxShadow: "0 0 50px rgba(0, 0, 0, 0.5)",
+      backdropFilter: "blur(10px)",
+      backgroundColor: `${colors.primary[400]}60`,
+     
       marginLeft: "30%",
     },
   };
@@ -88,6 +134,7 @@ const LoginForm = () => {
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+<<<<<<< HEAD
   };
 
   const validatePassword = (password) => {
@@ -97,10 +144,25 @@ const LoginForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+=======
+>>>>>>> master
   };
 
-  const handleTogglePassword = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
+  const validatePassword = (password) => {
+    return password.length >= 4;
+  };
+
+  const logTokenInfo = () => {
+    const token = localStorage.getItem("accessToken");
+
+    if (token) {
+      console.log("Token:", token);
+
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      console.log("Decoded Token:", decodedToken);
+    } else {
+      console.log("Token not found in localStorage");
+    }
   };
 
   const logTokenInfo = () => {
@@ -118,7 +180,11 @@ const LoginForm = () => {
 
   const handleLogin = async (e) => {
     try {
+<<<<<<< HEAD
       setLoading(true); // Set loading to true when login starts
+=======
+      setLoadingButton(true);
+>>>>>>> master
 
       const response = await axios.post(
         "http://localhost:8081/api/login",
@@ -159,16 +225,27 @@ const LoginForm = () => {
         navigate(`/${role}`);
       } else {
         // User is deactivated, navigate to /deactivated
+<<<<<<< HEAD
         navigate("/deactivated");
+=======
+        navigate("/deactive");
+>>>>>>> master
       }
 
       // Set loading to false after a delay (2000 milliseconds)
       setTimeout(() => {
+<<<<<<< HEAD
         setLoading(false);
       }, 2000);
     } catch (error) {
       // Set loading to false when login fails
       setLoading(false);
+=======
+        setLoadingButton(false);
+      }, 3000);
+    } catch (error) {
+      setLoadingButton(false);
+>>>>>>> master
 
       if (error.response) {
         toast.error(`Login failed: ${error.response.data.message}`);
@@ -212,6 +289,7 @@ const LoginForm = () => {
 
   return (
     <>
+      <BackgroundAnimation />
       <MainNavbar />
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
@@ -234,6 +312,7 @@ const LoginForm = () => {
               </div>
 
               <div style={{ marginBottom: "15px" }}>
+<<<<<<< HEAD
                 <label htmlFor="email">Email</label>
                 <div>
                   <input
@@ -300,10 +379,73 @@ const LoginForm = () => {
                   borderRadius: "4px",
                   cursor: "pointer",
                 }}
+=======
+              <TextField
+   fullWidth
+  variant="standard"
+  id="email"
+  name="email"
+margin="normal"
+label="Email"
+  value={formData.email}
+  onChange={(e) =>
+    setFormData((prevData) => ({
+      ...prevData,
+      email: e.target.value,
+    }))
+  }
+  error={!!errors.email}
+  helperText={errors.email}
+ 
+/>
+              </div>
+
+              <div style={{ marginBottom: "5px" }}>
+                <TextField
+                  fullWidth
+                  variant="standard"
+                  id="password"
+                  name="password"
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      password: e.target.value,
+                    }))
+                  }
+                  error={!!errors.password}
+                  helperText={errors.password}
+                />
+              </div>
+
+              <Button
+>>>>>>> master
                 type="submit"
+                variant="contained"
+                color="primary"
+                disabled={loading}
+                fullWidth
+                style={{ marginTop: "10px" }}
               >
-                Login
-              </button>
+                {loading ? (
+       <Lottie
+       options={{
+         loop: true,
+         autoplay: true,
+         animationData: newAnimationData,
+         rendererSettings: {
+           preserveAspectRatio: "xMidYMid slice",
+         },
+       }}
+       height={50}
+       width={50}
+     />
+    ): (
+      "Login"
+    )}
+              </Button>
             </form>
           </div>
         </ThemeProvider>

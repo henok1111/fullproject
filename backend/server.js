@@ -2,15 +2,30 @@ import express from "express";
 import cors from "cors";
 import mysql from "mysql2/promise";
 import bodyParser from "body-parser";
-import bcrypt from "bcrypt";
 import bluebird from "bluebird";
 import jwt from "jsonwebtoken";
-
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { promisify } from "util";
+import AddClient from "./component/addclient.js";
+import AddUser from "./component/adduser.js";
+import Login from "./login.js";
+import Getuser from "./component/getuser.js";
+import Getrole from "./component/getrole.js";
+import EditUser from "./component/EditUser.js";
+import DeleteUser from "./component/deleteUser.js";
+import EditUserStatus from "./component/EditUserStatus.js";
+import { checkEmail } from "./component/checkemail.js";
+import getJoinedClientData from "./component/getJoinedClientData.js";
+import deleteClient from "./component/deleteClient.js";
+import editClient from "./component/editclient.js";
 const app = express();
 const PORT = 8081;
-const SECRET_KEY = "k0PJbIobltNQ4zlgiu_Gtpo0iZVQ9IytOsjR7so9CoM";
-
-app.use(bodyParser.json());
+const router = express.Router();
+app.use(express.json());
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -28,7 +43,13 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json()); // Parse JSON requests
+ // Parse JSON requests
+app.use(express.static("uploads"));
+app.use(express.urlencoded({ extended: true }));
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
 
 // MySQL Connection
 const db = mysql.createPool({
@@ -50,31 +71,45 @@ db.getConnection()
   .catch((err) => {
     console.error("Database connection failed: ", err);
   });
-// Middleware to verify JWT token
-const VerifyToken = async (req, res, next) => {
-  const authHeader = req.header("Authorization");
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Unauthorized" });
+const decodeTokenMiddleware = (req, res, next) => {
+  // Check if 'Authorization' header exists
+  if (!req.headers.authorization) {
+    console.error("Authorization header missing");
+    return res
+      .status(401)
+      .json({ status: "error", message: "Authorization header missing" });
   }
 
-  const token = authHeader.substring(7); // Remove "Bearer " prefix
+  // Extract the token from the 'Authorization' header
+  const token = req.headers.authorization.split(" ")[1];
+  console.log("Token on the Backend:", token);
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded;
+    // Decode the token and extract user information
+    const decodedToken = jwt.verify(token, SECRET_KEY);
 
-    // Check if the user's role is allowed for the requested page
-    const allowedRoles = getRolesForRoute(req.path); // Implement this function
-    if (!allowedRoles.includes(decoded.role)) {
-      // Redirect to unauthorized page
-      return res.redirect("/unauthorized");
+    if (decodedToken && decodedToken.userId) {
+      req.user = {
+        userId: decodedToken.userId,
+        name: decodedToken.name,
+        email: decodedToken.email,
+        // Add any other user information you need
+      };
+
+      next(); // Move to the next middleware or route handler
+    } else {
+      console.log("Failed to decode token or extract user information");
+      return res.status(401).json({
+        status: "error",
+        message: "Failed to decode token or extract user information",
+      });
     }
-
-    next();
   } catch (error) {
-    console.error("Error verifying token:", error);
-    return res.status(403).json({ message: "Invalid token" });
+    console.error("Error decoding token:", error);
+    return res
+      .status(401)
+      .json({ status: "error", message: "Error decoding token" });
   }
 };
 
@@ -111,7 +146,6 @@ app.post("/api/createUser", async (req, res) => {
 });
 
 // POST endpoint for handling login requests
-// POST endpoint for handling login requests
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -140,14 +174,14 @@ app.post("/api/login", async (req, res) => {
     }
 
     // Extract user information
-    const { id, first_name, role, status } = userResults[0];
+    const { id, first_name, role } = userResults[0];
 
     // If role_name is null, assign it as 'student'
     const userRole = role;
 
     // Generate a JWT token for authentication with additional user information
     const token = jwt.sign(
-      { userId: id, first_name, email, role_name: userRole, status },
+      { userId: id, first_name, email, role_name: userRole },
       SECRET_KEY,
       { expiresIn: "30m" }
     );
@@ -156,7 +190,7 @@ app.post("/api/login", async (req, res) => {
     res.status(200).json({
       success: true,
       token,
-      user: { id, first_name, email, role_name: userRole, status },
+      user: { id, first_name, email, role_name: userRole },
     });
   } catch (error) {
     console.error("Error in login route:", error);
@@ -164,18 +198,16 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-
 // GET endpoint to retrieve users
 app.get("/api/getUsers", async (req, res) => {
-  try {
-    const [results] = await global.pool.query(
-      "SELECT id, first_name, last_name, email, phone_number, address, role, status FROM users"
-    );
-    res.json(results);
-  } catch (error) {
-    console.error("Error fetching users: ", error);
-    res.status(500).json({ error: error.message || "Internal Server Error" });
-  }
+  await Getuser(req, res);
+});
+
+app.get("/api/getRole/:id", async (req, res) => {
+  await Getrole(req, res);
+});
+app.post("/api/editUserStatus", async (req, res) => {
+  await EditUserStatus(db, req, res);
 });
 
 app.get("/api/getRole/:id", (req, res) => {
@@ -204,81 +236,6 @@ app.get("/api/getRole/:id", (req, res) => {
       console.error("Error fetching role from database:", err);
       res.status(500).json({ error: "Internal Server Error" });
     });
-});
-
-
-// Endpoint to edit user
-app.post("/api/editUser", async (req, res) => {
-  try {
-    const userData = req.body;
-
-    // Log the received user information
-    console.log("Received edit user request with data:", userData);
-
-    // Your existing logic for editing the user
-    const [result] = await global.pool.query(
-      "UPDATE users SET first_name = ?, last_name = ?, email = ?, phone_number = ?, address = ?, role = ? WHERE id = ?",
-      [
-        userData.first_name,
-        userData.last_name,
-        userData.email,
-        userData.phone_number,
-        userData.address,
-        userData.role,
-        userData.id,
-      ]
-    );
-
-    res.status(200).json({ message: "User edited successfully!" });
-  } catch (error) {
-    console.error("Error editing user: ", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-
-// Endpoint to delete user
-app.post("/api/deleteUser", async (req, res) => {
-  try {
-    const userId = req.body.id;
-
-    // Log the received user ID
-    console.log(`Received delete request for user ID: ${userId}`);
-
-    // Your existing logic for deleting the user
-    const [result] = await global.pool.query(
-      "DELETE FROM users WHERE id = ?",
-      [userId]
-    );
-
-    res.json({ message: `User with ID ${userId} deleted successfully!` });
-  } catch (error) {
-    console.error("Error deleting user: ", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-
-// Endpoint to edit user status
-app.post("/api/editUserStatus", async (req, res) => {
-  try {
-    const userId = req.body.id;
-    const newStatus = req.body.status;
-
-    // Log the received user ID and new status
-    console.log(`Received edit user status request for user ID ${userId} with new status: ${newStatus}`);
-
-    // Your existing logic for editing user status
-    const [result] = await global.pool.query(
-      "UPDATE users SET status = ? WHERE id = ?",
-      [newStatus, userId]
-    );
-
-    res.json({ message: `User with ID ${userId} status updated successfully!` });
-  } catch (error) {
-    console.error("Error updating user status: ", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
 });
 
 app.listen(PORT, () => {

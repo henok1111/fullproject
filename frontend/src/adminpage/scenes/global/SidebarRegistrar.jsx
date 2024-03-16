@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+
+// Import statements...
+import React, { useState, useEffect, useRef } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../../theme";
+import axios from "axios";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
@@ -12,9 +15,12 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import GavelIcon from "@mui/icons-material/Gavel";
+import { jwtDecode } from "jwt-decode";
+
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
   return (
     <MenuItem
       active={selected === title}
@@ -29,64 +35,106 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
     </MenuItem>
   );
 };
-const Sidebar = ({ role, name, privateImage, userId }) => {
+
+const Sidebar = ({ role, name, userId }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("");
   const [imagePath, setImagePath] = useState("");
   const [firstName, setFirstName] = useState(name);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const fileInputRef = useRef(null);
+  const [files, setFiles] = useState();
 
-  useEffect(() => {
-    // Retrieve the image path from local storage when the component is mounted
-    const storedImagePath = localStorage.getItem("imagePath");
+  const handleChoosePicture = () => {
+    const token = localStorage.getItem("accessToken"); // Replace with your actual storage method
 
-    // Check if the storedImagePath exists or fetch it from your source
-    if (storedImagePath) {
-      setImagePath(storedImagePath);
-    } else {
-      // Fetch the image path from your desired source (replace this comment with your actual code)
-      // For example, if you are fetching it from an API:
-      // fetchImage().then((path) => {
-      //   setImagePath(path);
-      //   localStorage.setItem("imagePath", path);
-      // });
+    if (fileInputRef.current) {
+      fileInputRef.current.onchange = (event) => {
+        const selectedFile = event.target.files[0];
 
-      // For demonstration purposes, let's set a default image path if fetching fails
-      const defaultImagePath = "path/to/default/image.jpg";
-      setImagePath(defaultImagePath);
-      localStorage.setItem("imagePath", defaultImagePath);
+        if (selectedFile) {
+          const formData = new FormData();
+          formData.append("image", selectedFile);
+
+          axios
+            .post("http://localhost:8081/api/upload", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((res) => {
+              if (res.data && res.data.Status === "success") {
+                console.log("Success");
+              } else {
+                console.log("Failed");
+              }
+            })
+            .catch((err) => console.log(err));
+        }
+      };
+
+      fileInputRef.current.click();
     }
-  }, []);
+  };
 
+  const handleProfilePictureChange = (event) => {
+    const file = event.target.files[0];
+
+    // Assuming you are storing the file in the state
+    setProfilePicture(file);
+
+    // If you are storing the file URL directly, use something like:
+    // setProfilePicture(URL.createObjectURL(file));
+  };
+
+  const handleChange = async () => {
+    try {
+      // Check if userId and profilePicture are defined
+      if (userId === undefined || profilePicture === null) {
+        throw new Error("userId and profilePicture must be defined");
+      }
+
+      // You can now use the FormData API to send the file to the server
+      const formData = new FormData();
+      formData.append("profilePicture", profilePicture);
+
+      // Add other user data to the form data if needed
+      formData.append("id", userId);
+      // ...
+
+      // Make API call to update user profile
+      const response = await axios.post(
+        "http://localhost:8081/api/upload",
+        formData
+      );
+
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+    }
+  };
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        // Retrieve the first name from local storage
-        const storedFirstName = localStorage.getItem("accesstoken");
+        // Retrieve the access token from local storage
+        const accessToken = localStorage.getItem("accessToken");
 
-        if (storedFirstName) {
-          // Display the stored first name
-          setFirstName(storedFirstName);
+        if (accessToken) {
+          // Decode the token to get the user details
+          const decodedToken = jwtDecode(accessToken);
+
+          // Log all values inside the decoded t
+          // Extract the first_name from the decoded token
+          const userFirstName = decodedToken.name;
+
+          // Set the first_name state with the extracted value
+          setFirstName(userFirstName);
         } else {
-          // If first name is not found in local storage, fetch it from the server
-          const response = await fetch(`/api/userDetails/:userId`);
-
-          if (!response.ok) {
-            throw new Error(
-              `Error fetching user details: ${response.status} ${response.statusText}`
-            );
-          }
-
-          if (
-            response.headers.get("content-type").includes("application/json")
-          ) {
-            const data = await response.json();
-            setFirstName(data.firstName);
-          } else {
-            console.warn("Received a non-JSON response. Using default values.");
-            setFirstName("Default Name");
-          }
+          console.warn("Access token not found in local storage");
+          setFirstName("Default Name");
         }
       } catch (error) {
         console.error("Error fetching user details:", error.message);
@@ -95,35 +143,8 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
     };
 
     fetchUserDetails();
-  }, [userId]); // Include userId in the dependency array if you're using it inside the useEffect
-
-  const handleChoosePicture = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-
-    input.addEventListener("change", (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          // Limit image size to 5MB
-          const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-          if (reader.result.length < maxSize) {
-            // Update the image path with the selected image
-            setImagePath(reader.result);
-            // Store the image path in local storage
-            localStorage.setItem("imagePath", reader.result);
-          } else {
-            console.error("Image size exceeds the allowed limit (5MB).");
-            // You can show an error message to the user if needed.
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    input.click();
-  };
+  }, [])// Empty dependency array to run the effect only once on component mount
+  
 
   // Define different items for admin, judge, and registrar
   const sidebarItems = {
@@ -234,14 +255,21 @@ const Sidebar = ({ role, name, privateImage, userId }) => {
           {!isCollapsed && (
             <Box mb="0px">
               <Box display="flex" justifyContent="center" alignItems="center">
-                <img
-                  alt="profile-user"
-                  width="100px"
-                  height="100px"
-                  src={imagePath}
-                  style={{ cursor: "pointer", borderRadius: "50%" }}
-                  onClick={handleChoosePicture}
+                <input
+                  type="file"
+                  style={{ display: "none" }}
+                  ref={fileInputRef}
                 />
+                <label htmlFor="fileInput">
+                  <img
+                    alt="profile-user"
+                    width="100px"
+                    height="100px"
+                    // src={`http://localhost:8081/${user.image}`}
+                    style={{ cursor: "pointer", borderRadius: "50%" }}
+                    onClick={handleChoosePicture}
+                  />
+                </label>
               </Box>
               <Box textAlign="center">
                 <Typography
