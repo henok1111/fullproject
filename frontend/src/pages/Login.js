@@ -9,19 +9,6 @@ import Clock from "../components/clock";
 import { CssBaseline, ThemeProvider, useTheme } from "@mui/material";
 import { ColorModeContext, tokens } from "../theme";
 import Ap from "../image/court/ff.png";
-<<<<<<< HEAD
-
-// Function to extract user role from the token
-const getUserRoleFromToken = (token) => {
-  const decodedToken = JSON.parse(atob(token.split(".")[1]));
-  return decodedToken.role_name;
-};
-
-// Function to extract user status from the token
-const getUserStatusFromToken = (token) => {
-  const decodedToken = JSON.parse(atob(token.split(".")[1]));
-  return decodedToken.status;
-=======
 import Lottie from "react-lottie";
 import animationData from "../a.json";
 import { TextField, Button , InputLabel } from "@mui/material";
@@ -57,7 +44,6 @@ const BackgroundAnimation = () => {
       />
     </div>
   );
->>>>>>> master
 };
 
 const Logo = () => (
@@ -134,35 +120,10 @@ const LoginForm = () => {
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-<<<<<<< HEAD
   };
 
   const validatePassword = (password) => {
     return password.length >= 4;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-=======
->>>>>>> master
-  };
-
-  const validatePassword = (password) => {
-    return password.length >= 4;
-  };
-
-  const logTokenInfo = () => {
-    const token = localStorage.getItem("accessToken");
-
-    if (token) {
-      console.log("Token:", token);
-
-      const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      console.log("Decoded Token:", decodedToken);
-    } else {
-      console.log("Token not found in localStorage");
-    }
   };
 
   const logTokenInfo = () => {
@@ -180,11 +141,7 @@ const LoginForm = () => {
 
   const handleLogin = async (e) => {
     try {
-<<<<<<< HEAD
-      setLoading(true); // Set loading to true when login starts
-=======
       setLoadingButton(true);
->>>>>>> master
 
       const response = await axios.post(
         "http://localhost:8081/api/login",
@@ -225,27 +182,15 @@ const LoginForm = () => {
         navigate(`/${role}`);
       } else {
         // User is deactivated, navigate to /deactivated
-<<<<<<< HEAD
-        navigate("/deactivated");
-=======
         navigate("/deactive");
->>>>>>> master
       }
 
       // Set loading to false after a delay (2000 milliseconds)
       setTimeout(() => {
-<<<<<<< HEAD
-        setLoading(false);
-      }, 2000);
-    } catch (error) {
-      // Set loading to false when login fails
-      setLoading(false);
-=======
         setLoadingButton(false);
       }, 3000);
     } catch (error) {
       setLoadingButton(false);
->>>>>>> master
 
       if (error.response) {
         toast.error(`Login failed: ${error.response.data.message}`);
@@ -312,74 +257,6 @@ const LoginForm = () => {
               </div>
 
               <div style={{ marginBottom: "15px" }}>
-<<<<<<< HEAD
-                <label htmlFor="email">Email</label>
-                <div>
-                  <input
-                    style={{
-                      width: "100%",
-                      padding: "8px",
-                      boxSizing: "border-box",
-                      backgroundColor: colors.primary[700],
-                      color: colors.primary[200],
-                      borderRadius: "5px",
-                    }}
-                    type="text"
-                    id="email"
-                    name="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                  {errors.email && (
-                    <div style={{ color: "red", marginTop: "5px" }}>
-                      {errors.email}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: "15px" }}>
-                <label htmlFor="password">Password</label>
-                <div>
-                  <input
-                    style={{
-                      width: "100%",
-                      padding: "8px",
-                      boxSizing: "border-box",
-                      paddingRight: "30px",
-                      backgroundColor: colors.primary[700],
-                      color: colors.primary[200],
-                      borderRadius: "5px",
-                    }}
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    name="password"
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                  {errors.password && (
-                    <div style={{ color: "red", marginTop: "5px" }}>
-                      {errors.password}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <button
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  backgroundColor: colors.blueAccent
-                    ? colors.blueAccent[600]
-                    : "#000",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
-=======
               <TextField
    fullWidth
   variant="standard"
@@ -421,7 +298,6 @@ label="Email"
               </div>
 
               <Button
->>>>>>> master
                 type="submit"
                 variant="contained"
                 color="primary"

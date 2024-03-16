@@ -113,92 +113,72 @@ const decodeTokenMiddleware = (req, res, next) => {
   }
 };
 
-// POST endpoint for receiving form data
-app.post("/api/createUser", async (req, res) => {
-  const userData = req.body;
-
-  try {
-    // Hash the password before storing it in the database
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
-
-    // Do not store 'confirm_password' in the database
-
-    // Update the query to use the hashed password
-    const [results] = await db.query("INSERT INTO users SET ?", {
-      first_name: userData.first_name,
-      last_name: userData.last_name,
-      email: userData.email,
-      phone_number: userData.phone_number,
-      address: userData.address,
-      password: hashedPassword,
-      role: userData.role,
-      status: "activated", // Assuming the default status is activated for a new user
-    });
-
-    res.json({
-      message: "User created successfully",
-      userId: results.insertId,
-    });
-  } catch (error) {
-    console.error("Error creating user: ", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const uploadFolder = path.join(__dirname, "uploads");
+    // Create the 'uploads' folder if it doesn't exist
+    if (!fs.existsSync(uploadFolder)) {
+      fs.mkdirSync(uploadFolder);
+    }
+    cb(null, uploadFolder);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
 });
 
-// POST endpoint for handling login requests
+const upload = multer({ storage });
+
+app.post(
+  "/api/upload",
+  upload.single("profilePicture"),
+  async (db, req, res) => {
+    try {
+      // console.log('Received update request:', req.body);
+
+      const { id, first_name, email } = req.body;
+      const role_name = req.body.role;
+      //console.log(role_name)
+      const image = req.file ? req.file.filename : null;
+
+      // Use the MySQL connection pool to execute queries
+      const query = promisify(db.query).bind(db);
+      const currentImageResult = await query(
+        "SELECT profile_picture_url FROM users WHERE id = ?",
+        [id]
+      );
+      
+      const currentImage = currentImageResult[0]
+        ? currentImageResult[0].image
+        : null;
+
+      // Update the user record
+      await query(
+        "UPDATE users SET profile_picture_url = IFNULL(?, profile_picture_url) WHERE user_id = ?",
+        [email, first_name, role_name, image, id]
+      );
+      console.log(role_name);
+      if (role_name === "Student") {
+        // If the role is changed to 'Instructor', delete from students table and insert into instructors table
+        await query("DELETE FROM instructors WHERE user_id = ?", [user_id]);
+        await query("INSERT INTO students (user_id) VALUES (?)", [user_id]);
+      }
+
+      res.status(200).json({ message: "User data updated successfully" });
+    } catch (error) {
+      //console.error('Error updating user profile:', error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while updating user profile" });
+    }
+  }
+);
 app.post("/api/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Check if the user exists with the provided email
-    const userQuery = "SELECT * FROM users WHERE email = ?";
-
-    const [userResults] = await db.query(userQuery, [email]);
-
-    if (userResults.length === 0) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password" });
-    }
-
-    // Compare the provided password with the hashed password in the database
-    const isValidPassword = await bcrypt.compare(
-      password,
-      userResults[0].password
-    );
-
-    if (!isValidPassword) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid password" });
-    }
-
-    // Extract user information
-    const { id, first_name, role } = userResults[0];
-
-    // If role_name is null, assign it as 'student'
-    const userRole = role;
-
-    // Generate a JWT token for authentication with additional user information
-    const token = jwt.sign(
-      { userId: id, first_name, email, role_name: userRole },
-      SECRET_KEY,
-      { expiresIn: "30m" }
-    );
-
-    // Send the token as a response to the client along with user information
-    res.status(200).json({
-      success: true,
-      token,
-      user: { id, first_name, email, role_name: userRole },
-    });
-  } catch (error) {
-    console.error("Error in login route:", error);
-    res.status(500).json({ success: false, message: "Login failed" });
-  }
+  await Login(db, req, res);
 });
 
-// GET endpoint to retrieve users
 app.get("/api/getUsers", async (req, res) => {
   await Getuser(req, res);
 });
@@ -210,34 +190,32 @@ app.post("/api/editUserStatus", async (req, res) => {
   await EditUserStatus(db, req, res);
 });
 
-app.get("/api/getRole/:id", (req, res) => {
-  const { id } = req.params;
-
-  // Parse the id to ensure it is a valid integer
-  const userId = parseInt(id, 10);
-
-  if (isNaN(userId)) {
-    return res.status(400).json({ error: "Invalid user ID" });
-  }
-
-  // Query the database to fetch the user's role based on the provided ID
-  const query = "SELECT role FROM users WHERE id = ?";
-
-  db.query(query, [userId])
-    .then(([results]) => {
-      if (results.length > 0) {
-        const role = results[0].role;
-        res.json({ role });
-      } else {
-        res.status(404).json({ error: "User not found" });
-      }
-    })
-    .catch((err) => {
-      console.error("Error fetching role from database:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-    });
+app.post("/api/editUser", async (req, res) => {
+  await EditUser(db, req, res);
 });
 
+
+app.post("/api/addclient", async (req, res) => {
+  await AddClient(db,req, res);
+});
+app.get("/api/getJoinedClientData", async (req, res) => {
+  await getJoinedClientData(db, req, res);
+});
+
+
+app.get("/api/checkemail", async (req, res) => {
+  await checkEmail(db, req, res);
+});
+
+app.post("/api/deleteClient", async (req, res) => {
+  await deleteClient( db,req, res);
+});
+app.post("/api/deleteUser", async (req, res) => {
+  await DeleteUser(db, req, res);
+});
+app.post("/api/editClient", async (req, res) => {
+  await editClient(db, req, res);
+});
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
