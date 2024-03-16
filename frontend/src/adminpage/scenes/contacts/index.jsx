@@ -105,28 +105,31 @@ const Contacts = () => {
 
   const handleConfirmDelete = async () => {
     try {
-        const response = await fetch("http://localhost:8081/api/deleteUser", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id: params.id }),
-        });
+      const response = await fetch("http://localhost:8081/api/deleteUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: selectedUserToDelete.id }),
+      });
 
-        if (response.ok) {
-            console.log(`User with ID ${params.id} deleted successfully!`);
-            setOpenSnackbar(true);
-            fetchUsers(); // Fetch users after successful deletion
-        } else {
-            console.error(`Error deleting user with ID ${params.id}`);
-        }
+      if (response.ok) {
+        console.log(`User with ID ${selectedUserToDelete.id} deleted successfully!`);
+        setOpenSnackbar(true);
+        fetchUsers();
+      } else {
+        console.error(`Error deleting user with ID ${selectedUserToDelete.id}`);
+      }
     } catch (error) {
-        console.error("Error deleting user:", error);
+      console.error("Error deleting user:", error);
     }
 
-    setAnchorEl(null);
-};
+    setDeleteConfirmationOpen(false);
+  };
 
+  const handleCancelDelete = () => {
+    setDeleteConfirmationOpen(false);
+  };
 
   const handleEditFormChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -140,32 +143,34 @@ const Contacts = () => {
 
   const handleSwitchChange = async (userId, newStatus) => {
     try {
-        const backendStatus = newStatus ? "Activated" : "Deactivated";
+      const backendStatus = newStatus ? "Activated" : "Deactivated";
 
-        const response = await fetch("http://localhost:8081/api/editUserStatus", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id: userId, status: backendStatus }),
-        });
+      const response = await fetch("http://localhost:8081/api/editUserStatus", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: userId, status: backendStatus }),
+      });
 
-        if (response.ok) {
-            console.log(`User with ID ${userId} status updated successfully!`);
-            setUserData((prevData) =>
-                prevData.map((user) =>
-                    user.id === userId ? { ...user, status: newStatus } : user
-                )
-            );
-            setOpenSnackbar(true);
-        } else {
-            console.error(`Error updating user status with ID ${userId}`);
-        }
+      if (response.ok) {
+        console.log(`User with ID ${userId} status updated successfully!`);
+
+        // Immediately update the local state with the new status
+        setUserData((prevData) =>
+          prevData.map((user) =>
+            user.id === userId ? { ...user, status: newStatus } : user
+          )
+        );
+
+        setOpenSnackbar(true);
+      } else {
+        console.error(`Error updating user status with ID ${userId}`);
+      }
     } catch (error) {
-        console.error("Error updating user status:", error);
+      console.error("Error updating user status:", error);
     }
-};
-
+  };
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -260,10 +265,10 @@ const Contacts = () => {
       renderCell: (params) => (
         <>
           <IconButton aria-label="edit" onClick={() => handleEditClick(params)}>
-            <EditIcon  style={{ color: "yellowgreen" }}/>
+            <EditIcon />
           </IconButton>
           <IconButton aria-label="delete" onClick={() => handleDeleteClick(params)}>
-            <DeleteIcon style={{ color: "rgba(255, 0, 0, 0.9)" }}/>
+            <DeleteIcon />
           </IconButton>
         </>
       ),
@@ -316,21 +321,16 @@ const Contacts = () => {
       <Dialog
         open={deleteConfirmationOpen}
         onClose={handleCancelDelete}
-        sx={{
-          "& .MuiDialog-paper": {
-            backgroundColor: `${colors.blueAccent[900]}`, // Set your preferred background color
-          },
-        }}
       >
-     
-        <DialogContent color="red">
+        <DialogTitle>Delete User</DialogTitle>
+        <DialogContent>
           Are you sure you want to delete this user?
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelDelete} color="success">
+          <Button onClick={handleCancelDelete} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
             Delete
           </Button>
         </DialogActions>
@@ -425,7 +425,6 @@ const Contacts = () => {
             color="secondary"
             onClick={handleCancelEdit}
             sx={{ marginTop: "10px" }}
-            
           >
             Cancel
           </Button>
