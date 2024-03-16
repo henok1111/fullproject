@@ -79,7 +79,6 @@ const Sidebar = ({ role, name, userId }) => {
     }
   };
 
-<<<<<<< HEAD
   const handleProfilePictureChange = (event) => {
     const file = event.target.files[0];
 
@@ -116,8 +115,6 @@ const Sidebar = ({ role, name, userId }) => {
       console.error("Error updating user profile:", error.message);
     }
   };
-=======
->>>>>>> 4fb2d8a0c7022d34ffa149eccf0930f22c4f8d4b
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {

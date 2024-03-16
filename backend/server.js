@@ -18,7 +18,6 @@ import Getrole from "./component/getrole.js";
 import EditUser from "./component/EditUser.js";
 import DeleteUser from "./component/deleteUser.js";
 import EditUserStatus from "./component/EditUserStatus.js";
-<<<<<<< HEAD
 import { checkEmail } from "./component/checkemail.js";
 import getJoinedClientData from "./component/getJoinedClientData.js";
 import deleteClient from "./component/deleteClient.js";
@@ -27,16 +26,6 @@ const app = express();
 const PORT = 8081;
 const router = express.Router();
 app.use(express.json());
-=======
-import updateProfileProfile from "./component/editProfilePicture.js";
-
-const app = express();
-const PORT = 8081;
-const router = express.Router();
-const SECRET_KEY = "k0PJbIobltNQ4zlgiu_Gtpo0iZVQ9IytOsjR7so9CoM";
-
-app.use(bodyParser.json());
->>>>>>> 4fb2d8a0c7022d34ffa149eccf0930f22c4f8d4b
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -66,7 +55,7 @@ app.use((err, req, res, next) => {
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "1234",
+  password: "",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
@@ -144,7 +133,6 @@ const upload = multer({ storage });
 
 app.post(
   "/api/upload",
-<<<<<<< HEAD
   upload.single("profilePicture"),
   async (db, req, res) => {
     try {
@@ -185,12 +173,6 @@ app.post(
         .status(500)
         .json({ error: "An error occurred while updating user profile" });
     }
-=======
-  decodeTokenMiddleware,
-  upload.single("image"),
-  async (req, res) => {
-    await updateProfileProfile(db, req, res);
->>>>>>> 4fb2d8a0c7022d34ffa149eccf0930f22c4f8d4b
   }
 );
 app.post("/api/login", async (req, res) => {
