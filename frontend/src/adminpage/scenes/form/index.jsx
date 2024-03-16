@@ -66,7 +66,7 @@ const Form = () => {
       setRoles((prevRoles) => [...prevRoles, values.role]);
 
       // Sending a POST request to the server
-      const response = await fetch("http://localhost:8081/api/createUser", {
+      const response = await fetch("http://localhost:8081/api/adduser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

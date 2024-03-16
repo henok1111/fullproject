@@ -216,6 +216,9 @@ app.post("/api/deleteUser", async (req, res) => {
 app.post("/api/editClient", async (req, res) => {
   await editClient(db, req, res);
 });
+app.post("/api/adduser", async (req, res) => {
+  await AddUser(db, req, res);
+});
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
