@@ -1,11 +1,9 @@
-// Import statements...
 import React, { useState, useEffect, useRef } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../../theme";
-import axios from "axios";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
@@ -15,6 +13,7 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import GavelIcon from "@mui/icons-material/Gavel";
 import { jwtDecode } from "jwt-decode";
+import henok from "./image.png";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -42,79 +41,77 @@ const Sidebar = ({ role, name, userId }) => {
   const [selected, setSelected] = useState("");
   const [imagePath, setImagePath] = useState("");
   const [firstName, setFirstName] = useState(name);
-  const [profilePicture, setProfilePicture] = useState(null);
   const fileInputRef = useRef(null);
-  const [files, setFiles] = useState();
 
-  const handleChoosePicture = () => {
-    const token = localStorage.getItem("accessToken"); // Replace with your actual storage method
-
-    if (fileInputRef.current) {
-      fileInputRef.current.onchange = (event) => {
-        const selectedFile = event.target.files[0];
-
-        if (selectedFile) {
-          const formData = new FormData();
-          formData.append("image", selectedFile);
-
-          axios
-            .post("http://localhost:8081/api/upload", formData, {
-              headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: `Bearer ${token}`,
-              },
-            })
-            .then((res) => {
-              if (res.data && res.data.Status === "success") {
-                console.log("Success");
-              } else {
-                console.log("Failed");
-              }
-            })
-            .catch((err) => console.log(err));
-        }
-      };
-
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleProfilePictureChange = (event) => {
-    const file = event.target.files[0];
-
-    // Assuming you are storing the file in the state
-    setProfilePicture(file);
-
-    // If you are storing the file URL directly, use something like:
-    // setProfilePicture(URL.createObjectURL(file));
-  };
-
-  const handleChange = async () => {
+  const fetchUserImage = async () => {
     try {
-      // Check if userId and profilePicture are defined
-      if (userId === undefined || profilePicture === null) {
-        throw new Error("userId and profilePicture must be defined");
-      }
+      const accessToken = localStorage.getItem("accessToken");
+      const decodedToken = jwtDecode(accessToken);
+      const userId = decodedToken.userId;
+      
+      // Make an API request to fetch the user image path
+      const response = await fetch(`http://localhost:8081/api/getUserImage/${userId}`);
+      const data = await response.json();
+      const { imagePath } = data;
+      
+      // Update the state with the fetched image path
+      setImagePath(imagePath);
+      console.log(imagePath);
 
-      // You can now use the FormData API to send the file to the server
-      const formData = new FormData();
-      formData.append("profilePicture", profilePicture);
-
-      // Add other user data to the form data if needed
-      formData.append("id", userId);
-      // ...
-
-      // Make API call to update user profile
-      const response = await axios.post(
-        "http://localhost:8081/api/upload",
-        formData
-      );
-
-      console.log(response.data);
     } catch (error) {
-      console.error("Error updating user profile:", error.message);
+      console.error("Error fetching user image:", error);
     }
   };
+
+  useEffect(() => {
+    // Call the function to fetch user image path when the component mounts
+    fetchUserImage();
+  }, []);
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Retrieve the user ID from the decoded token
+        const accessToken = localStorage.getItem("accessToken");
+        const decodedToken = jwtDecode(accessToken);
+        const userId = decodedToken.userId;
+
+        // Append the user ID to the FormData object
+        formData.append("userId", userId);
+
+        // Make a POST request to upload the file to the server
+        const response = await fetch("http://localhost:8081/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+
+        // Update the imagePath state variable synchronously
+        setImagePath(data.filePath);
+
+        // Fetch user image automatically after selecting a new image
+        fetchUserImage(); // Call fetchUserImage function here
+
+        // Display the selected image automatically
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImagePath(reader.result);
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Error uploading file:", error);
+      }
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -125,7 +122,6 @@ const Sidebar = ({ role, name, userId }) => {
           // Decode the token to get the user details
           const decodedToken = jwtDecode(accessToken);
 
-          // Log all values inside the decoded t
           // Extract the first_name from the decoded token
           const userFirstName = decodedToken.name;
 
@@ -142,10 +138,8 @@ const Sidebar = ({ role, name, userId }) => {
     };
 
     fetchUserDetails();
-  }, [])// Empty dependency array to run the effect only once on component mount
-  
+  }, []);
 
-  // Define different items for admin, judge, and registrar
   const sidebarItems = {
     admin: [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
@@ -208,12 +202,14 @@ const Sidebar = ({ role, name, userId }) => {
       sx={{
         "& .pro-sidebar-inner": {
           background: `${colors.primary[400]} !important`,
+          color:`${colors.primary[900]}!important`,
+          borderRight:"none"
         },
         "& .pro-icon-wrapper": {
           backgroundColor: "transparent !important",
         },
         "& .pro-inner-item": {
-          padding: "5px 35px 5px 20px !important",
+          padding: "5px 20px 5px 20px !important",
         },
         "& .pro-inner-item:hover": {
           color: "#868dfb !important",
@@ -225,7 +221,6 @@ const Sidebar = ({ role, name, userId }) => {
     >
       <ProSidebar collapsed={isCollapsed}>
         <Menu iconShape="square">
-          {/* LOGO AND MENU ICON */}
           <MenuItem
             onClick={() => setIsCollapsed(!isCollapsed)}
             icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
@@ -258,15 +253,15 @@ const Sidebar = ({ role, name, userId }) => {
                   type="file"
                   style={{ display: "none" }}
                   ref={fileInputRef}
+                  onChange={handleImageChange}
                 />
-                <label htmlFor="fileInput">
+               <label htmlFor="fileInput">
                   <img
                     alt="profile-user"
                     width="100px"
                     height="100px"
-                    // src={`http://localhost:8081/${user.image}`}
-                    style={{ cursor: "pointer", borderRadius: "50%" }}
-                    onClick={handleChoosePicture}
+                    src={`http://localhost:8081/${imagePath}`}                    style={{ cursor: "pointer", borderRadius: "50%" }}
+                    onClick={handleImageClick}                  
                   />
                 </label>
               </Box>

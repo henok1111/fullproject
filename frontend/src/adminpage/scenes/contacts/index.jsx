@@ -265,7 +265,9 @@ const Contacts = () => {
       renderCell: (params) => (
         <>
           <IconButton aria-label="edit" onClick={() => handleEditClick(params)}>
-            <EditIcon />
+
+            <EditIcon style={{ color: "yellowgreen" }}/>
+
           </IconButton>
           <IconButton aria-label="delete" onClick={() => handleDeleteClick(params)}>
             <DeleteIcon />
@@ -321,11 +323,17 @@ const Contacts = () => {
       <Dialog
         open={deleteConfirmationOpen}
         onClose={handleCancelDelete}
+
+   
+        sx={{
+          "& .MuiDialog-paper": {
+            backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
+          },
+        }} 
       >
-        <DialogTitle>Delete User</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete this user?
-        </DialogContent>
+        <DialogTitle id="alert-dialog-title" color={"red"}>
+          {"Are you sure you want to delete this client?"}
+        </DialogTitle>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
             Cancel
