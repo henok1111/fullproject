@@ -1,8 +1,10 @@
+// server.js
+
 import express from "express";
 import cors from "cors";
 import mysql from "mysql2/promise";
-import bodyParser from "body-parser";
 import bluebird from "bluebird";
+import bodyParser from "body-parser";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
@@ -22,6 +24,8 @@ import { checkEmail } from "./component/checkemail.js";
 import getJoinedClientData from "./component/getJoinedClientData.js";
 import deleteClient from "./component/deleteClient.js";
 import editClient from "./component/editclient.js";
+import uploadImage from "./component/uploadimage.js";
+import getUserImage from "./component/getuserimage.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -43,12 +47,11 @@ app.use(
     credentials: true,
   })
 );
- // Parse JSON requests
 app.use(express.static("uploads"));
 app.use(express.urlencoded({ extended: true }));
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something went wrong!');
+  res.status(500).send("Something went wrong!");
 });
 
 // MySQL Connection
@@ -72,109 +75,28 @@ db.getConnection()
     console.error("Database connection failed: ", err);
   });
 
-const decodeTokenMiddleware = (req, res, next) => {
-  // Check if 'Authorization' header exists
-  if (!req.headers.authorization) {
-    console.error("Authorization header missing");
-    return res
-      .status(401)
-      .json({ status: "error", message: "Authorization header missing" });
-  }
-
-  // Extract the token from the 'Authorization' header
-  const token = req.headers.authorization.split(" ")[1];
-  console.log("Token on the Backend:", token);
-
-  try {
-    // Decode the token and extract user information
-    const decodedToken = jwt.verify(token, SECRET_KEY);
-
-    if (decodedToken && decodedToken.userId) {
-      req.user = {
-        userId: decodedToken.userId,
-        name: decodedToken.name,
-        email: decodedToken.email,
-        // Add any other user information you need
-      };
-
-      next(); // Move to the next middleware or route handler
-    } else {
-      console.log("Failed to decode token or extract user information");
-      return res.status(401).json({
-        status: "error",
-        message: "Failed to decode token or extract user information",
-      });
-    }
-  } catch (error) {
-    console.error("Error decoding token:", error);
-    return res
-      .status(401)
-      .json({ status: "error", message: "Error decoding token" });
-  }
-};
-
+// Multer configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-    const uploadFolder = path.join(__dirname, "uploads");
-    // Create the 'uploads' folder if it doesn't exist
-    if (!fs.existsSync(uploadFolder)) {
-      fs.mkdirSync(uploadFolder);
+    const __filename = fileURLToPath(import.meta.url)
+    const __dirname = dirname(__filename)
+    const uploadFolder = path.join(__dirname,"uploads")
+    if(!fs.existsSync(uploadFolder)){
+      fs.mkdirSync(uploadFolder)
     }
-    cb(null, uploadFolder);
+    cb(null, uploadFolder); // Save files in the "uploads" directory
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    cb(null, file.originalname); // Generate unique filenames
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
-app.post(
-  "/api/upload",
-  upload.single("profilePicture"),
-  async (db, req, res) => {
-    try {
-      // console.log('Received update request:', req.body);
+// Handle file upload route
+app.post("/api/upload", upload.single("file"), (req, res) => uploadImage(db, req, res));
 
-      const { id, first_name, email } = req.body;
-      const role_name = req.body.role;
-      //console.log(role_name)
-      const image = req.file ? req.file.filename : null;
 
-      // Use the MySQL connection pool to execute queries
-      const query = promisify(db.query).bind(db);
-      const currentImageResult = await query(
-        "SELECT profile_picture_url FROM users WHERE id = ?",
-        [id]
-      );
-      
-      const currentImage = currentImageResult[0]
-        ? currentImageResult[0].image
-        : null;
-
-      // Update the user record
-      await query(
-        "UPDATE users SET profile_picture_url = IFNULL(?, profile_picture_url) WHERE user_id = ?",
-        [email, first_name, role_name, image, id]
-      );
-      console.log(role_name);
-      if (role_name === "Student") {
-        // If the role is changed to 'Instructor', delete from students table and insert into instructors table
-        await query("DELETE FROM instructors WHERE user_id = ?", [user_id]);
-        await query("INSERT INTO students (user_id) VALUES (?)", [user_id]);
-      }
-
-      res.status(200).json({ message: "User data updated successfully" });
-    } catch (error) {
-      //console.error('Error updating user profile:', error);
-      res
-        .status(500)
-        .json({ error: "An error occurred while updating user profile" });
-    }
-  }
-);
 app.post("/api/login", async (req, res) => {
   await Login(db, req, res);
 });
@@ -193,7 +115,9 @@ app.post("/api/editUserStatus", async (req, res) => {
 app.post("/api/editUser", async (req, res) => {
   await EditUser(db, req, res);
 });
-
+app.get("/api/getUserImage/:userId", (req, res) => {
+  getUserImage(db, req, res); // Call getUserImage function with db, req, and res parameters
+});
 
 app.post("/api/addclient", async (req, res) => {
   await AddClient(db,req, res);
@@ -215,6 +139,9 @@ app.post("/api/deleteUser", async (req, res) => {
 });
 app.post("/api/editClient", async (req, res) => {
   await editClient(db, req, res);
+});
+app.post("/api/adduser", async (req, res) => {
+  await AddUser(db, req, res);
 });
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
