@@ -43,32 +43,59 @@ const Sidebar = ({ role, name, userId }) => {
   const [firstName, setFirstName] = useState(name);
   const fileInputRef = useRef(null);
 
+  const fetchUserImage = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      const decodedToken = jwtDecode(accessToken);
+      const userId = decodedToken.userId;
+      
+      // Make an API request to fetch the user image path
+      const response = await fetch(`http://localhost:8081/api/getUserImage/${userId}`);
+      const data = await response.json();
+      const { imagePath } = data;
+      
+      // Update the state with the fetched image path
+      setImagePath(imagePath);
+      console.log(imagePath);
+
+    } catch (error) {
+      console.error("Error fetching user image:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Call the function to fetch user image path when the component mounts
+    fetchUserImage();
+  }, []);
+
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
       try {
         const formData = new FormData();
         formData.append("file", file);
-        
+
         // Retrieve the user ID from the decoded token
         const accessToken = localStorage.getItem("accessToken");
         const decodedToken = jwtDecode(accessToken);
         const userId = decodedToken.userId;
-        
+
         // Append the user ID to the FormData object
         formData.append("userId", userId);
-  
+
         // Make a POST request to upload the file to the server
         const response = await fetch("http://localhost:8081/api/upload", {
           method: "POST",
           body: formData,
         });
-        //console.log(response);
         const data = await response.json();
-        console.log(data)
+
+        // Update the imagePath state variable synchronously
         setImagePath(data.filePath);
-        console.log(imagePath)
-  
+
+        // Fetch user image automatically after selecting a new image
+        fetchUserImage(); // Call fetchUserImage function here
+
         // Display the selected image automatically
         const reader = new FileReader();
         reader.onload = () => {
@@ -84,32 +111,6 @@ const Sidebar = ({ role, name, userId }) => {
   const handleImageClick = () => {
     fileInputRef.current.click();
   };
-
-  useEffect(() => {
-    const fetchUserImage = async () => {
-      try {
-        const accessToken = localStorage.getItem("accessToken");
-        const decodedToken = jwtDecode(accessToken);
-        const userId = decodedToken.userId;
-        
-        // Make an API request to fetch the user image path
-        const response = await fetch(`http://localhost:8081/api/getUserImage/${userId}`);
-        const data = await response.json();
-        const { imagePath } = data;
-        
-        // Update the state with the fetched image path
-        setImagePath(imagePath);
-        console.log(imagePath)
-
-
-      } catch (error) {
-        console.error("Error fetching user image:", error);
-      }
-    };
-  
-    // Call the function to fetch user image path when the component mounts
-    fetchUserImage();
-  }, [userId]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -201,12 +202,14 @@ const Sidebar = ({ role, name, userId }) => {
       sx={{
         "& .pro-sidebar-inner": {
           background: `${colors.primary[400]} !important`,
+          color:`${colors.primary[900]}!important`,
+          borderRight:"none"
         },
         "& .pro-icon-wrapper": {
           backgroundColor: "transparent !important",
         },
         "& .pro-inner-item": {
-          padding: "5px 35px 5px 20px !important",
+          padding: "5px 20px 5px 20px !important",
         },
         "& .pro-inner-item:hover": {
           color: "#868dfb !important",
@@ -252,12 +255,15 @@ const Sidebar = ({ role, name, userId }) => {
                   ref={fileInputRef}
                   onChange={handleImageChange}
                 />
-               
-                <img
-                      src={`http://localhost:8081/${imagePath}`}
-                      alt="profile-user"
-                      onClick={handleImageClick}
-                    />
+               <label htmlFor="fileInput">
+                  <img
+                    alt="profile-user"
+                    width="100px"
+                    height="100px"
+                    src={`http://localhost:8081/${imagePath}`}                    style={{ cursor: "pointer", borderRadius: "50%" }}
+                    onClick={handleImageClick}                  
+                  />
+                </label>
               </Box>
               <Box textAlign="center">
                 <Typography
@@ -268,7 +274,6 @@ const Sidebar = ({ role, name, userId }) => {
                 >
                   {firstName}
                 </Typography>
-                <img src={henok} alt="heloo" style={{width:"100px", height:"100px"}} />
                 <Typography variant="h5" color={colors.greenAccent[500]}>
                   {role === "admin" ? "Administrator" : ""}
                   {role === "judge" ? "Judge" : ""}
