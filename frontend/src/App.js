@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import Login from "./pages/Login";
 import Admin from "./adminpage/admin";
 import Admins from "./adminpage/judge";
@@ -24,7 +29,13 @@ import Appointment from "./adminpage/scenes/Appointment";
 import Client from "./adminpage/scenes/client";
 import AddCase from "./adminpage/scenes/addcase/addcase";
 import Caseform from "./adminpage/scenes/form/caseform";
-import { GavelRounded, HailRounded, PedalBikeOutlined } from "@mui/icons-material";
+import ProfilePage from "./adminpage/scenes/profile";
+import NotFound from "./adminpage/scenes/global/pagenotfound";
+import {
+  GavelRounded,
+  HailRounded,
+  PedalBikeOutlined,
+} from "@mui/icons-material";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -69,7 +80,15 @@ const App = () => {
         <Router>
           <Routes>
             <Route path="/" element={<RedirectToDashboard />} />
-            <Route path="/login" element={<Login setAuthenticated={setAuthenticated} setUserRole={setUserRole} />} />
+            <Route
+              path="/login"
+              element={
+                <Login
+                  setAuthenticated={setAuthenticated}
+                  setUserRole={setUserRole}
+                />
+              }
+            />
             {authenticated && (
               <>
                 {userRole === "Registrar" && (
@@ -84,9 +103,11 @@ const App = () => {
               </>
             )}
 
-           
-            <Route path="*" element={<p color="black">Page Not Found</p>} />
-            <Route path="/unauthorized" element={<p color="black">Unauthorized</p>} />
+            <Route path="*" element={<NotFound />} />
+            <Route
+              path="/unauthorized"
+              element={<p color="black">Unauthorized</p>}
+            />
           </Routes>
         </Router>
       </ThemeProvider>
@@ -114,7 +135,7 @@ const RegistrarRoutes = () => {
         <Route path="/client" element={<Client />} />
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/appointmentform" element={<Appointmentform />} />
-       
+        <Route path="/profilepage" element={<ProfilePage />} />
       </Route>
     </Routes>
   );
@@ -165,6 +186,7 @@ const JudgeRoutes = () => {
         <Route path="faq" element={<FAQ />} />
         <Route path="pie" element={<Pie />} />
         <Route path="geography" element={<Geography />} />
+        <Route path="/profilepage" element={<ProfilePage />} />
       </Route>
     </Routes>
   );
@@ -185,6 +207,7 @@ const AdminRoutes = () => {
         <Route path="line" element={<Line />} />
         <Route path="geography" element={<Geography />} />
         <Route path="addcase" element={<AddCase />} />
+        <Route path="/profilepage" element={<ProfilePage />} />
       </Route>
     </Routes>
   );
