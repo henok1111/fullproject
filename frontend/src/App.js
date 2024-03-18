@@ -1,7 +1,5 @@
-import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Admin from "./adminpage/admin";
 import Admins from "./adminpage/judge";
@@ -24,15 +22,9 @@ import AddClient from "./adminpage/scenes/addclient/addclient";
 import Appointmentform from "./adminpage/scenes/Appointment/appointmentform";
 import Appointment from "./adminpage/scenes/Appointment";
 import Client from "./adminpage/scenes/client";
-import ProfilePage from "./adminpage/scenes/profile";
-import {
-  GavelOutlined,
-  HomeMaxOutlined,
-  PendingActionsRounded,
-} from "@mui/icons-material";
 import AddCase from "./adminpage/scenes/addcase/addcase";
 import Caseform from "./adminpage/scenes/form/caseform";
-import Deactive from "./pages/deactive";
+import { GavelRounded, HailRounded, PedalBikeOutlined } from "@mui/icons-material";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -77,15 +69,7 @@ const App = () => {
         <Router>
           <Routes>
             <Route path="/" element={<RedirectToDashboard />} />
-            <Route
-              path="/login"
-              element={
-                <Login
-                  setAuthenticated={setAuthenticated}
-                  setUserRole={setUserRole}
-                />
-              }
-            />
+            <Route path="/login" element={<Login setAuthenticated={setAuthenticated} setUserRole={setUserRole} />} />
             {authenticated && (
               <>
                 {userRole === "Registrar" && (
@@ -100,12 +84,9 @@ const App = () => {
               </>
             )}
 
-            <Route path="/deactive" element={<Deactive />} />
+           
             <Route path="*" element={<p color="black">Page Not Found</p>} />
-            <Route
-              path="/unauthorized"
-              element={<p color="black">Unauthorized</p>}
-            />
+            <Route path="/unauthorized" element={<p color="black">Unauthorized</p>} />
           </Routes>
         </Router>
       </ThemeProvider>
@@ -133,7 +114,7 @@ const RegistrarRoutes = () => {
         <Route path="/client" element={<Client />} />
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/appointmentform" element={<Appointmentform />} />
-        <Route path="/registrarprofile" element={<ProfilePage />} />
+       
       </Route>
     </Routes>
   );
@@ -156,21 +137,21 @@ const JudgeRoutes = () => {
                   subtitle: "Total Case",
                   progress: "0.50",
                   increase: "+21%",
-                  icon: <GavelOutlined />,
+                  icon: <GavelRounded />,
                 },
                 {
                   title: "Your Title",
                   subtitle: "Your Subtitle",
                   progress: "0.75",
                   increase: "+15%",
-                  icon: <HomeMaxOutlined />,
+                  icon: <HailRounded />,
                 },
                 {
                   title: "Fuck",
                   subtitle: "Henok",
                   progress: "0.75",
                   increase: "+15%",
-                  icon: <PendingActionsRounded />,
+                  icon: <PedalBikeOutlined />,
                 },
                 // Add more objects as needed
               ]}

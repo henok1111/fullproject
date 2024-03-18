@@ -1,13 +1,14 @@
 const EditUser = async (db, req, res) => {
-    const userData = req.body;
-  
-    try {
-      await db.query("UPDATE users SET ? WHERE id = ?", [userData, userData.id]);
+  const userData = req.body;
+
+  try {
+      const result = await db.query("UPDATE users SET ? WHERE id = ?", [userData, userData.id]);
+      console.log("SQL result:", result); // Log the SQL result
       res.json({ message: "User edited successfully" });
-    } catch (error) {
+  } catch (error) {
       console.error("Error editing user: ", error);
       res.status(500).json({ error: "Internal Server Error" });
-    }
-  };
-  export default EditUser;
-  
+  }
+};
+
+export default EditUser;

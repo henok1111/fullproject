@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import Lottie from "react-lottie"; // Import Lottie library
 
 import {
   AppBar,
@@ -15,7 +16,9 @@ import { ColorModeContext, tokens } from "../theme";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import Groups2RoundedIcon from "@mui/icons-material/Groups2Rounded";
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
-import Logo from "../image/Logo/logo.png";
+
+// Import your Lottie animation file
+import animationData from "../logo.json";
 
 const Topbar = () => {
   const theme = useTheme();
@@ -47,12 +50,15 @@ const Topbar = () => {
       <Toolbar sx={{ justifyContent: "space-between" }}>
         {/* Left side */}
         <Box display="flex" alignItems="center">
-          <img
-            src={Logo}
-            alt="Logo"
-            width="50"
-            height="50"
-            style={{ marginRight: "5px", borderRadius: "50%" }}
+          {/* Replace the logo with Lottie animation */}
+          <Lottie
+            options={{
+              loop: true,
+              autoplay: true,
+              animationData: animationData,
+            }}
+            height={85} // Set the height as needed
+            width={85}  // Set the width as needed
           />
           <Typography
             variant="h6"
@@ -71,20 +77,7 @@ const Topbar = () => {
 
         {/* Right side */}
         <Box display="flex" alignItems="center">
-          {/* <Button component={Link} to="/" sx={{ ...buttonStyle }}>
-            <HomeRoundedIcon sx={{ fontSize: 30 }} />
-            Home
-          </Button>
-
-          <Button component={Link} to="/about" sx={{ ...buttonStyle }}>
-            <Groups2RoundedIcon sx={{ fontSize: 30 }} />
-            About Us
-          </Button>
-
-          <Button component={Link} to="/login" sx={{ ...buttonStyle }}>
-            <LoginRoundedIcon sx={{ fontSize: 30 }} />
-            Login
-          </Button> */}
+          {/* Other buttons */}
           <Button
             onClick={colorMode.toggleColorMode}
             sx={{ ...buttonStyle, marginRight: "10px" }}

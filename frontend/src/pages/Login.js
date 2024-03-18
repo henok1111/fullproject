@@ -9,17 +9,41 @@ import Clock from "../components/clock";
 import { CssBaseline, ThemeProvider, useTheme } from "@mui/material";
 import { ColorModeContext, tokens } from "../theme";
 import Ap from "../image/court/ff.png";
+import Lottie from "react-lottie";
+import animationData from "../a.json";
+import { TextField, Button , InputLabel } from "@mui/material";
+import newAnimationData from "./newAnimationData.json";
 
-// Function to extract user role from the token
-const getUserRoleFromToken = (token) => {
-  const decodedToken = JSON.parse(atob(token.split(".")[1]));
-  return decodedToken.role_name;
-};
+// Background animation component with fixed positioning and higher z-index
+const BackgroundAnimation = () => {
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
 
-// Function to extract user status from the token
-const getUserStatusFromToken = (token) => {
-  const decodedToken = JSON.parse(atob(token.split(".")[1]));
-  return decodedToken.status;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "2vw",
+        height: "2vh",
+        zIndex: -1, // Set a higher z-index to ensure it covers other elements
+      }}
+    >
+      <Lottie
+        options={defaultOptions}
+        height={750}
+        width={1800}
+        isClickToPauseDisabled
+      />
+    </div>
+  );
 };
 
 const Logo = () => (
@@ -35,38 +59,46 @@ const Logo = () => (
       alt="Logo"
       style={{
         width: "299px",
-        height: "167px",
-        marginBottom: "10px",
-        borderRadius: "5px",
+        height: "187px",
+        marginBottom: "5px",
+        borderRadius: "10px",
       }}
     />
-    <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Login</h1>
+    <h1 style={{ textAlign: "center", marginBottom: "3px", }}>Login</h1>
   </div>
 );
+const getUserRoleFromToken = (token) => {
+  const decodedToken = JSON.parse(atob(token.split(".")[1]));
+  return decodedToken.role_name;
+};
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode) || {};
   const colorMode = useContext(ColorModeContext);
+  const [loadingButton, setLoadingButton] = useState(false);
+  const [newAnimationDataState, setNewAnimationDataState] = useState(newAnimationData);
 
   const styles = {
     container: {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      height: "85vh",
+      height: "85%",
+      width: "100%", // Ensure container fills the viewport width
       marginTop: "0px",
-      backgroundColor: colors.primary ? colors.primary[700] : "#000",
+      // Remove background color to allow animation to fill the space
     },
     form: {
       padding: "20px",
       borderRadius: "8px",
-      maxWidth: "400px",
+      maxWidth: "380px",
       width: "100%",
-      boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-      backgroundColor: colors.primary ? colors.blueAccent[900] : "#000",
-      color: colors.primary[100],
+      boxShadow: "0 0 50px rgba(0, 0, 0, 0.5)",
+      backdropFilter: "blur(10px)",
+      backgroundColor: `${colors.primary[400]}60`,
+     
       marginLeft: "30%",
     },
   };
@@ -94,15 +126,6 @@ const LoginForm = () => {
     return password.length >= 4;
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleTogglePassword = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
-  };
-
   const logTokenInfo = () => {
     const token = localStorage.getItem("accessToken");
 
@@ -118,7 +141,7 @@ const LoginForm = () => {
 
   const handleLogin = async (e) => {
     try {
-      setLoading(true);
+      setLoadingButton(true);
 
       const response = await axios.post(
         "http://localhost:8081/api/login",
@@ -164,10 +187,10 @@ const LoginForm = () => {
 
       // Set loading to false after a delay (2000 milliseconds)
       setTimeout(() => {
-        setLoading(false);
-      }, 2000);
+        setLoadingButton(false);
+      }, 3000);
     } catch (error) {
-      setLoading(false);
+      setLoadingButton(false);
 
       if (error.response) {
         toast.error(`Login failed: ${error.response.data.message}`);
@@ -211,6 +234,7 @@ const LoginForm = () => {
 
   return (
     <>
+      <BackgroundAnimation />
       <MainNavbar />
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
@@ -233,76 +257,71 @@ const LoginForm = () => {
               </div>
 
               <div style={{ marginBottom: "15px" }}>
-                <label htmlFor="email">Email</label>
-                <div>
-                  <input
-                    style={{
-                      width: "100%",
-                      padding: "8px",
-                      boxSizing: "border-box",
-                      backgroundColor: colors.primary[700],
-                      color: colors.primary[200],
-                      borderRadius: "5px",
-                    }}
-                    type="text"
-                    id="email"
-                    name="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                  {errors.email && (
-                    <div style={{ color: "red", marginTop: "5px" }}>
-                      {errors.email}
-                    </div>
-                  )}
-                </div>
+              <TextField
+   fullWidth
+  variant="standard"
+  id="email"
+  name="email"
+margin="normal"
+label="Email"
+  value={formData.email}
+  onChange={(e) =>
+    setFormData((prevData) => ({
+      ...prevData,
+      email: e.target.value,
+    }))
+  }
+  error={!!errors.email}
+  helperText={errors.email}
+ 
+/>
               </div>
 
-              <div style={{ marginBottom: "15px" }}>
-                <label htmlFor="password">Password</label>
-                <div>
-                  <input
-                    style={{
-                      width: "100%",
-                      padding: "8px",
-                      boxSizing: "border-box",
-                      paddingRight: "30px",
-                      backgroundColor: colors.primary[700],
-                      color: colors.primary[200],
-                      borderRadius: "5px",
-                    }}
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    name="password"
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                  {errors.password && (
-                    <div style={{ color: "red", marginTop: "5px" }}>
-                      {errors.password}
-                    </div>
-                  )}
-                </div>
+              <div style={{ marginBottom: "5px" }}>
+                <TextField
+                  fullWidth
+                  variant="standard"
+                  id="password"
+                  name="password"
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      password: e.target.value,
+                    }))
+                  }
+                  error={!!errors.password}
+                  helperText={errors.password}
+                />
               </div>
 
-              <button
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  backgroundColor: colors.blueAccent
-                    ? colors.blueAccent[600]
-                    : "#000",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
+              <Button
                 type="submit"
+                variant="contained"
+                color="primary"
+                disabled={loading}
+                fullWidth
+                style={{ marginTop: "10px" }}
               >
-                {loading ? "Logging in..." : "Login"}
-              </button>
+                {loading ? (
+       <Lottie
+       options={{
+         loop: true,
+         autoplay: true,
+         animationData: newAnimationData,
+         rendererSettings: {
+           preserveAspectRatio: "xMidYMid slice",
+         },
+       }}
+       height={50}
+       width={50}
+     />
+    ): (
+      "Login"
+    )}
+              </Button>
             </form>
           </div>
         </ThemeProvider>
