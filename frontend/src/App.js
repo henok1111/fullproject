@@ -25,6 +25,7 @@ import Client from "./adminpage/scenes/client";
 import AddCase from "./adminpage/scenes/addcase/addcase";
 import Caseform from "./adminpage/scenes/form/caseform";
 import { GavelRounded, HailRounded, PedalBikeOutlined } from "@mui/icons-material";
+import Deactive from "./pages/deactive";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -84,7 +85,7 @@ const App = () => {
               </>
             )}
 
-           
+           <Route path="/deactive" element={<Deactive/>}/ >
             <Route path="*" element={<p color="black">Page Not Found</p>} />
             <Route path="/unauthorized" element={<p color="black">Unauthorized</p>} />
           </Routes>
