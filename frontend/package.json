@@ -34,6 +34,7 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.1",
     "react-dom": "^18.2.0",
+    "react-google-translate": "^1.0.12",
     "react-hook-form": "^7.51.0",
     "react-icons": "^4.12.0",
     "react-intersection-observer": "^9.5.3",

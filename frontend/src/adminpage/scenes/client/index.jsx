@@ -46,6 +46,18 @@ const Client = () => {
 
   const navigate = useNavigate();
 
+  const isEmailUnique = async (email) => {
+    try {
+      const response = await fetch(`http://localhost:8081/api/checkemail?email=${email}`);
+      const data = await response.json();
+      return data.isUnique;
+    } catch (error) {
+      console.error("Error checking email uniqueness:", error);
+      return false;
+    }
+  }
+
+  
   // Define fetchData as an arrow function to access it in the component
   const fetchData = async () => {
     try {
@@ -205,70 +217,78 @@ const handleEditFormChange = (e, fieldName, index) => {
     fetchData();
   };
 
-const handleEditFormSubmit = async () => {
-  // Prepare the data to be sent to the backend
-  const editedClientData = {
-    id: selectedClient.id,
-    first_name: editedValues.first_name,
-    middle_name: editedValues.middle_name,
-    last_name: editedValues.last_name,
-    gender: editedValues.gender,
-    email: editedValues.email,
-    mobile_number: editedValues.mobile_number,
-    address: editedValues.address,
-    references: selectedClient.references.map((ref, index) => ({
-      id: ref.id, // Include the reference ID
-      reference_name: editedValues.references[index].reference_name, // Update reference_name
-      reference_mobile: editedValues.references[index].reference_mobile, // Update reference_mobile
-    })),
+  const handleEditFormSubmit = async () => {
+    // Prepare the data to be sent to the backend
+    const editedClientData = {
+      id: selectedClient.id,
+      first_name: editedValues.first_name,
+      middle_name: editedValues.middle_name,
+      last_name: editedValues.last_name,
+      gender: editedValues.gender,
+      email: editedValues.email,
+      mobile_number: editedValues.mobile_number,
+      address: editedValues.address,
+      references: selectedClient.references.map((ref, index) => ({
+        id: ref.id, // Include the reference ID
+        reference_name: editedValues.references[index].reference_name, // Update reference_name
+        reference_mobile: editedValues.references[index].reference_mobile, // Update reference_mobile
+      })),
+    };
+  
+    try {
+      const token = localStorage.getItem("token");
+      const isEmailValid = await isEmailUnique(editedValues.email); // Use editedValues.email here
+    
+      if (!isEmailValid) {
+        // Use errors object from react-hook-form to set errors
+        // Assuming you're using 'errors' object from react-hook-form
+        // Replace 'email' with the field name provided in your schema
+        setError("email", {
+          type: "manual",
+          message: "This email is already in use. Please use a different one.",
+        });
+        return;
+      }
+  
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+  
+      console.log("Client data to be sent:", editedClientData);
+  
+      const response = await fetch("http://localhost:8081/api/editClient", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editedClientData),
+      });
+  
+      if (response.ok) {
+        console.log("Client edited successfully!");
+        fetchData();
+        setOpenSnackbar(true);
+      } else {
+        console.error("Error editing client:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error editing client:", error.message);
+    } finally {
+      setIsEditing(false);
+      setEditedValues({
+        first_name: "",
+        middle_name: "",
+        last_name: "",
+        gender: "",
+        email: "",
+        mobile_number: "",
+        address: "",
+        references: [],
+      });
+    }
   };
-
-  try {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      console.error("No token found");
-      return;
-    }
-
-    console.log("Client data to be sent:", editedClientData);
-
-    const response = await fetch("http://localhost:8081/api/editClient", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(editedClientData),
-    });
-
-    if (response.ok) {
-      console.log("Client edited successfully!");
-      fetchData();
-      setOpenSnackbar(true);
-    } else {
-      console.error("Error editing client:", response.statusText);
-    }
-  } catch (error) {
-    console.error("Error editing client:", error.message);
-  } finally {
-    setIsEditing(false);
-    setEditedValues({
-      first_name: "",
-      middle_name: "",
-      last_name: "",
-      gender: "",
-      email: "",
-      mobile_number: "",
-      address: "",
-      references: [],
-    });
-  }
-};
-
-
-
-
   const handleCancelEdit = () => {
     setIsEditing(false);
     setSelectedClient({
