@@ -37,6 +37,9 @@ import {
   PedalBikeOutlined,
 } from "@mui/icons-material";
 
+import Deactive from "./pages/deactive";
+
+
 const App = () => {
   const [theme, colorMode] = useMode();
   const [authenticated, setAuthenticated] = useState(false);
@@ -103,11 +106,11 @@ const App = () => {
               </>
             )}
 
-            <Route path="*" element={<NotFound />} />
-            <Route
-              path="/unauthorized"
-              element={<p color="black">Unauthorized</p>}
-            />
+
+           <Route path="/deactive" element={<Deactive/>}/ >
+            <Route path="*" element={<p color="black">Page Not Found</p>} />
+            <Route path="/unauthorized" element={<p color="black">Unauthorized</p>} />
+
           </Routes>
         </Router>
       </ThemeProvider>
