@@ -58,7 +58,7 @@ app.use((err, req, res, next) => {
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "1234",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
@@ -78,11 +78,11 @@ db.getConnection()
 // Multer configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const __filename = fileURLToPath(import.meta.url)
-    const __dirname = dirname(__filename)
-    const uploadFolder = path.join(__dirname,"uploads")
-    if(!fs.existsSync(uploadFolder)){
-      fs.mkdirSync(uploadFolder)
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const uploadFolder = path.join(__dirname, "uploads");
+    if (!fs.existsSync(uploadFolder)) {
+      fs.mkdirSync(uploadFolder);
     }
     cb(null, uploadFolder); // Save files in the "uploads" directory
   },
@@ -94,8 +94,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Handle file upload route
-app.post("/api/upload", upload.single("file"), (req, res) => uploadImage(db, req, res));
-
+app.post("/api/upload", upload.single("file"), (req, res) =>
+  uploadImage(db, req, res)
+);
 
 app.post("/api/login", async (req, res) => {
   await Login(db, req, res);
@@ -120,19 +121,18 @@ app.get("/api/getUserImage/:userId", (req, res) => {
 });
 
 app.post("/api/addclient", async (req, res) => {
-  await AddClient(db,req, res);
+  await AddClient(db, req, res);
 });
 app.get("/api/getJoinedClientData", async (req, res) => {
   await getJoinedClientData(db, req, res);
 });
-
 
 app.get("/api/checkemail", async (req, res) => {
   await checkEmail(db, req, res);
 });
 
 app.post("/api/deleteClient", async (req, res) => {
-  await deleteClient( db,req, res);
+  await deleteClient(db, req, res);
 });
 app.post("/api/deleteUser", async (req, res) => {
   await DeleteUser(db, req, res);
