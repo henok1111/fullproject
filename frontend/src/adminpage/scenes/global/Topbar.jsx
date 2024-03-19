@@ -59,7 +59,7 @@ const Topbar = () => {
        
         borderRadius="3px"
       >
-        <div  backgroundColor={colors.primary[400]}    id="google_translate_element"></div>
+        <div id="google_translate_element"></div>
       </Box>
      
       {/* ICONS */}
