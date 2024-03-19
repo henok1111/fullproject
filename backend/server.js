@@ -58,7 +58,7 @@ app.use((err, req, res, next) => {
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "1234",
+  password: "",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
