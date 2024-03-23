@@ -41,7 +41,7 @@ const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
         
       </MenuItem>
       {subItems && openSubMenu && (
-        <Menu iconShape="square" style={{ paddingLeft: "20px" }}>
+        <Menu iconShape="round" style={{ paddingLeft: "20px" }}>
           {subItems.map((subItem, index) => (
             <MenuItem
               key={index}
@@ -204,8 +204,9 @@ const Sidebar = ({ role, name, userId }) => {
         title: "Case Management", // Submenu title
         icon: <GavelIcon />, // Icon for the submenu
         subItems: [ // Submenu items
-          { title: "Add Case", to: "addcase" ,icon: <PersonOutlinedIcon />}, // Example submenu item
-          { title: "View Cases", to: "viewcases",icon: <PersonOutlinedIcon /> }, // Example submenu item
+        { title: "View Cases", to: "addcase",icon: <PersonOutlinedIcon /> },
+          { title: "Add Case", to: "/registrar/caseform" ,icon: <PersonOutlinedIcon />}, // Example submenu item
+           // Example submenu item
           // Add more submenu items as needed
         ]
       },

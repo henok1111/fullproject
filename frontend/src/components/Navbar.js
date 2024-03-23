@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import Lottie from "react-lottie"; // Import Lottie library
-
+import "./navbar.css";
 import {
   AppBar,
   Toolbar,
@@ -61,6 +61,7 @@ const Topbar = () => {
             width={85}  // Set the width as needed
           />
           <Typography
+          className="courtm"
             variant="h6"
             component="div"
             sx={{
@@ -69,6 +70,8 @@ const Topbar = () => {
               fontFamily: '"Trirong", serif',
               fontWeight: 700,
               ml: "10px",
+
+              
             }}
           >
             Court Information System

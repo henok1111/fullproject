@@ -130,7 +130,9 @@ app.get("/api/getJoinedClientData", async (req, res) => {
 app.get("/api/checkemail", async (req, res) => {
   await checkEmail(db, req, res);
 });
-
+app.get("/api/checkuseremail", async (req, res) => {
+  await checkEmail(db, req, res);
+});
 app.post("/api/deleteClient", async (req, res) => {
   await deleteClient(db, req, res);
 });
