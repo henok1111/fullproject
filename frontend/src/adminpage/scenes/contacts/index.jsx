@@ -265,10 +265,12 @@ const Contacts = () => {
       renderCell: (params) => (
         <>
           <IconButton aria-label="edit" onClick={() => handleEditClick(params)}>
+
             <EditIcon style={{ color: "yellowgreen" }}/>
+
           </IconButton>
           <IconButton aria-label="delete" onClick={() => handleDeleteClick(params)}>
-            <DeleteIcon style={{ color: "rgba(255, 0, 0, 0.9)" }}/>
+            <DeleteIcon />
           </IconButton>
         </>
       ),
@@ -321,6 +323,8 @@ const Contacts = () => {
       <Dialog
         open={deleteConfirmationOpen}
         onClose={handleCancelDelete}
+
+   
         sx={{
           "& .MuiDialog-paper": {
             backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color

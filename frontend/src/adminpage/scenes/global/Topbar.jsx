@@ -9,12 +9,13 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Navigate, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button, Popover, Typography } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
+import ProfilePage from "../profile";
 
 const Topbar = () => {
   const theme = useTheme();
@@ -31,8 +32,17 @@ const Topbar = () => {
     window.location.href = "/login";
   };
 
+  const getUserRoleFromToken = (token) => {
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    return decodedToken.role_name;
+  };
+
+  const token = localStorage.getItem("accessToken");
+  const role_name = getUserRoleFromToken(token);
+  const role = role_name.toLowerCase();
+
   const handleclickprofilebutton = () => {
-    navigate("/registrar/registrarprofile");
+    navigate(`/${role}/profilepage`);
   };
 
   const handleSettingsClick = (event) => {
