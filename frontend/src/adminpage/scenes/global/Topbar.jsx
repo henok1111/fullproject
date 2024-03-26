@@ -16,6 +16,9 @@ import { useState } from "react";
 import { Button, Popover, Typography } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import ProfilePage from "../profile";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 
 const Topbar = () => {
   const theme = useTheme();
@@ -59,22 +62,10 @@ const Topbar = () => {
   return (
     <Box
       display="flex"
-      justifyContent="space-between"
+      justifyContent="end"
       p={2}
       backgroundColor={colors.blueAccent[900]}
     >
-      {/* SEARCH BAR */}
-      <Box
-        display="flex"
-        backgroundColor={colors.primary[400]}
-        borderRadius="3px"
-      >
-        <InputBase sx={{ ml: 2, flex: 1 }} placeholder="Search" />
-        <IconButton type="button" sx={{ p: 1 }}>
-          <SearchIcon />
-        </IconButton>
-      </Box>
-
       {/* ICONS */}
       <Box display="flex">
         <IconButton onClick={colorMode.toggleColorMode}>
@@ -90,7 +81,7 @@ const Topbar = () => {
         <IconButton onClick={handleSettingsClick}>
           <PersonIcon />
         </IconButton>
-        <Popover
+        <Menu
           id={id}
           open={open}
           anchorEl={anchorEl}
@@ -103,26 +94,50 @@ const Topbar = () => {
             vertical: "top",
             horizontal: "right",
           }}
+          PaperProps={{
+            elevation: 0,
+            sx: {
+              overflow: "visible",
+              filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+              mt: 1.5,
+              "& .MuiAvatar-root": {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+              },
+              "&::before": {
+                content: '""',
+                display: "block",
+                position: "absolute",
+                top: 0,
+                right: 14,
+                width: 10,
+                height: 10,
+                bgcolor: "background.paper",
+                transform: "translateY(-50%) rotate(45deg)",
+                zIndex: 0,
+              },
+            },
+          }}
         >
           <Box p={1}>
-            <Button
-              startIcon={<PersonOutlinedIcon />}
-              onClick={handleclickprofilebutton}
-              variant="outlines"
-            >
+            <MenuItem onClick={handleclickprofilebutton} variant="outlines">
+              <ListItemIcon>
+                <PersonOutlinedIcon fontSize="small" />
+              </ListItemIcon>
               Profile
-            </Button>
+            </MenuItem>
           </Box>
           <Box p={1}>
-            <Button
-              startIcon={<LogoutIcon />}
-              variant="outlines"
-              onClick={handleLogout}
-            >
+            <MenuItem variant="outlines" onClick={handleLogout}>
+              <ListItemIcon>
+                <LogoutIcon fontSize="small" />
+              </ListItemIcon>
               Logout
-            </Button>
+            </MenuItem>
           </Box>
-        </Popover>
+        </Menu>
       </Box>
     </Box>
   );

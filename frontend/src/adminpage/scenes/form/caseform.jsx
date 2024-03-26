@@ -54,7 +54,20 @@ const Caseform = () => {
   const [inputValue, setInputValue] = useState("");
   const navigate = useNavigate();
   const [rowCount, setRowCount] = useState(1);
+  const [selectedRole, setSelectedRole] = useState("Petitioner");
 
+  const initialValues = {
+    respondentDetails: [{ name: "", advocate: "" }],
+  };
+
+  const checkoutSchema = yup.object().shape({
+    respondentDetails: yup.array().of(
+      yup.object().shape({
+        name: yup.string().required("Respondent Name is required"),
+        advocate: yup.string().required("Respondent Advocate is required"),
+      })
+    ),
+  });
   const handleAddMore = () => {
     setRowCount((prevRowCount) => prevRowCount + 1);
   };
@@ -140,6 +153,10 @@ const Caseform = () => {
                       name="role"
                       display="flex"
                       row
+                      value={selectedRole}
+                      onChange={(event) => {
+                        setSelectedRole(event.target.value);
+                      }}
                       sx={{ mt: "12px" }}
                     >
                       <FormControlLabel
@@ -160,21 +177,43 @@ const Caseform = () => {
                     key={index}
                     style={{ display: "flex", marginTop: "10px" }}
                   >
-                    <TextField
-                      name={`respondentDetails.${index}.name`}
-                      label="Respondent Name"
-                      variant="outlined"
-                      margin="normal"
-                      fullWidth
-                    />
-                    <TextField
-                      name={`respondentDetails.${index}.advocate`}
-                      label="Respondent's Advocate"
-                      variant="outlined"
-                      margin="normal"
-                      fullWidth
-                      sx={{ marginLeft: "20px" }}
-                    />
+                    {selectedRole === "Respondent" ? (
+                      <>
+                        <TextField
+                          name={`petitionerDetails.${index}.name`}
+                          label="Petitioner Name"
+                          variant="outlined"
+                          margin="normal"
+                          fullWidth
+                        />
+                        <TextField
+                          name={`petitionerDetails.${index}.advocate`}
+                          label="Petitioner's Advocate"
+                          variant="outlined"
+                          margin="normal"
+                          fullWidth
+                          sx={{ marginLeft: "20px" }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <TextField
+                          name={`respondentDetails.${index}.name`}
+                          label="Respondent Name"
+                          variant="outlined"
+                          margin="normal"
+                          fullWidth
+                        />
+                        <TextField
+                          name={`respondentDetails.${index}.advocate`}
+                          label="Respondent's Advocate"
+                          variant="outlined"
+                          margin="normal"
+                          fullWidth
+                          sx={{ marginLeft: "20px" }}
+                        />
+                      </>
+                    )}
                     {index > 0 && (
                       <Button
                         type="button"
