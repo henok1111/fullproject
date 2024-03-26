@@ -25,7 +25,7 @@ function Deactive() {
 
         <Box>
           <Topbar />
-
+         
           <Box height={669} bgcolor={colors.primary[800]}>
             <IconButton onClick={handleBackButtonClick} sx={{ position: 'absolute', top: 69, left: 0,  }}>
               <ArrowBack fontSize="large" color="secondary" />

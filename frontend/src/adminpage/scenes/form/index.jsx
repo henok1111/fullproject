@@ -12,6 +12,7 @@ const Form = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [emailExists, setEmailExists] = useState(false);
   const [roles, setRoles] = useState([
     "Admin",
     "Judge",
@@ -40,12 +41,30 @@ const Form = () => {
     confirm_password: "",
     role: "",
   };
+  const isEmailUnique = async (email) => {
+    try {
+      const response = await fetch(`http://localhost:8081/api/checkuseremail?email=${email}`);
+      const data = await response.json();
+      return data.isUnique;
+    } catch (error) {
+      console.error("Error checking email uniqueness:", error);
+      return false;
+    }
+  };
+  
 
   // Updated handleFormSubmit to send a POST request to the server
   const handleFormSubmit = async (values, { resetForm }) => {
     try {
       // Log form values
       console.log(values);
+ // Check if the email is unique
+ const isEmailValid = await isEmailUnique(values.email);
+  
+ if (!isEmailValid) {
+   setEmailExists(true);
+   return;
+ }
 
       // Create an object based on the form data
       const userObject = {
@@ -146,18 +165,22 @@ const Form = () => {
                 sx={{ gridColumn: "span 2" }}
               />
               <TextField
-                fullWidth
-                variant="filled"
-                type="email"
-                label="Email"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.email}
-                name="email"
-                error={!!touched.email && !!errors.email}
-                helperText={touched.email && errors.email}
-                sx={{ gridColumn: "span 4" }}
-              />
+  fullWidth
+  variant="filled"
+  type="email"
+  label="Email"
+  onBlur={handleBlur}
+  onChange={handleChange}
+  value={values.email}
+  name="email"
+  error={!!touched.email && (!!errors.email || emailExists)}
+  helperText={
+    (touched.email && errors.email) ||
+    (emailExists && "This email is already in use.")
+  }
+  sx={{ gridColumn: "span 4" }}
+/>
+
               <TextField
                 fullWidth
                 variant="filled"

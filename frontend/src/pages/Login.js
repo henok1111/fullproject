@@ -13,7 +13,7 @@ import Lottie from "react-lottie";
 import animationData from "../a.json";
 import { TextField, Button , InputLabel } from "@mui/material";
 import newAnimationData from "./newAnimationData.json";
-
+import "../components/navbar.css"
 // Background animation component with fixed positioning and higher z-index
 const BackgroundAnimation = () => {
   const defaultOptions = {
@@ -54,7 +54,7 @@ const Logo = () => (
       alignItems: "center",
     }}
   >
-    <img
+    <img  
       src={Ap}
       alt="Logo"
       style={{

@@ -1,41 +1,138 @@
-import React, { useState } from "react";
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import React, { useState, useEffect, useRef } from "react";
+import { Box, Button, Grid, TextField } from "@mui/material";
 import Header from "../../components/Header";
-import { tokens } from "../../../theme"; // Ensure this import is correct
+import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import { jwtDecode } from "jwt-decode";
+import { useFormik } from 'formik';
+import * as yup from "yup";
 
 const ProfilePage = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [imagePath, setImagePath] = useState("");
+  const fileInputRef = useRef(null);
+  const validationSchema = yup.object().shape({
+    firstName: yup.string().required("First name is required"),
+    lastName: yup.string().required("Last name is required"),
+    email: yup.string().email("Invalid email").required("Email is required"),
+    phone: yup.string().required("Phone number is required"),
+    address: yup.string().required("Address is required"),
+    password: yup.string().required("Password is required"),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref("password"), null], "Passwords must match")
+      .required("Confirm Password is required"),
+  });
+  const handleSubmit = async (values) => {
+    try {
+      // Log the form values before sending them to the backend
+      console.log("Form values:", values);
+  
+      // Make a POST request to update user information
+      const accessToken = localStorage.getItem("accessToken");
+      const decodedToken = jwtDecode(accessToken);
+      const userId = decodedToken.userId;
+  
+      const response = await fetch(`http://localhost:8081/api/updateUser/${userId}`, {
+        method: "POST",
+        body: JSON.stringify(values), // Send form values as JSON data
+        headers: {
+          "Content-Type": "application/json" // Set content type to JSON
+        }
+      });
+      const data = await response.json();
+      console.log("User information updated:", data);
+  
+      // Optionally, you can reset the form fields here
+      formik.resetForm();
+  
+      // Fetch user image after updating the information
+      fetchUserImage();
+    } catch (error) {
+      console.error("Error updating user information:", error);
+    }
+  };
+  
+  
+  const fetchUserImage = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      const decodedToken = jwtDecode(accessToken);
+      const userId = decodedToken.userId;
 
-  const handleChoosePicture = () => {
-    const input = document.createElement("input");
-    input.type = "file";
+      const response = await fetch(
+        `http://localhost:8081/api/getUserImage/${userId}`
+      );
+      const data = await response.json();
+      const { imagePath } = data;
 
-    input.addEventListener("change", (event) => {
-      const file = event.target.files[0];
-      if (file) {
+      setImagePath(imagePath);
+    } catch (error) {
+      console.error("Error fetching user image:", error);
+    }
+  };
+  useEffect(() => {
+    fetchUserImage();
+  }, []);
+
+  const formik = useFormik({
+    initialValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      address: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: handleSubmit,
+  });
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Retrieve the user ID from the decoded token
+        const accessToken = localStorage.getItem("accessToken");
+        const decodedToken = jwtDecode(accessToken);
+        const userId = decodedToken.userId;
+
+        // Append the user ID to the FormData object
+        formData.append("userId", userId);
+
+        // Make a POST request to upload the file to the server
+        const response = await fetch("http://localhost:8081/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+
+        // Update the imagePath state variable synchronously
+        setImagePath(data.filePath);
+
+        // Fetch user image automatically after selecting a new image
+        fetchUserImage(); // Call fetchUserImage function here
+
+        // Display the selected image automatically
         const reader = new FileReader();
-        reader.onloadend = () => {
-          // Limit image size to 5MB
-          const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-          if (reader.result.length < maxSize) {
-            // Update the image path with the selected image
-            setImagePath(reader.result);
-            // Store the image path in local storage
-            localStorage.setItem("imagePath", reader.result);
-          } else {
-            console.error("Image size exceeds the allowed limit (5MB).");
-            // You can show an error message to the user if needed.
-          }
+        reader.onload = () => {
+          setImagePath(reader.result);
         };
         reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Error uploading file:", error);
       }
-    });
-
-    input.click();
+    }
   };
 
   return (
@@ -49,57 +146,132 @@ const ProfilePage = () => {
         }}
         padding={2}
       >
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
-            <img
-              alt="profile-user"
-              width="300px"
-              height="300px"
-              src={imagePath}
-              style={{ cursor: "pointer", borderRadius: "100%" }}
-              onClick={handleChoosePicture}
-            />
-          </Grid>
-          <Grid item xs={12} sm={8}>
-            <Box display="flex" gap={2}>
-              <TextField label="First Name" variant="outlined" fullWidth />
-              <TextField label="Last Name" variant="outlined" fullWidth />
-            </Box>
-            <Box display="flex" gap={2} mt={2}>
-              <TextField
-                type="email"
-                label="Email"
-                variant="outlined"
-                fullWidth
+        <form onSubmit={formik.handleSubmit}>
+          <Grid container spacing={2}>
+            <Box display="flex" justifyContent="center" alignItems="center">
+              <input
+                type="file"
+                style={{ display: "none" }}
+                ref={fileInputRef}
+                onChange={handleImageChange}
               />
-              <TextField label="Phone" variant="outlined" fullWidth />
+              <label htmlFor="fileInput">
+                <img
+                  alt="profile-user"
+                  width="280px"
+                  height="280px"
+                  src={`http://localhost:8081/${imagePath}`}
+                  style={{ cursor: "pointer", borderRadius: "50%" }}
+                  onClick={handleImageClick}
+                />
+              </label>
             </Box>
-            <Box display="flex" gap={2} mt={2}>
-              <TextField
-                label="Registration Number"
-                variant="outlined"
-                fullWidth
-              />
-              <TextField label="Associated Name" variant="outlined" fullWidth />
-            </Box>
-            <Box display="flex" gap={2} mt={2}>
-              <TextField label="Address" variant="outlined" fullWidth />
-              <TextField label="Zip Code" variant="outlined" width={100} />
-            </Box>
-          </Grid>
-        </Grid>
-        <Box display="flex" justifyContent="flex-end" mt={2}>
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<EditIcon fontSize="small" />}
-          >
-            Edit
-          </Button>
-        </Box>
-      </Box>
-    </Box>
-  );
+            <Grid item xs={12} sm={8}>
+              <Box display="flex" gap={2}>
+                <TextField
+                  label="First Name"
+                  variant="outlined"
+                  fullWidth
+                  id="firstName"
+                  name="firstName"
+                  value={formik.values.firstName}
+                  onChange={formik.handleChange}
+                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                  helperText={formik.touched.firstName && formik.errors.firstName}
+                />
+                <TextField
+                  label="Last Name"
+                  variant="outlined"
+                  fullWidth
+                  id="lastName"
+                  name="lastName"
+                  value={formik.values.lastName}
+                  onChange={formik.handleChange}
+                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                  helperText={formik.touched.lastName && formik.errors.lastName}
+                />
+              </Box>
+              <Box display="flex" gap={2} mt={2}>
+                <TextField
+                  type="email"
+                  label="Email"
+                  variant="outlined"
+                  fullWidth
+                  id="email"
+                  name="email"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                />
+                <TextField
+                  label="Phone"
+                  variant="outlined"
+                  fullWidth
+                  id="phone"
+                  name="phone"
+                  value={formik.values.phone}
+                  onChange={formik.handleChange}
+                  error={formik.touched.phone && Boolean(formik.errors.phone)}
+                  helperText={formik.touched.phone && formik.errors.phone}
+                />
+              </
+              Box>
+<Box display="flex" gap={3} mt={3}>
+<TextField
+label="Address"
+variant="outlined"
+fullWidth
+id="address"
+name="address"
+value={formik.values.address}
+onChange={formik.handleChange}
+error={formik.touched.address && Boolean(formik.errors.address)}
+helperText={formik.touched.address && formik.errors.address}
+/>
+</Box>
+<Box display="flex" gap={2} mt={2}>
+<TextField
+label="Password"
+variant="outlined"
+type="password"
+fullWidth
+id="password"
+name="password"
+value={formik.values.password}
+onChange={formik.handleChange}
+error={formik.touched.password && Boolean(formik.errors.password)}
+helperText={formik.touched.password && formik.errors.password}
+/>
+<TextField
+label="Confirm Password"
+variant="outlined"
+type="password"
+fullWidth
+id="confirmPassword"
+name="confirmPassword"
+value={formik.values.confirmPassword}
+onChange={formik.handleChange}
+error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
+/>
+</Box>
+</Grid>
+</Grid>
+<Box display="flex" justifyContent="flex-end" mt={2}>
+<Button
+type="submit"
+variant="contained"
+color="secondary"
+startIcon={<EditIcon fontSize="small" />}
+>
+Edit
+</Button>
+</Box>
+</form>
+</Box>
+</Box>
+);
 };
 
 export default ProfilePage;

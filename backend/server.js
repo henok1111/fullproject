@@ -26,6 +26,7 @@ import deleteClient from "./component/deleteClient.js";
 import editClient from "./component/editclient.js";
 import uploadImage from "./component/uploadimage.js";
 import getUserImage from "./component/getuserimage.js";
+import EditSpecificUser from "./component/editspecificuser.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -58,7 +59,7 @@ app.use((err, req, res, next) => {
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "1234",
+  password: "",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
@@ -130,7 +131,9 @@ app.get("/api/getJoinedClientData", async (req, res) => {
 app.get("/api/checkemail", async (req, res) => {
   await checkEmail(db, req, res);
 });
-
+app.get("/api/checkuseremail", async (req, res) => {
+  await checkEmail(db, req, res);
+});
 app.post("/api/deleteClient", async (req, res) => {
   await deleteClient(db, req, res);
 });
@@ -142,6 +145,9 @@ app.post("/api/editClient", async (req, res) => {
 });
 app.post("/api/adduser", async (req, res) => {
   await AddUser(db, req, res);
+});
+app.post("/api/updateUser/:userId", async (req, res) => {
+  await EditSpecificUser(db, req, res);
 });
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

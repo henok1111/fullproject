@@ -66,6 +66,14 @@ const Topbar = () => {
       p={2}
       backgroundColor={colors.blueAccent[900]}
     >
+      {/* SEARCH BAR */}
+      <Box display="flex" borderRadius="3px">
+        <div
+          backgroundColor={colors.primary[400]}
+          id="google_translate_element"
+        ></div>
+      </Box>
+
       {/* ICONS */}
       <Box display="flex">
         <IconButton onClick={colorMode.toggleColorMode}>

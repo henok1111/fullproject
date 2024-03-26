@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Icon, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../../theme";
@@ -15,22 +15,54 @@ import GavelIcon from "@mui/icons-material/Gavel";
 import { jwtDecode } from "jwt-decode";
 import henok from "./image.png";
 
-const Item = ({ title, to, icon, selected, setSelected }) => {
+const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const [openSubMenu, setOpenSubMenu] = useState(false);
+
+  const handleSubMenuClick = () => {
+    setOpenSubMenu(!openSubMenu);
+  };
+
   return (
-    <MenuItem
-      active={selected === title}
-      style={{
-        color: colors.grey[100],
-      }}
-      onClick={() => setSelected(title)}
-      icon={icon}
-    >
-      <Typography>{title}</Typography>
-      <Link to={to} />
-    </MenuItem>
+    <>
+      <MenuItem
+        active={selected === title}
+        style={{
+          color: colors.grey[100],
+          
+        }}
+        onClick={subItems ? handleSubMenuClick : () => setSelected(title)}
+        icon={icon}
+      >
+        <Typography>{title}</Typography>
+        <Link to={to} />
+        
+      </MenuItem>
+      {subItems && openSubMenu && (
+        <Menu iconShape="round" style={{ paddingLeft: "20px" }}>
+          {subItems.map((subItem, index) => (
+            <MenuItem
+              key={index}
+              active={selected === subItem.title}
+              icon={icon}
+              style={{
+                color: colors.grey[100],
+                
+                marginLeft:"6px",
+                
+              }}
+              onClick={() => setSelected(subItem.title)}
+            >
+              <Typography>{subItem.title}</Typography>
+              <Link to={subItem.to} />
+              
+            </MenuItem>
+          ))}
+        </Menu>
+      )}
+    </>
   );
 };
 
@@ -168,7 +200,16 @@ const Sidebar = ({ role, name, userId }) => {
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
       { title: "Manage Team", to: "team", icon: <PeopleOutlinedIcon /> },
       { title: "Profile Form", to: "form", icon: <PersonOutlinedIcon /> },
-      { title: "Case Management", to: "addcase", icon: <GavelIcon /> },
+      {
+        title: "Case Management", // Submenu title
+        icon: <GavelIcon />, // Icon for the submenu
+        subItems: [ // Submenu items
+        { title: "View Cases", to: "addcase",icon: <PersonOutlinedIcon /> },
+          { title: "Add Case", to: "/registrar/caseform" ,icon: <PersonOutlinedIcon />}, // Example submenu item
+           // Example submenu item
+          // Add more submenu items as needed
+        ]
+      },
       {
         title: "Client Management",
         to: "client",
@@ -292,6 +333,7 @@ const Sidebar = ({ role, name, userId }) => {
                 icon={item.icon}
                 selected={selected}
                 setSelected={setSelected}
+                subItems={item.subItems} // Pass subItems to the Item component
               />
             ))}
           </Box>
