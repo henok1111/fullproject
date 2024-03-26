@@ -26,6 +26,7 @@ import deleteClient from "./component/deleteClient.js";
 import editClient from "./component/editclient.js";
 import uploadImage from "./component/uploadimage.js";
 import getUserImage from "./component/getuserimage.js";
+import EditSpecificUser from "./component/editspecificuser.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -144,6 +145,9 @@ app.post("/api/editClient", async (req, res) => {
 });
 app.post("/api/adduser", async (req, res) => {
   await AddUser(db, req, res);
+});
+app.post("/api/updateUser/:userId", async (req, res) => {
+  await EditSpecificUser(db, req, res);
 });
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
