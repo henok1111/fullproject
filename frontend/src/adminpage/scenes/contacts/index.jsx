@@ -92,10 +92,9 @@ const Contacts = () => {
       address: params.address,
       role: params.role,
     });
-  
+
     setAnchorEl(null);
   };
-  
 
   const handleDeleteClick = (params) => {
     setSelectedUserToDelete(params);
@@ -114,7 +113,9 @@ const Contacts = () => {
       });
 
       if (response.ok) {
-        console.log(`User with ID ${selectedUserToDelete.id} deleted successfully!`);
+        console.log(
+          `User with ID ${selectedUserToDelete.id} deleted successfully!`
+        );
         setOpenSnackbar(true);
         fetchUsers();
       } else {
@@ -265,11 +266,12 @@ const Contacts = () => {
       renderCell: (params) => (
         <>
           <IconButton aria-label="edit" onClick={() => handleEditClick(params)}>
-
-            <EditIcon style={{ color: "yellowgreen" }}/>
-
+            <EditIcon style={{ color: "yellowgreen" }} />
           </IconButton>
-          <IconButton aria-label="delete" onClick={() => handleDeleteClick(params)}>
+          <IconButton
+            aria-label="delete"
+            onClick={() => handleDeleteClick(params)}
+          >
             <DeleteIcon />
           </IconButton>
         </>
@@ -323,13 +325,11 @@ const Contacts = () => {
       <Dialog
         open={deleteConfirmationOpen}
         onClose={handleCancelDelete}
-
-   
         sx={{
           "& .MuiDialog-paper": {
             backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
           },
-        }} 
+        }}
       >
         <DialogTitle id="alert-dialog-title" color={"red"}>
           {"Are you sure you want to delete this client?"}

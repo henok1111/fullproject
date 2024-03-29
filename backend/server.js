@@ -27,6 +27,15 @@ import editClient from "./component/editclient.js";
 import uploadImage from "./component/uploadimage.js";
 import getUserImage from "./component/getuserimage.js";
 import EditSpecificUser from "./component/editspecificuser.js";
+import AddService from "./component/addservice.js";
+import ViewServices from "./component/viewservices.js";
+import EditService from "./component/editservice.js";
+import DeleteService from "./component/deleteservice.js";
+import AddCaseType from "./component/addcasetype.js";
+import FetchCaseType from "./component/fetchcasetype.js";
+import AddCasesubType from "./component/addcasesubtype.js";
+import FetchCaseTypeGrid from "./component/fetchcasetypeGRID.js";
+
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -50,6 +59,7 @@ app.use(
 );
 app.use(express.static("uploads"));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Something went wrong!");
@@ -59,7 +69,7 @@ app.use((err, req, res, next) => {
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "1234",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
@@ -107,6 +117,18 @@ app.get("/api/getUsers", async (req, res) => {
   await Getuser(req, res);
 });
 
+app.get("/api/getServices", async (req, res) => {
+  await ViewServices(req, res);
+});
+
+app.get("/api/getCaseType", async (req, res) => {
+  await FetchCaseType(req, res);
+});
+
+app.get("/api/getCaseTypeGrid", async (req, res) => {
+  await FetchCaseTypeGrid(req, res);
+});
+
 app.get("/api/getRole/:id", async (req, res) => {
   await Getrole(req, res);
 });
@@ -115,12 +137,27 @@ app.post("/api/editUserStatus", async (req, res) => {
 });
 
 app.post("/api/editUser", async (req, res) => {
-  await EditUser(db, req, res);
+  await EditUser(req, res);
+});
+
+app.post("/api/editservice", async (req, res) => {
+  await EditService(db, req, res);
 });
 app.get("/api/getUserImage/:userId", (req, res) => {
   getUserImage(db, req, res); // Call getUserImage function with db, req, and res parameters
 });
 
+app.post("/api/addservice", async (req, res) => {
+  await AddService(db, req, res);
+});
+
+app.post("/api/addcasetype", async (req, res) => {
+  await AddCaseType(db, req, res);
+});
+
+app.post("/api/addcasesubtype", async (req, res) => {
+  await AddCasesubType(db, req, res);
+});
 app.post("/api/addclient", async (req, res) => {
   await AddClient(db, req, res);
 });
@@ -139,6 +176,10 @@ app.post("/api/deleteClient", async (req, res) => {
 });
 app.post("/api/deleteUser", async (req, res) => {
   await DeleteUser(db, req, res);
+});
+
+app.post("/api/deleteService", async (req, res) => {
+  await DeleteService(db, req, res);
 });
 app.post("/api/editClient", async (req, res) => {
   await editClient(db, req, res);

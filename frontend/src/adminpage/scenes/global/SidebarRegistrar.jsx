@@ -13,7 +13,9 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import GavelIcon from "@mui/icons-material/Gavel";
 import { jwtDecode } from "jwt-decode";
-import henok from "./image.png";
+import SettingsIcon from "@mui/icons-material/Settings";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import PaidIcon from "@mui/icons-material/Paid";
 
 const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
   const theme = useTheme();
@@ -31,14 +33,12 @@ const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
         active={selected === title}
         style={{
           color: colors.grey[100],
-          
         }}
         onClick={subItems ? handleSubMenuClick : () => setSelected(title)}
         icon={icon}
       >
         <Typography>{title}</Typography>
         <Link to={to} />
-        
       </MenuItem>
       {subItems && openSubMenu && (
         <Menu iconShape="round" style={{ paddingLeft: "20px" }}>
@@ -49,15 +49,13 @@ const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
               icon={icon}
               style={{
                 color: colors.grey[100],
-                
-                marginLeft:"6px",
-                
+
+                marginLeft: "6px",
               }}
               onClick={() => setSelected(subItem.title)}
             >
               <Typography>{subItem.title}</Typography>
               <Link to={subItem.to} />
-              
             </MenuItem>
           ))}
         </Menu>
@@ -80,16 +78,17 @@ const Sidebar = ({ role, name, userId }) => {
       const accessToken = localStorage.getItem("accessToken");
       const decodedToken = jwtDecode(accessToken);
       const userId = decodedToken.userId;
-      
+
       // Make an API request to fetch the user image path
-      const response = await fetch(`http://localhost:8081/api/getUserImage/${userId}`);
+      const response = await fetch(
+        `http://localhost:8081/api/getUserImage/${userId}`
+      );
       const data = await response.json();
       const { imagePath } = data;
-      
+
       // Update the state with the fetched image path
       setImagePath(imagePath);
       console.log(imagePath);
-
     } catch (error) {
       console.error("Error fetching user image:", error);
     }
@@ -203,12 +202,14 @@ const Sidebar = ({ role, name, userId }) => {
       {
         title: "Case Management", // Submenu title
         icon: <GavelIcon />, // Icon for the submenu
-        subItems: [ // Submenu items
-        { title: "View Cases", to: "addcase",icon: <PersonOutlinedIcon /> },
-          { title: "Add Case", to: "/registrar/caseform" ,icon: <PersonOutlinedIcon />}, // Example submenu item
-           // Example submenu item
-          // Add more submenu items as needed
-        ]
+        subItems: [
+          {
+            title: "Add Case",
+            to: "/registrar/caseform",
+            icon: <PersonOutlinedIcon />,
+          },
+          { title: "View Cases", to: "addcase", icon: <PersonOutlinedIcon /> },
+        ],
       },
       {
         title: "Client Management",
@@ -221,9 +222,16 @@ const Sidebar = ({ role, name, userId }) => {
         icon: <ReceiptOutlinedIcon />,
       },
       {
-        title: "Invoices Balances",
-        to: "invoices",
-        icon: <ReceiptOutlinedIcon />,
+        title: "Income",
+        icon: <PaidIcon />,
+        subItems: [
+          { title: "Invoices", to: "invoices", icon: <ReceiptOutlinedIcon /> },
+          {
+            title: "Services",
+            to: "services",
+            icon: <ReceiptOutlinedIcon />,
+          },
+        ],
       },
       {
         title: "Contact Information",
@@ -235,6 +243,13 @@ const Sidebar = ({ role, name, userId }) => {
         to: "calendar",
         icon: <CalendarTodayOutlinedIcon />,
       },
+      {
+        title: "Settings",
+        icon: <SettingsIcon />,
+        subItems: [
+          { title: "Case Type", to: "casetype", icon: <AccountBalanceIcon /> },
+        ],
+      },
     ],
   };
 
@@ -243,8 +258,8 @@ const Sidebar = ({ role, name, userId }) => {
       sx={{
         "& .pro-sidebar-inner": {
           background: `${colors.primary[400]} !important`,
-          color:`${colors.primary[900]}!important`,
-          borderRight:"none"
+          color: `${colors.primary[900]}!important`,
+          borderRight: "none",
         },
         "& .pro-icon-wrapper": {
           backgroundColor: "transparent !important",
@@ -296,13 +311,14 @@ const Sidebar = ({ role, name, userId }) => {
                   ref={fileInputRef}
                   onChange={handleImageChange}
                 />
-               <label htmlFor="fileInput">
+                <label htmlFor="fileInput">
                   <img
                     alt="profile-user"
                     width="100px"
                     height="100px"
-                    src={`http://localhost:8081/${imagePath}`}                    style={{ cursor: "pointer", borderRadius: "50%" }}
-                    onClick={handleImageClick}                  
+                    src={`http://localhost:8081/${imagePath}`}
+                    style={{ cursor: "pointer", borderRadius: "50%" }}
+                    onClick={handleImageClick}
                   />
                 </label>
               </Box>
@@ -333,7 +349,7 @@ const Sidebar = ({ role, name, userId }) => {
                 icon={item.icon}
                 selected={selected}
                 setSelected={setSelected}
-                subItems={item.subItems} // Pass subItems to the Item component
+                subItems={item.subItems}
               />
             ))}
           </Box>

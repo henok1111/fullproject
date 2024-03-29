@@ -43,7 +43,9 @@ const Form = () => {
   };
   const isEmailUnique = async (email) => {
     try {
-      const response = await fetch(`http://localhost:8081/api/checkuseremail?email=${email}`);
+      const response = await fetch(
+        `http://localhost:8081/api/checkuseremail?email=${email}`
+      );
       const data = await response.json();
       return data.isUnique;
     } catch (error) {
@@ -51,20 +53,19 @@ const Form = () => {
       return false;
     }
   };
-  
 
   // Updated handleFormSubmit to send a POST request to the server
   const handleFormSubmit = async (values, { resetForm }) => {
     try {
       // Log form values
       console.log(values);
- // Check if the email is unique
- const isEmailValid = await isEmailUnique(values.email);
-  
- if (!isEmailValid) {
-   setEmailExists(true);
-   return;
- }
+      // Check if the email is unique
+      const isEmailValid = await isEmailUnique(values.email);
+
+      if (!isEmailValid) {
+        setEmailExists(true);
+        return;
+      }
 
       // Create an object based on the form data
       const userObject = {
@@ -165,21 +166,21 @@ const Form = () => {
                 sx={{ gridColumn: "span 2" }}
               />
               <TextField
-  fullWidth
-  variant="filled"
-  type="email"
-  label="Email"
-  onBlur={handleBlur}
-  onChange={handleChange}
-  value={values.email}
-  name="email"
-  error={!!touched.email && (!!errors.email || emailExists)}
-  helperText={
-    (touched.email && errors.email) ||
-    (emailExists && "This email is already in use.")
-  }
-  sx={{ gridColumn: "span 4" }}
-/>
+                fullWidth
+                variant="filled"
+                type="email"
+                label="Email"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.email}
+                name="email"
+                error={!!touched.email && (!!errors.email || emailExists)}
+                helperText={
+                  (touched.email && errors.email) ||
+                  (emailExists && "This email is already in use.")
+                }
+                sx={{ gridColumn: "span 4" }}
+              />
 
               <TextField
                 fullWidth

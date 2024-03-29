@@ -31,6 +31,7 @@ import AddCase from "./adminpage/scenes/addcase/addcase";
 import Caseform from "./adminpage/scenes/form/caseform";
 import ProfilePage from "./adminpage/scenes/profile";
 import NotFound from "./adminpage/scenes/global/pagenotfound";
+import Casetype from "./adminpage/scenes/case/casetype";
 import {
   GavelRounded,
   HailRounded,
@@ -38,7 +39,7 @@ import {
 } from "@mui/icons-material";
 
 import Deactive from "./pages/deactive";
-
+import AddServices from "./adminpage/scenes/services/addservices";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -106,11 +107,12 @@ const App = () => {
               </>
             )}
 
-
-           <Route path="/deactive" element={<Deactive/>}/ >
-            <Route path="*" element={<p color="black">Page Not Found</p>} />
-            <Route path="/unauthorized" element={<p color="black">Unauthorized</p>} />
-
+            <Route path="/deactive" element={<Deactive />} />
+            <Route path="*" element={<NotFound />} />
+            <Route
+              path="/unauthorized"
+              element={<p color="black">Unauthorized</p>}
+            />
           </Routes>
         </Router>
       </ThemeProvider>
@@ -139,6 +141,8 @@ const RegistrarRoutes = () => {
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/appointmentform" element={<Appointmentform />} />
         <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/casetype" element={<Casetype />} />
+        <Route path="/services" element={<AddServices />} />
       </Route>
     </Routes>
   );

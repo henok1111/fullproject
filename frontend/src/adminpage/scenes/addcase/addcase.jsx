@@ -31,7 +31,7 @@ const AddCase = () => {
   };
 
   const columns = [
-    { field: "No", headerName: "No", flex: 0.5 },
+    { field: "Number", headerName: "Number", flex: 0.5 },
     {
       field: "Client & Case Detail",
       headerName: "Client & Case Detail",
@@ -131,7 +131,6 @@ const AddCase = () => {
               <Box
                 m="40px 0 0 0"
                 height="115vh"
-                paddingBottom="25vh"
                 sx={{
                   "& .MuiDataGrid-root": {
                     border: "none",
