@@ -27,6 +27,9 @@ import editClient from "./component/editclient.js";
 import uploadImage from "./component/uploadimage.js";
 import getUserImage from "./component/getuserimage.js";
 import EditSpecificUser from "./component/editspecificuser.js";
+import GetCases from "./component/getcase.js";
+import { GetPetitioners,GetRespondents } from "./component/getpetionerandrespondant.js";
+import { AddAppointment } from "./component/addappointment.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -124,6 +127,9 @@ app.get("/api/getUserImage/:userId", (req, res) => {
 app.post("/api/addclient", async (req, res) => {
   await AddClient(db, req, res);
 });
+app.post("/api/addappointments", async (req, res) => {
+  await AddAppointment(db, req, res);
+});
 app.get("/api/getJoinedClientData", async (req, res) => {
   await getJoinedClientData(db, req, res);
 });
@@ -146,9 +152,20 @@ app.post("/api/editClient", async (req, res) => {
 app.post("/api/adduser", async (req, res) => {
   await AddUser(db, req, res);
 });
+app.get("/api/cases", async (req, res) => {
+  await GetCases(req, res); // Call GetCases function with req and res parameters
+});
 app.post("/api/updateUser/:userId", async (req, res) => {
   await EditSpecificUser(db, req, res);
 });
+app.get("/api/petitioners/:caseId", async (req, res) => {
+  await GetPetitioners(db, req, res);
+});
+
+app.get("/api/respondents/:caseId", async (req, res) => {
+  await GetRespondents(db, req, res);
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

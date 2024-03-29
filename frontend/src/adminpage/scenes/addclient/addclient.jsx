@@ -1,388 +1,667 @@
-import React, { useEffect } from "react";
-import { useFormik } from "formik";
+import React, { useState, useEffect } from "react";
+import { useTheme } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
   TextField,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
   Snackbar,
-  FormControl,
-  FormLabel,
+  Typography,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
-import * as yup from "yup";
-import Header from "../../components/Header";
+import { DataGrid, GridCloseIcon, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../../theme";
-import { useTheme } from "@mui/material";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import Header from "../../components/Header";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 const validationSchema = yup.object().shape({
-  firstName: yup.string().required("First Name is required"),
-  middleName: yup.string().required("Middle Name is required"),
-  lastName: yup.string().required("Last Name is required"),
-  gender: yup.string().required("Gender is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
-  mobileNumber: yup.string().required("Mobile Number is required"),
-  alternateNumber: yup.string(),
-  address: yup.string().required("Address is required"),
-  references: yup.array().of(
-    yup.object().shape({
-      referenceName: yup.string(),
-      referenceMobile: yup.string(),
-    })
-  ),
+  first_name: yup.string().required('First Name is required'),
+  middle_name: yup.string(),
+  last_name: yup.string().required('Last Name is required'),
+  gender: yup.string(),
+  email: yup.string().email('Invalid email address').required('Email is required'),
+  mobile_number: yup.string(),
+  address: yup.string(),
+  // Add validation for other fields as needed
 });
 
-const isEmailUnique = async (email) => {
-  try {
-    const response = await fetch(`http://localhost:8081/api/checkemail?email=${email}`);
-    const data = await response.json();
-    return data.isUnique;
-  } catch (error) {
-    console.error("Error checking email uniqueness:", error);
-    return false;
-  }
-};
-const createUserObject = (values) => {
-  return {
-    first_name: values.firstName,
-    middle_name: values.middleName,
-    last_name: values.lastName,
-    gender: values.gender,
-    email: values.email,
-    mobile_number: values.mobileNumber,
-    alternate_number: values.alternateNumber,
-    address: values.address,
-    references: values.references.map((reference) => ({
-      reference_name: reference.referenceName,
-      reference_mobile: reference.referenceMobile,
-    })),
-  };
-};
-
-const AddClient = () => {
+const Client = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-
-  const formik = useFormik({
-    validationSchema,
-    initialValues: {
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      gender: "male",
-      email: "",
-      mobileNumber: "",
-      alternateNumber: "",
-      address: "",
-      references: [{ referenceName: "", referenceMobile: "" }],
-    },
-    onSubmit: (values) => handleSubmit(values, formik),
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const { control, handleSubmit, formState: { errors }, setValue } = useForm({
+    resolver: yupResolver(validationSchema),
   });
 
-  const handleAddReference = () => {
-    formik.setFieldValue("references", [
-      ...formik.values.references,
-      { referenceName: "", referenceMobile: "" },
-    ]);
-  };
+  const navigate = useNavigate();
 
-  const handleRemoveReference = (index) => {
-    const updatedReferences = [...formik.values.references];
-    updatedReferences.splice(index, 1);
-    formik.setFieldValue("references", updatedReferences);
-  };
-
-  const handleSubmit = async (values, formik) => {
+  const isEmailUnique = async (email) => {
     try {
-      // Check if the email is unique
-      const isEmailValid = await isEmailUnique(values.email);
+      const response = await fetch(`http://localhost:8081/api/checkemail?email=${email}`);
+      const data = await response.json();
+      return data.isUnique;
+    } catch (error) {
+      console.error("Error checking email uniqueness:", error);
+      return false;
+    }
+  }
+
   
-      if (!isEmailValid) {
-        formik.setErrors({
-          email: "This email is already in use. Please use a different one.",
-        });
-        return;
+  // Define fetchData as an arrow function to access it in the component
+  const fetchData = async () => {
+    try {
+      console.log("Fetching client data...");
+      const response = await fetch(
+        "http://localhost:8081/api/getJoinedClientData"
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Error fetching joined client data: ${response.statusText}`
+        );
       }
-  
-      // Continue with the rest of your form submission logic
-      console.log("Form submitted");
-      console.log("Formik Values:", values);
-  
-      const userObject = createUserObject(values);
-  
-      console.log("User Object:", userObject);
-  
-      try {
-        JSON.parse(JSON.stringify(userObject));
-        console.log("User Object is a valid JSON");
-      } catch (error) {
-        console.error("User Object is not a valid JSON:", error);
-        return;
-      }
-  
-      console.log("Sending request to:", "http://localhost:8081/api/addclient");
-  
-      let response;
-  
-      try {
-        response = await fetch("http://localhost:8081/api/addclient", {
+
+      const result = await response.json();
+      setData(result);
+      console.log("Client data fetched successfully:", result);
+    } catch (error) {
+      setError(error.message);
+      console.error("Error fetching joined client data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData(); // Call fetchData when the component mounts
+  }, []);
+
+  const [selectedClient, setSelectedClient] = useState({
+    id: null,
+    first_name: "",
+    middle_name: "",
+    last_name: "",
+    gender: "",
+    email: "",
+    mobile_number: "",
+    address: "",
+    references: [],
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [editedValues, setEditedValues] = useState({});
+
+  const handleEditClick = (params) => {
+    setSelectedClient({
+      id: params.id,
+      first_name: params.first_name,
+      last_name: params.last_name,
+      email: params.email,
+      phone_number: params.phone_number,
+      address: params.address,
+      middle_name: params.middle_name,
+      gender:params.gender,
+      mobile_number: params.mobile_number,
+      
+      references: params.references
+    });
+    setIsEditing(true);
+    setAnchorEl(null);
+  };
+
+  const handleDeleteClick = (params) => {
+    setSelectedClient(params);
+    setOpenDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      console.log(
+        "Sending DELETE request to http://localhost:8081/api/deleteClient"
+      );
+      console.log("Request Body:", JSON.stringify({ id: selectedClient.id }));
+
+      const response = await fetch(
+        "http://localhost:8081/api/deleteClient",
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(userObject),
-        });
+          body: JSON.stringify({ id: selectedClient.id }),
+        }
+      );
+
+      if (response.ok) {
+        console.log(
+          `Client with ID ${selectedClient.id} deleted successfully!`
+        );
+
+        // Update the data state after successful deletion
+        const updatedData = data.filter(
+          (client) => client.id !== selectedClient.id
+        );
+        setData(updatedData);
+
+        setOpenSnackbar(true);
+      } else {
+        console.error(`Error deleting client with ID ${selectedClient.id}`);
+      }
+    } catch (error) {
+      console.error("Error deleting client:", error);
+    } finally {
+      setOpenDialog(false);
+    }
+  };
+
+const handleEditFormChange = (e, fieldName, index) => {
+  const { value } = e.target;
+
+  let updatedValues = {};
+
+  if (fieldName.startsWith('references')) {
+    const referenceIndex = parseInt(fieldName.match(/\[(\d+)\]/)[1]);
+    const referenceFieldName = fieldName.split('.')[1];
+
+    // Update the form state for the nested field within the references array
+    setValue(`references[${referenceIndex}].${referenceFieldName}`, value);
+
+    updatedValues = {
+      ...editedValues,
+      references: editedValues.references ? [...editedValues.references] : [], // Create a shallow copy of references or initialize it as an empty array
+    };
+
+    // Update the specific reference if it exists, otherwise, initialize it
+    if (updatedValues.references[referenceIndex]) {
+      updatedValues.references[referenceIndex] = {
+        ...updatedValues.references[referenceIndex],
+        [referenceFieldName]: value,
+      };
+    } else {
+      updatedValues.references[referenceIndex] = { [referenceFieldName]: value };
+    }
+  } else {
+    // Update the form state for non-nested fields
+    setValue(fieldName, value);
+
+    updatedValues = {
+      ...editedValues,
+      [fieldName]: value, // Update the latest edited value
+    };
+  }
+
+  setEditedValues(updatedValues);
+  console.log("Edited Values:", updatedValues);
+};
+
+
+
+
+  const handleAddClientClick = () => {
+    // Navigate to /addclient route
+    navigate("/registrar/addclient");
+    fetchData();
+  };
+
+  const handleEditFormSubmit = async () => {
+    // Prepare the data to be sent to the backend
+    const editedClientData = {
+      id: selectedClient.id,
+      first_name: editedValues.first_name,
+      middle_name: editedValues.middle_name,
+      last_name: editedValues.last_name,
+      gender: editedValues.gender,
+      email: editedValues.email,
+      mobile_number: editedValues.mobile_number,
+      address: editedValues.address,
+      references: selectedClient.references.map((ref, index) => ({
+        id: ref.id, // Include the reference ID
+        reference_name: editedValues.references[index].reference_name, // Update reference_name
+        reference_mobile: editedValues.references[index].reference_mobile, // Update reference_mobile
+      })),
+    };
   
-        console.log("Response Status:", response.status);
-        console.log("Response OK:", response.ok);
-      } catch (error) {
-        console.error("Error during fetch:", error);
+    try {
+      const token = localStorage.getItem("token");
+      const isEmailValid = await isEmailUnique(editedValues.email); // Use editedValues.email here
+    
+      if (!isEmailValid) {
+        // Use errors object from react-hook-form to set errors
+        // Assuming you're using 'errors' object from react-hook-form
+        // Replace 'email' with the field name provided in your schema
+        setError("email", {
+          type: "manual",
+          message: "This email is already in use. Please use a different one.",
+        });
         return;
       }
   
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+  
+      console.log("Client data to be sent:", editedClientData);
+  
+      const response = await fetch("http://localhost:8081/api/editClient", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editedClientData),
+      });
+  
       if (response.ok) {
-        const responseData = await response.json();
-        console.log("API Response:", responseData);
-        formik.resetForm();
+        console.log("Client edited successfully!");
+        fetchData();
+        setOpenSnackbar(true);
       } else {
-        console.error("Failed to submit form data");
+        console.error("Error editing client:", response.statusText);
       }
     } catch (error) {
-      console.error("Error submitting form data:", error);
+      console.error("Error editing client:", error.message);
+    } finally {
+      setIsEditing(false);
+      setEditedValues({
+        first_name: "",
+        middle_name: "",
+        last_name: "",
+        gender: "",
+        email: "",
+        mobile_number: "",
+        address: "",
+        references: [],
+      });
     }
   };
-  
-
-  useEffect(() => {
-    console.log("Initial Formik Values:", formik.values);
-  }, [formik.values]);
-
-  const handleCancel = () => {
-    formik.resetForm();
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setSelectedClient({
+      id: null,
+      first_name: "",
+      middle_name: "",
+      last_name: "",
+      gender: "",
+      email: "",
+      mobile_number: "",
+      address: "",
+      references: [],
+    });
   };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+  const columns = [
+    { field: "first_name", headerName: "First Name", flex: 2.5 },
+    { field: "middle_name", headerName: "Middle Name", flex: 2.5 },
+    { field: "last_name", headerName: "Last Name", flex: 2.5 },
+    { field: "gender", headerName: "Gender", flex: 1.5 },
+    { field: "email", headerName: "Email", flex: 3 },
+    { field: "mobile_number", headerName: "Mobile Number", flex: 2.5 },
+    { field: "address", headerName: "Address", flex: 2 },
+    {
+      field: "references",
+      headerName: "References",
+      flex: 8,
+      renderCell: (params) => {
+        const references = params.row.references || [];
+        return (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "wrap",
+            }}
+          >
+            {references.map((ref, index) => (
+              <div key={index} style={{ marginRight: "16px" }}>
+                <div style={{ fontWeight: "bold" }}>
+                  {`Name: ${ref.reference_name}`}
+                </div>
+                <div>{`Mobile: ${ref.reference_mobile}`}</div>
+              </div>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
+      field: "actions",
+      headerName: "  Actions",
+      flex: 3,
+      renderCell: (params) => (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-around",
+          }}
+        >
+          <Button
+            onClick={() => handleEditClick(params.row)}
+            style={{ color: "yellowgreen" }}
+          >
+            <EditIcon />
+          </Button>
+          <Button
+            onClick={() => handleDeleteClick(params.row)}
+            style={{ color: "rgba(255, 0, 0, 0.9)" }}
+          >
+            <DeleteIcon />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
-      <Header title="Client Management" subtitle="Add Client" />
-      <form onSubmit={formik.handleSubmit}>
-        <Box
-          padding="20px"
-          backgroundColor={colors.blueAccent[900]}
-          sx={{ mb: "150px" }}
+      <Header title="Client Management" subtitle="" />
+      <Box
+        display="flex"
+        justifyContent="flex-end"
+        marginBottom="20px"
+        marginRight="20px"
+      >
+        <Button
+          onClick={handleAddClientClick}
+          variant="contained"
+          color="secondary"
         >
+          Add Client
+        </Button>
+      </Box>
+      <Box
+        m="40px 0 0 0"
+        height="115vh"
+        paddingBottom="25vh"
+        display="flex"
+        flexDirection="column"
+      >
+        {isEditing && (
           <Box
-            sx={{
-              backgroundColor: `${colors.primary[400]}75`,
-            }}
-            padding="30px"
-            borderRadius="10px"
-            margin="5px"
+            marginLeft={10}
+            marginRight={10}
+            bgcolor={`${colors.primary[400]}80`}
+            borderRadius={5}
+            padding={5}
+            marginBottom={5}
           >
-            <Box sx={{ display: "flex", gap: "20px" }}>
-              <TextField
-                name="firstName"
-                label="First Name"
-                variant="outlined"
-                fullWidth
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.firstName}
-                error={formik.touched.firstName && !!formik.errors.firstName}
-                helperText={
-                  formik.touched.firstName && formik.errors.firstName
-                }
-              />
-              <TextField
-                name="middleName"
-                label="Middle Name"
-                variant="outlined"
-                fullWidth
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.middleName}
-                error={
-                  formik.touched.middleName && !!formik.errors.middleName
-                }
-                helperText={
-                  formik.touched.middleName && formik.errors.middleName
-                }
-              />
-              <TextField
-                name="lastName"
-                label="Last Name"
-                variant="outlined"
-                fullWidth
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.lastName}
-                error={formik.touched.lastName && !!formik.errors.lastName}
-                helperText={formik.touched.lastName && formik.errors.lastName}
-              />
-            </Box>
-            <Box sx={{ display: "flex", mt: "20px", gap: "20px" }}>
-              <FormControl component="fieldset">
-                <FormLabel component="legend">Gender</FormLabel>
-                <RadioGroup
-                  name="gender"
-                  value={formik.values.gender || "male"}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  row
-                >
-                  <FormControlLabel
-                    value="female"
-                    control={<Radio color="default" />}
-                    label="Female"
-                  />
-                  <FormControlLabel
-                    value="male"
-                    control={<Radio color="default" />}
-                    label="Male"
-                  />
-                </RadioGroup>
-              </FormControl>
-              <TextField
-                name="email"
-                label="Email"
-                variant="outlined"
-                fullWidth
-                type="email"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.email}
-                error={formik.touched.email && !!formik.errors.email}
-                helperText={formik.touched.email && formik.errors.email}
-              />
-              <TextField
-                name="mobileNumber"
-                label="Mobile Number"
-                variant="outlined"
-                fullWidth
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.mobileNumber}
-                error={
-                  formik.touched.mobileNumber &&
-                  !!formik.errors.mobileNumber
-                }
-                helperText={
-                  formik.touched.mobileNumber && formik.errors.mobileNumber
-                }
-              />
-            </Box>
-            <Box sx={{ display: "flex", mt: "20px", gap: "20px" }}>
-              <TextField
-                name="alternateNumber"
-                label="Alternate Number"
-                variant="outlined"
-                fullWidth
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.alternateNumber}
-              />
-              <TextField
-                name="address"
-                label="Address"
-                variant="outlined"
-                fullWidth
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.address}
-                error={formik.touched.address && !!formik.errors.address}
-                helperText={formik.touched.address && formik.errors.address}
-              />
-            </Box>
-            <Box sx={{ mt: "20px" }}>
-              <FormLabel component="legend">References</FormLabel>
-              {formik.values.references.map((reference, index) => (
-                <Box
-                  key={index}
-                  sx={{ display: "flex", gap: "20px", alignItems: "center" }}
-                >
-                  <TextField
-                    name={`references[${index}].referenceName`}
-                    label="Reference Name"
-                    variant="outlined"
-                    fullWidth
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={reference.referenceName}
-                  />
-                  <TextField
-                    name={`references[${index}].referenceMobile`}
-                    label="Reference Mobile"
-                    variant="outlined"
-                    fullWidth
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={reference.referenceMobile}
-                  />
-                  <Button
-                    type="button"
-                    color="secondary"
-                    variant="contained"
-                    onClick={() => handleRemoveReference(index)}
-                    startIcon={<DeleteOutlineIcon />}
-                    sx={{
-                      ml: "10px",
-                      width: "150px",
-                      height: "40px",
-                      backgroundColor: "gainsboro",
-                    }}
-                  >
-                    Remove
-                  </Button>
+            <Typography variant="h2" gutterBottom>
+              Edit Client
+            </Typography>
+            <form onSubmit={handleSubmit(handleEditFormSubmit)}>
+              <Box
+                sx={{ display: "flex", gap: "20px", alignItems: "center" }}
+              >
+                <Controller
+  name="first_name"
+  control={control}
+  
+  render={({ field }) => (
+    <TextField
+      {...field}
+      label="First Name"
+      fullWidth
+      margin="normal"
+      error={!!errors.first_name}
+      helperText={errors.first_name?.message}
+      onChange={(e) => handleEditFormChange(e, "first_name")}
+    />
+  )}
+/>
+<Controller
+  name="middle_name"
+  control={control}
+  
+  render={({ field }) => (
+    <TextField
+      {...field}
+      label="Middle Name"
+      fullWidth
+      margin="normal"
+      onChange={(e) => handleEditFormChange(e, "middle_name")}
+    />
+  )}
+/>
+<Controller
+  name="last_name"
+  control={control}
+
+  render={({ field }) => (
+    <TextField
+      {...field}
+      label="Last Name"
+      fullWidth
+      margin="normal"
+      error={!!errors.last_name}
+      helperText={errors.last_name?.message}
+      onChange={(e) => handleEditFormChange(e, "last_name")}
+    />
+  )}
+/>
+<Controller
+  name="gender"
+  control={control}
+ 
+  render={({ field }) => (
+    <TextField
+      {...field}
+      label="Gender"
+      fullWidth
+      margin="normal"
+      onChange={(e) => handleEditFormChange(e, "gender")}
+    />
+  )}
+/>
+
+  <Controller
+    name="email"
+    control={control}
+    render={({ field }) => (
+      <TextField
+        {...field}
+        label="Email"
+        fullWidth
+        margin="normal"
+        error={!!errors.email}
+        helperText={errors.email?.message}
+        onChange={(e) => handleEditFormChange(e, "email")}
+      />
+    )}
+  />
+  
+  <Controller
+    name="mobile_number"
+    control={control}
+    render={({ field }) => (
+      <TextField
+        {...field}
+        label="Mobile Number"
+        fullWidth
+        margin="normal"
+        onChange={(e) => handleEditFormChange(e, "mobile_number")}
+      />
+    )}
+  />
+  
+  <Controller
+    name="address"
+    control={control}
+    render={({ field }) => (
+      <TextField
+        {...field}
+        label="Address"
+        fullWidth
+        margin="normal"
+        onChange={(e) => handleEditFormChange(e, "address")}
+      />
+    )}
+  />
+
+
+                 
+              </Box>
+
+             
+{selectedClient.references.map((ref, index) => (
+  <Box
+    key={index}
+    sx={{ display: "flex", gap: "20px", alignItems: "center" }}
+  >
+    <Controller
+      name={`references[${index}].referenceName`}
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label="Reference Name"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          onChange={(e) => handleEditFormChange(e, `references[${index}].reference_name`)}
+        />
+      )}
+    />
+    <Controller
+      name={`references[${index}].referenceMobile`}
+      control={control}
+      
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label="Reference Mobile"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          onChange={(e) => handleEditFormChange(e, `references[${index}].reference_mobile`)}
+        />
+      )}
+    />
                 </Box>
               ))}
-              <Button
-                type="button"
-                color="secondary"
-                variant="contained"
-                onClick={handleAddReference}
-                sx={{ mt: "10px" }}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginTop: "20px",
+                }}
               >
-                Add Reference
-              </Button>
-            </Box>
+                <Button type="submit" variant="contained" color="primary">
+                  Save
+                </Button>
+                <Button
+                  onClick={handleCancelEdit}
+                  variant="contained"
+                  color="secondary"
+                  sx={{ marginLeft: "10px" }}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            </form>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              mt: "20px",
-            }}
-          >
-            <Button
-              type="button"
-              color="secondary"
-              variant="contained"
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              color="secondary"
-              variant="contained"
-              startIcon={<AddOutlinedIcon />}
-              sx={{ marginLeft: "10px" }}
-            >
-              Add Client
-            </Button>
-          </Box>
-        </Box>
-      </form>
+        )}
+
+        <DataGrid
+          rows={data}
+          columns={columns}
+          pageSize={10}
+          rowsPerPageOptions={[10]}
+          checkboxSelection={false}
+          disableSelectionOnClick
+          components={{
+            Toolbar: GridToolbar,
+          }}
+          sx={{
+            flexGrow: 1,
+            "& .MuiDataGrid-root": {
+              border: "none",
+            },
+            "& .MuiDataGrid-cell": {
+              borderBottom: "none",
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: colors.blueAccent[800],
+              borderBottom: "none",
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: colors.primary[400],
+            },
+            "& .MuiDataGrid-footerContainer": {
+              borderTop: "none",
+              backgroundColor: colors.blueAccent[700],
+            },
+            "& .MuiCheckbox-root": {
+              color: `${colors.greenAccent[200]} !important`,
+            },
+            "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+              color: `${colors.grey[100]} !important`,
+            },
+          }}
+        />
+      </Box>
+
       <Snackbar
-        open={false}
+        open={openSnackbar}
         autoHideDuration={6000}
-        onClose={() => {}}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        onClose={handleCloseSnackbar}
+        message="Operation successful!"
+        action={
+          <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={handleCloseSnackbar}
+          >
+            <GridCloseIcon fontSize="small" />
+          </IconButton>
+        }
       />
+
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        sx={{
+          "& .MuiDialog-paper": {
+            backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title" color={"red"}>
+          {"Are you sure you want to delete this client?"}
+        </DialogTitle>
+        <DialogContent>
+          {/* You can add additional content here if needed */}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            No
+          </Button>
+          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
 
-export default AddClient;
+export default Client; 

@@ -55,10 +55,8 @@ const Client = () => {
       console.error("Error checking email uniqueness:", error);
       return false;
     }
-  }
+  };
 
-  
-  // Define fetchData as an arrow function to access it in the component
   const fetchData = async () => {
     try {
       console.log("Fetching client data...");
@@ -84,7 +82,7 @@ const Client = () => {
   };
 
   useEffect(() => {
-    fetchData(); // Call fetchData when the component mounts
+    fetchData();
   }, []);
 
   const [selectedClient, setSelectedClient] = useState({
@@ -96,14 +94,11 @@ const Client = () => {
     email: "",
     mobile_number: "",
     address: "",
-    references: [],
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [editedValues, setEditedValues] = useState({});
 
   const handleEditClick = (params) => {
     setSelectedClient({
@@ -116,11 +111,8 @@ const Client = () => {
       middle_name: params.middle_name,
       gender:params.gender,
       mobile_number: params.mobile_number,
-      
-      references: params.references
     });
     setIsEditing(true);
-    setAnchorEl(null);
   };
 
   const handleDeleteClick = (params) => {
@@ -151,7 +143,6 @@ const Client = () => {
           `Client with ID ${selectedClient.id} deleted successfully!`
         );
 
-        // Update the data state after successful deletion
         const updatedData = data.filter(
           (client) => client.id !== selectedClient.id
         );
@@ -168,81 +159,33 @@ const Client = () => {
     }
   };
 
-const handleEditFormChange = (e, fieldName, index) => {
-  const { value } = e.target;
-
-  let updatedValues = {};
-
-  if (fieldName.startsWith('references')) {
-    const referenceIndex = parseInt(fieldName.match(/\[(\d+)\]/)[1]);
-    const referenceFieldName = fieldName.split('.')[1];
-
-    // Update the form state for the nested field within the references array
-    setValue(`references[${referenceIndex}].${referenceFieldName}`, value);
-
-    updatedValues = {
-      ...editedValues,
-      references: editedValues.references ? [...editedValues.references] : [], // Create a shallow copy of references or initialize it as an empty array
-    };
-
-    // Update the specific reference if it exists, otherwise, initialize it
-    if (updatedValues.references[referenceIndex]) {
-      updatedValues.references[referenceIndex] = {
-        ...updatedValues.references[referenceIndex],
-        [referenceFieldName]: value,
-      };
-    } else {
-      updatedValues.references[referenceIndex] = { [referenceFieldName]: value };
-    }
-  } else {
-    // Update the form state for non-nested fields
+  const handleEditFormChange = (e, fieldName) => {
+    const { value } = e.target;
     setValue(fieldName, value);
-
-    updatedValues = {
-      ...editedValues,
-      [fieldName]: value, // Update the latest edited value
-    };
-  }
-
-  setEditedValues(updatedValues);
-  console.log("Edited Values:", updatedValues);
-};
-
-
-
+    console.log(fieldName, value);
+  };
 
   const handleAddClientClick = () => {
-    // Navigate to /addclient route
     navigate("/registrar/addclient");
-    fetchData();
   };
 
   const handleEditFormSubmit = async () => {
-    // Prepare the data to be sent to the backend
     const editedClientData = {
       id: selectedClient.id,
-      first_name: editedValues.first_name,
-      middle_name: editedValues.middle_name,
-      last_name: editedValues.last_name,
-      gender: editedValues.gender,
-      email: editedValues.email,
-      mobile_number: editedValues.mobile_number,
-      address: editedValues.address,
-      references: selectedClient.references.map((ref, index) => ({
-        id: ref.id, // Include the reference ID
-        reference_name: editedValues.references[index].reference_name, // Update reference_name
-        reference_mobile: editedValues.references[index].reference_mobile, // Update reference_mobile
-      })),
+      first_name: selectedClient.first_name,
+      middle_name: selectedClient.middle_name,
+      last_name: selectedClient.last_name,
+      gender: selectedClient.gender,
+      email: selectedClient.email,
+      mobile_number: selectedClient.mobile_number,
+      address: selectedClient.address,
     };
-  
+
     try {
       const token = localStorage.getItem("token");
-      const isEmailValid = await isEmailUnique(editedValues.email); // Use editedValues.email here
-    
+      const isEmailValid = await isEmailUnique(selectedClient.email);
+      
       if (!isEmailValid) {
-        // Use errors object from react-hook-form to set errors
-        // Assuming you're using 'errors' object from react-hook-form
-        // Replace 'email' with the field name provided in your schema
         setError("email", {
           type: "manual",
           message: "This email is already in use. Please use a different one.",
@@ -277,18 +220,9 @@ const handleEditFormChange = (e, fieldName, index) => {
       console.error("Error editing client:", error.message);
     } finally {
       setIsEditing(false);
-      setEditedValues({
-        first_name: "",
-        middle_name: "",
-        last_name: "",
-        gender: "",
-        email: "",
-        mobile_number: "",
-        address: "",
-        references: [],
-      });
     }
   };
+
   const handleCancelEdit = () => {
     setIsEditing(false);
     setSelectedClient({
@@ -300,13 +234,17 @@ const handleEditFormChange = (e, fieldName, index) => {
       email: "",
       mobile_number: "",
       address: "",
-      references: [],
     });
   };
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
   const columns = [
     { field: "first_name", headerName: "First Name", flex: 2.5 },
     { field: "middle_name", headerName: "Middle Name", flex: 2.5 },
@@ -315,32 +253,6 @@ const handleEditFormChange = (e, fieldName, index) => {
     { field: "email", headerName: "Email", flex: 3 },
     { field: "mobile_number", headerName: "Mobile Number", flex: 2.5 },
     { field: "address", headerName: "Address", flex: 2 },
-    {
-      field: "references",
-      headerName: "References",
-      flex: 8,
-      renderCell: (params) => {
-        const references = params.row.references || [];
-        return (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "wrap",
-            }}
-          >
-            {references.map((ref, index) => (
-              <div key={index} style={{ marginRight: "16px" }}>
-                <div style={{ fontWeight: "bold" }}>
-                  {`Name: ${ref.reference_name}`}
-                </div>
-                <div>{`Mobile: ${ref.reference_mobile}`}</div>
-              </div>
-            ))}
-          </div>
-        );
-      },
-    },
     {
       field: "actions",
       headerName: "  Actions",
@@ -406,155 +318,130 @@ const handleEditFormChange = (e, fieldName, index) => {
               Edit Client
             </Typography>
             <form onSubmit={handleSubmit(handleEditFormSubmit)}>
-              <Box
-                sx={{ display: "flex", gap: "20px", alignItems: "center" }}
-              >
-                <Controller
-  name="first_name"
-  control={control}
-  
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="First Name"
-      fullWidth
-      margin="normal"
-      error={!!errors.first_name}
-      helperText={errors.first_name?.message}
-      onChange={(e) => handleEditFormChange(e, "first_name")}
-    />
-  )}
-/>
-<Controller
-  name="middle_name"
-  control={control}
-  
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Middle Name"
-      fullWidth
-      margin="normal"
-      onChange={(e) => handleEditFormChange(e, "middle_name")}
-    />
-  )}
-/>
-<Controller
-  name="last_name"
-  control={control}
-
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Last Name"
-      fullWidth
-      margin="normal"
-      error={!!errors.last_name}
-      helperText={errors.last_name?.message}
-      onChange={(e) => handleEditFormChange(e, "last_name")}
-    />
-  )}
-/>
-<Controller
-  name="gender"
-  control={control}
- 
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Gender"
-      fullWidth
-      margin="normal"
-      onChange={(e) => handleEditFormChange(e, "gender")}
-    />
-  )}
-/>
-
-  <Controller
-    name="email"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        label="Email"
-        fullWidth
-        margin="normal"
-        error={!!errors.email}
-        helperText={errors.email?.message}
-        onChange={(e) => handleEditFormChange(e, "email")}
-      />
-    )}
-  />
-  
-  <Controller
-    name="mobile_number"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        label="Mobile Number"
-        fullWidth
-        margin="normal"
-        onChange={(e) => handleEditFormChange(e, "mobile_number")}
-      />
-    )}
-  />
-  
-  <Controller
-    name="address"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        label="Address"
-        fullWidth
-        margin="normal"
-        onChange={(e) => handleEditFormChange(e, "address")}
-      />
-    )}
-  />
-
-
-                 
-              </Box>
-
-             
-{selectedClient.references.map((ref, index) => (
-  <Box
-    key={index}
-    sx={{ display: "flex", gap: "20px", alignItems: "center" }}
-  >
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+  <Box sx={{ display: "flex", gap: "20px" }}>
     <Controller
-      name={`references[${index}].referenceName`}
+      name="first_name"
       control={control}
       render={({ field }) => (
         <TextField
           {...field}
-          label="Reference Name"
-          variant="outlined"
+          label="First Name"
           fullWidth
           margin="normal"
-          onChange={(e) => handleEditFormChange(e, `references[${index}].reference_name`)}
+          error={!!errors.first_name}
+          helperText={errors.first_name?.message}
+          onChange={(e) => handleEditFormChange(e, "first_name")}
         />
       )}
     />
     <Controller
-      name={`references[${index}].referenceMobile`}
+      name="middle_name"
       control={control}
-      
       render={({ field }) => (
         <TextField
           {...field}
-          label="Reference Mobile"
-          variant="outlined"
+          label="Middle Name"
           fullWidth
           margin="normal"
-          onChange={(e) => handleEditFormChange(e, `references[${index}].reference_mobile`)}
+          onChange={(e) => handleEditFormChange(e, "middle_name")}
         />
       )}
     />
-                </Box>
-              ))}
+  </Box>
+  <Box sx={{ display: "flex", gap: "20px" }}>
+    <Controller
+      name="last_name"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label="Last Name"
+          fullWidth
+          margin="normal"
+          error={!!errors.last_name}
+          helperText={errors.last_name?.message}
+          onChange={(e) => handleEditFormChange(e, "last_name")}
+        />
+      )}
+    />
+    <Controller
+      name="email"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label="Email"
+          fullWidth
+          margin="normal"
+          error={!!errors.email}
+          helperText={errors.email?.message}
+          onChange={(e) => handleEditFormChange(e, "email")}
+        />
+      )}
+    />
+  </Box>
+  <Box sx={{ display: "flex", gap: "20px", alignItems: "center" }}>
+    <Typography variant="body1" sx={{ marginRight: "20px" }}>
+      Gender:
+    </Typography>
+    <Controller
+      name="gender"
+      control={control}
+      render={({ field }) => (
+        <>
+          <input
+            type="radio"
+            id="male"
+            name="gender"
+            value="male"
+            {...field}
+            onChange={(e) => handleEditFormChange(e, "gender")}
+          />
+          <label htmlFor="male">Male</label>
+          <input
+            type="radio"
+            id="female"
+            name="gender"
+            value="female"
+            {...field}
+            onChange={(e) => handleEditFormChange(e, "gender")}
+          />
+          <label htmlFor="female">Female</label>
+        </>
+      )}
+    />
+  </Box>
+  <Box sx={{ display: "flex", gap: "20px" }}>
+    <Controller
+      name="mobile_number"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label="Mobile Number"
+          fullWidth
+          margin="normal"
+          onChange={(e) => handleEditFormChange(e, "mobile_number")}
+        />
+      )}
+    />
+    <Controller
+      name="address"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label="Address"
+          fullWidth
+          margin="normal"
+          onChange={(e) => handleEditFormChange(e, "address")}
+        />
+      )}
+    />
+  </Box>
+</Box>
+
               <Box
                 sx={{
                   display: "flex",
@@ -636,7 +523,7 @@ const handleEditFormChange = (e, fieldName, index) => {
 
       <Dialog
         open={openDialog}
-        onClose={() => setOpenDialog(false)}
+        onClose={handleCloseDialog}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
         sx={{
@@ -652,7 +539,7 @@ const handleEditFormChange = (e, fieldName, index) => {
           {/* You can add additional content here if needed */}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="primary">
+          <Button onClick={handleCloseDialog} color="primary">
             No
           </Button>
           <Button onClick={handleConfirmDelete} color="primary" autoFocus>

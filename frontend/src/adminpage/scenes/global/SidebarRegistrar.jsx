@@ -41,7 +41,7 @@ const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
         
       </MenuItem>
       {subItems && openSubMenu && (
-        <Menu iconShape="round" style={{ paddingLeft: "20px" }}>
+        <Menu iconShape="round">
           {subItems.map((subItem, index) => (
             <MenuItem
               key={index}
@@ -49,9 +49,16 @@ const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
               icon={icon}
               style={{
                 color: colors.grey[100],
+                border: "3px solid  ",
+                marginLeft:"30px",
+                marginRight:"30px",
                 
-                marginLeft:"6px",
-                
+                borderTop:"transparent",
+                borderRight:"transparent",
+                padding:"0px",
+                marginBottom:".6rem",
+                borderRadius:"8px",
+                borderColor:colors.greenAccent[600]
               }}
               onClick={() => setSelected(subItem.title)}
             >
