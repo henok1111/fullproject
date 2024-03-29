@@ -33,7 +33,7 @@ const validationSchema = yup.object().shape({
   // Add validation for other fields as needed
 });
 
-const Client = () => {
+const Advocator = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [data, setData] = useState([]);
@@ -46,48 +46,50 @@ const Client = () => {
 
   const navigate = useNavigate();
 
-  const isEmailUnique = async (email) => {
+  // Function to fetch advocator data
+  const fetchAdvocatorData = async () => {
     try {
-      const response = await fetch(`http://localhost:8081/api/checkemail?email=${email}`);
-      const data = await response.json();
-      return data.isUnique;
-    } catch (error) {
-      console.error("Error checking email uniqueness:", error);
-      return false;
-    }
-  }
-
-  
-  // Define fetchData as an arrow function to access it in the component
-  const fetchData = async () => {
-    try {
-      console.log("Fetching client data...");
+      console.log("Fetching advocator data...");
       const response = await fetch(
-        "http://localhost:8081/api/getJoinedClientData"
+        "http://localhost:8081/api/getAdvocatorData"
       );
-
+  
       if (!response.ok) {
         throw new Error(
-          `Error fetching joined client data: ${response.statusText}`
+          `Error fetching advocator data: ${response.statusText}`
         );
       }
-
+  
       const result = await response.json();
-      setData(result);
-      console.log("Client data fetched successfully:", result);
+  
+      // Map the fetched data and rename 'advocator_id' to 'id'
+      const formattedData = result.map((advocator) => ({
+        id: advocator.advocator_id,
+        first_name: advocator.first_name,
+        middle_name: advocator.middle_name,
+        last_name: advocator.last_name,
+        gender: advocator.gender,
+        email: advocator.email,
+        mobile_number: advocator.mobile_number,
+        address: advocator.address,
+      }));
+  
+      setData(formattedData);
+      console.log("Advocator data fetched successfully:", formattedData);
     } catch (error) {
       setError(error.message);
-      console.error("Error fetching joined client data:", error);
+      console.error("Error fetching advocator data:", error);
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
-    fetchData(); // Call fetchData when the component mounts
+    fetchAdvocatorData(); // Call fetchAdvocatorData when the component mounts
   }, []);
 
-  const [selectedClient, setSelectedClient] = useState({
+  const [selectedAdvocator, setSelectedAdvocator] = useState({
     id: null,
     first_name: "",
     middle_name: "",
@@ -96,17 +98,15 @@ const Client = () => {
     email: "",
     mobile_number: "",
     address: "",
-    references: [],
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [editedValues, setEditedValues] = useState({});
 
   const handleEditClick = (params) => {
-    setSelectedClient({
+    setSelectedAdvocator({
       id: params.id,
       first_name: params.first_name,
       last_name: params.last_name,
@@ -116,111 +116,72 @@ const Client = () => {
       middle_name: params.middle_name,
       gender:params.gender,
       mobile_number: params.mobile_number,
-      
-      references: params.references
     });
     setIsEditing(true);
-    setAnchorEl(null);
   };
 
   const handleDeleteClick = (params) => {
-    setSelectedClient(params);
+    setSelectedAdvocator(params);
     setOpenDialog(true);
   };
 
   const handleConfirmDelete = async () => {
     try {
       console.log(
-        "Sending DELETE request to http://localhost:8081/api/deleteClient"
+        "Sending DELETE request to http://localhost:8081/api/deleteAdvocator"
       );
-      console.log("Request Body:", JSON.stringify({ id: selectedClient.id }));
+      console.log("Request Body:", JSON.stringify({ id: selectedAdvocator.id }));
 
       const response = await fetch(
-        "http://localhost:8081/api/deleteClient",
+        "http://localhost:8081/api/deleteAdvocator",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id: selectedClient.id }),
+          body: JSON.stringify({ id: selectedAdvocator.id }),
         }
       );
 
       if (response.ok) {
         console.log(
-          `Client with ID ${selectedClient.id} deleted successfully!`
+          `Advocator with ID ${selectedAdvocator.id} deleted successfully!`
         );
 
         // Update the data state after successful deletion
         const updatedData = data.filter(
-          (client) => client.id !== selectedClient.id
+          (advocator) => advocator.id !== selectedAdvocator.id
         );
         setData(updatedData);
 
         setOpenSnackbar(true);
       } else {
-        console.error(`Error deleting client with ID ${selectedClient.id}`);
+        console.error(`Error deleting advocator with ID ${selectedAdvocator.id}`);
       }
     } catch (error) {
-      console.error("Error deleting client:", error);
+      console.error("Error deleting advocator:", error);
     } finally {
       setOpenDialog(false);
     }
   };
 
-const handleEditFormChange = (e, fieldName, index) => {
-  const { value } = e.target;
+  const handleEditFormChange = (e, fieldName) => {
+    const { value } = e.target;
 
-  let updatedValues = {};
-
-  if (fieldName.startsWith('references')) {
-    const referenceIndex = parseInt(fieldName.match(/\[(\d+)\]/)[1]);
-    const referenceFieldName = fieldName.split('.')[1];
-
-    // Update the form state for the nested field within the references array
-    setValue(`references[${referenceIndex}].${referenceFieldName}`, value);
-
-    updatedValues = {
-      ...editedValues,
-      references: editedValues.references ? [...editedValues.references] : [], // Create a shallow copy of references or initialize it as an empty array
-    };
-
-    // Update the specific reference if it exists, otherwise, initialize it
-    if (updatedValues.references[referenceIndex]) {
-      updatedValues.references[referenceIndex] = {
-        ...updatedValues.references[referenceIndex],
-        [referenceFieldName]: value,
-      };
-    } else {
-      updatedValues.references[referenceIndex] = { [referenceFieldName]: value };
-    }
-  } else {
-    // Update the form state for non-nested fields
+    // Update the form state for the edited field
     setValue(fieldName, value);
 
-    updatedValues = {
+    // Update the editedValues object
+    setEditedValues({
       ...editedValues,
-      [fieldName]: value, // Update the latest edited value
-    };
-  }
-
-  setEditedValues(updatedValues);
-  console.log("Edited Values:", updatedValues);
-};
-
-
-
-
-  const handleAddClientClick = () => {
-    // Navigate to /addclient route
-    navigate("/registrar/addclient");
-    fetchData();
+      [fieldName]: value,
+    });
   };
 
   const handleEditFormSubmit = async () => {
     // Prepare the data to be sent to the backend
-    const editedClientData = {
-      id: selectedClient.id,
+    const editedAdvocatorData = {
+      id: selectedAdvocator.id,
       first_name: editedValues.first_name,
       middle_name: editedValues.middle_name,
       last_name: editedValues.last_name,
@@ -228,70 +189,45 @@ const handleEditFormChange = (e, fieldName, index) => {
       email: editedValues.email,
       mobile_number: editedValues.mobile_number,
       address: editedValues.address,
-      references: selectedClient.references.map((ref, index) => ({
-        id: ref.id, // Include the reference ID
-        reference_name: editedValues.references[index].reference_name, // Update reference_name
-        reference_mobile: editedValues.references[index].reference_mobile, // Update reference_mobile
-      })),
     };
   
     try {
       const token = localStorage.getItem("token");
-      const isEmailValid = await isEmailUnique(editedValues.email); // Use editedValues.email here
-    
-      if (!isEmailValid) {
-        // Use errors object from react-hook-form to set errors
-        // Assuming you're using 'errors' object from react-hook-form
-        // Replace 'email' with the field name provided in your schema
-        setError("email", {
-          type: "manual",
-          message: "This email is already in use. Please use a different one.",
-        });
-        return;
-      }
   
       if (!token) {
         console.error("No token found");
         return;
       }
   
-      console.log("Client data to be sent:", editedClientData);
+      console.log("Advocator data to be sent:", editedAdvocatorData);
   
-      const response = await fetch("http://localhost:8081/api/editClient", {
+      const response = await fetch("http://localhost:8081/api/editAdvocator", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(editedClientData),
+        body: JSON.stringify(editedAdvocatorData),
       });
   
       if (response.ok) {
-        console.log("Client edited successfully!");
-        fetchData();
+        console.log("Advocator edited successfully!");
+        fetchAdvocatorData();
         setOpenSnackbar(true);
       } else {
-        console.error("Error editing client:", response.statusText);
+        console.error("Error editing advocator:", response.statusText);
       }
     } catch (error) {
-      console.error("Error editing client:", error.message);
+      console.error("Error editing advocator:", error.message);
     } finally {
       setIsEditing(false);
-      setEditedValues({
-        first_name: "",
-        middle_name: "",
-        last_name: "",
-        gender: "",
-        email: "",
-        mobile_number: "",
-        address: "",
-        references: [],
-      });
+      setEditedValues({});
     }
   };
+
   const handleCancelEdit = () => {
     setIsEditing(false);
-    setSelectedClient({
+    setSelectedAdvocator({
       id: null,
       first_name: "",
       middle_name: "",
@@ -300,13 +236,13 @@ const handleEditFormChange = (e, fieldName, index) => {
       email: "",
       mobile_number: "",
       address: "",
-      references: [],
     });
   };
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
+
   const columns = [
     { field: "first_name", headerName: "First Name", flex: 2.5 },
     { field: "middle_name", headerName: "Middle Name", flex: 2.5 },
@@ -316,34 +252,8 @@ const handleEditFormChange = (e, fieldName, index) => {
     { field: "mobile_number", headerName: "Mobile Number", flex: 2.5 },
     { field: "address", headerName: "Address", flex: 2 },
     {
-      field: "references",
-      headerName: "References",
-      flex: 8,
-      renderCell: (params) => {
-        const references = params.row.references || [];
-        return (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "wrap",
-            }}
-          >
-            {references.map((ref, index) => (
-              <div key={index} style={{ marginRight: "16px" }}>
-                <div style={{ fontWeight: "bold" }}>
-                  {`Name: ${ref.reference_name}`}
-                </div>
-                <div>{`Mobile: ${ref.reference_mobile}`}</div>
-              </div>
-            ))}
-          </div>
-        );
-      },
-    },
-    {
       field: "actions",
-      headerName: "  Actions",
+      headerName: "Actions",
       flex: 3,
       renderCell: (params) => (
         <div
@@ -371,20 +281,14 @@ const handleEditFormChange = (e, fieldName, index) => {
 
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
-      <Header title="Client Management" subtitle="" />
+      <Header title="Advocator Management" subtitle="" />
       <Box
         display="flex"
         justifyContent="flex-end"
         marginBottom="20px"
         marginRight="20px"
       >
-        <Button
-          onClick={handleAddClientClick}
-          variant="contained"
-          color="secondary"
-        >
-          Add Client
-        </Button>
+        
       </Box>
       <Box
         m="40px 0 0 0"
@@ -403,158 +307,110 @@ const handleEditFormChange = (e, fieldName, index) => {
             marginBottom={5}
           >
             <Typography variant="h2" gutterBottom>
-              Edit Client
+              Edit Advocator
             </Typography>
             <form onSubmit={handleSubmit(handleEditFormSubmit)}>
               <Box
                 sx={{ display: "flex", gap: "20px", alignItems: "center" }}
               >
                 <Controller
-  name="first_name"
-  control={control}
-  
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="First Name"
-      fullWidth
-      margin="normal"
-      error={!!errors.first_name}
-      helperText={errors.first_name?.message}
-      onChange={(e) => handleEditFormChange(e, "first_name")}
-    />
-  )}
-/>
-<Controller
-  name="middle_name"
-  control={control}
-  
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Middle Name"
-      fullWidth
-      margin="normal"
-      onChange={(e) => handleEditFormChange(e, "middle_name")}
-    />
-  )}
-/>
-<Controller
-  name="last_name"
-  control={control}
-
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Last Name"
-      fullWidth
-      margin="normal"
-      error={!!errors.last_name}
-      helperText={errors.last_name?.message}
-      onChange={(e) => handleEditFormChange(e, "last_name")}
-    />
-  )}
-/>
-<Controller
-  name="gender"
-  control={control}
- 
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Gender"
-      fullWidth
-      margin="normal"
-      onChange={(e) => handleEditFormChange(e, "gender")}
-    />
-  )}
-/>
-
-  <Controller
-    name="email"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        label="Email"
-        fullWidth
-        margin="normal"
-        error={!!errors.email}
-        helperText={errors.email?.message}
-        onChange={(e) => handleEditFormChange(e, "email")}
-      />
-    )}
-  />
-  
-  <Controller
-    name="mobile_number"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        label="Mobile Number"
-        fullWidth
-        margin="normal"
-        onChange={(e) => handleEditFormChange(e, "mobile_number")}
-      />
-    )}
-  />
-  
-  <Controller
-    name="address"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        label="Address"
-        fullWidth
-        margin="normal"
-        onChange={(e) => handleEditFormChange(e, "address")}
-      />
-    )}
-  />
-
-
-                 
+                  name="first_name"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="First Name"
+                      fullWidth
+                      margin="normal"
+                      error={!!errors.first_name}
+                      helperText={errors.first_name?.message}
+                      onChange={(e) => handleEditFormChange(e, "first_name")}
+                    />
+                  )}
+                />
+                <Controller
+                  name="middle_name"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Middle Name"
+                      fullWidth
+                      margin="normal"
+                      onChange={(e) => handleEditFormChange(e, "middle_name")}
+                    />
+                  )}
+                />
+                <Controller
+                  name="last_name"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Last Name"
+                      fullWidth
+                      margin="normal"
+                      error={!!errors.last_name}
+                      helperText={errors.last_name?.message}
+                      onChange={(e) => handleEditFormChange(e, "last_name")}
+                    />
+                  )}
+                />
+                <Controller
+                  name="gender"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Gender"
+                      fullWidth
+                      margin="normal"
+                      onChange={(e) => handleEditFormChange(e, "gender")}
+                    />
+                  )}
+                />
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Email"
+                      fullWidth
+                      margin="normal"
+                      error={!!errors.email}
+                      helperText={errors.email?.message}
+                      onChange={(e) => handleEditFormChange(e, "email")}
+                    />
+                  )}
+                />
+                <Controller
+                  name="mobile_number"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Mobile Number"
+                      fullWidth
+                      margin="normal"
+                      onChange={(e) => handleEditFormChange(e, "mobile_number")}
+                    />
+                  )}
+                />
+                <Controller
+                  name="address"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Address"
+                      fullWidth
+                      margin="normal"
+                      onChange={(e) => handleEditFormChange(e, "address")}
+                    />
+                  )}
+                />
               </Box>
-
-             
-{selectedClient.references.map((ref, index) => (
-  <Box
-    key={index}
-    sx={{ display: "flex", gap: "20px", alignItems: "center" }}
-  >
-    <Controller
-      name={`references[${index}].referenceName`}
-      control={control}
-      render={({ field }) => (
-        <TextField
-          {...field}
-          label="Reference Name"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          onChange={(e) => handleEditFormChange(e, `references[${index}].reference_name`)}
-        />
-      )}
-    />
-    <Controller
-      name={`references[${index}].referenceMobile`}
-      control={control}
-      
-      render={({ field }) => (
-        <TextField
-          {...field}
-          label="Reference Mobile"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          onChange={(e) => handleEditFormChange(e, `references[${index}].reference_mobile`)}
-        />
-      )}
-    />
-                </Box>
-              ))}
               <Box
                 sx={{
                   display: "flex",
@@ -646,7 +502,7 @@ const handleEditFormChange = (e, fieldName, index) => {
         }}
       >
         <DialogTitle id="alert-dialog-title" color={"red"}>
-          {"Are you sure you want to delete this client?"}
+          {"Are you sure you want to delete this advocator?"}
         </DialogTitle>
         <DialogContent>
           {/* You can add additional content here if needed */}
@@ -664,4 +520,4 @@ const handleEditFormChange = (e, fieldName, index) => {
   );
 };
 
-export default Client; 
+export default Advocator;

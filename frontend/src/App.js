@@ -24,12 +24,15 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import AddInvoices from "./adminpage/scenes/invoices/addinvoices";
 import AddClient from "./adminpage/scenes/addclient/addclient";
+import Advocator from "./adminpage/scenes/advocator/viewadvocator";
+import AddAdvocator from "./adminpage/scenes/advocator/addAdvocator";
 import Appointmentform from "./adminpage/scenes/Appointment/appointmentform";
 import Appointment from "./adminpage/scenes/Appointment";
 import Client from "./adminpage/scenes/client";
 import AddCase from "./adminpage/scenes/addcase/addcase";
 import Caseform from "./adminpage/scenes/form/caseform";
 import ProfilePage from "./adminpage/scenes/profile";
+
 import NotFound from "./adminpage/scenes/global/pagenotfound";
 import {
   GavelRounded,
@@ -135,7 +138,9 @@ const RegistrarRoutes = () => {
         <Route path="/bar" element={<Bar />} />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/addclient" element={<AddClient />} />
-        <Route path="/client" element={<Client />} />
+        <Route path="/addadvocator" element={<AddAdvocator />} />
+        <Route path="/viewadvocator" element={<Advocator />} />
+        <Route path="/viewclient" element={<Client />} />
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/appointmentform" element={<Appointmentform />} />
         <Route path="/profilepage" element={<ProfilePage />} />

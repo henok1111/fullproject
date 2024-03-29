@@ -13,6 +13,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { promisify } from "util";
 import AddClient from "./component/addclient.js";
+import AddAdvocator from "./component/addadvocator.js";
 import AddUser from "./component/adduser.js";
 import Login from "./login.js";
 import Getuser from "./component/getuser.js";
@@ -30,6 +31,9 @@ import EditSpecificUser from "./component/editspecificuser.js";
 import GetCases from "./component/getcase.js";
 import { GetPetitioners,GetRespondents } from "./component/getpetionerandrespondant.js";
 import { AddAppointment } from "./component/addappointment.js";
+import getAdvocatorData from "./component/getadvocators.js";
+import editAdvocator from "./component/editadvocator.js";
+import deleteAdvocator from "./component/deleteadvocator.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -127,13 +131,19 @@ app.get("/api/getUserImage/:userId", (req, res) => {
 app.post("/api/addclient", async (req, res) => {
   await AddClient(db, req, res);
 });
+app.post("/api/addadvocator", async (req, res) => {
+  await AddAdvocator(db, req, res);
+});
+
 app.post("/api/addappointments", async (req, res) => {
   await AddAppointment(db, req, res);
 });
 app.get("/api/getJoinedClientData", async (req, res) => {
   await getJoinedClientData(db, req, res);
 });
-
+app.get("/api/getAdvocatorData", async (req, res) => {
+  await getAdvocatorData(db, req, res);
+});
 app.get("/api/checkemail", async (req, res) => {
   await checkEmail(db, req, res);
 });
@@ -143,11 +153,18 @@ app.get("/api/checkuseremail", async (req, res) => {
 app.post("/api/deleteClient", async (req, res) => {
   await deleteClient(db, req, res);
 });
+
+app.post("/api/deleteadvocator", async (req, res) => {
+  await deleteAdvocator(db, req, res);
+});
 app.post("/api/deleteUser", async (req, res) => {
   await DeleteUser(db, req, res);
 });
 app.post("/api/editClient", async (req, res) => {
   await editClient(db, req, res);
+});
+app.post("/api/editAdvocator", async (req, res) => {
+  await editAdvocator(db, req, res);
 });
 app.post("/api/adduser", async (req, res) => {
   await AddUser(db, req, res);
