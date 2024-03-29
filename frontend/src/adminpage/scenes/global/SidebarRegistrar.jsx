@@ -13,9 +13,7 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import GavelIcon from "@mui/icons-material/Gavel";
 import { jwtDecode } from "jwt-decode";
-import SettingsIcon from "@mui/icons-material/Settings";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import PaidIcon from "@mui/icons-material/Paid";
+import henok from "./image.png";
 
 const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
   const theme = useTheme();
@@ -41,16 +39,23 @@ const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
         <Link to={to} />
       </MenuItem>
       {subItems && openSubMenu && (
-        <Menu iconShape="round" style={{ paddingLeft: "20px" }}>
+        <Menu iconShape="round">
           {subItems.map((subItem, index) => (
             <MenuItem
               key={index}
               active={selected === subItem.title}
-              icon={icon}
+              icon={subItem.icon}
               style={{
                 color: colors.grey[100],
-
-                marginLeft: "6px",
+                border: "3px solid",
+                marginLeft: "30px",
+                marginRight: "30px",
+                borderTop: "transparent",
+                borderRight: "transparent",
+                padding: "0px",
+                marginBottom: ".6rem",
+                borderRadius: "8px",
+                borderColor: colors.greenAccent[600],
               }}
               onClick={() => setSelected(subItem.title)}
             >
@@ -80,9 +85,7 @@ const Sidebar = ({ role, name, userId }) => {
       const userId = decodedToken.userId;
 
       // Make an API request to fetch the user image path
-      const response = await fetch(
-        `http://localhost:8081/api/getUserImage/${userId}`
-      );
+      const response = await fetch(`http://localhost:8081/api/getUserImage/${userId}`);
       const data = await response.json();
       const { imagePath } = data;
 
@@ -203,18 +206,21 @@ const Sidebar = ({ role, name, userId }) => {
         title: "Case Management", // Submenu title
         icon: <GavelIcon />, // Icon for the submenu
         subItems: [
-          {
-            title: "Add Case",
-            to: "/registrar/caseform",
-            icon: <PersonOutlinedIcon />,
-          },
-          { title: "View Cases", to: "addcase", icon: <PersonOutlinedIcon /> },
-        ],
+          { title: "View Cases", to: "/registrar/addcase", icon: <PersonOutlinedIcon /> },
+          { title: "Add Case", to: "/registrar/caseform", icon: <PersonOutlinedIcon /> },
+          // Add more submenu items as needed
+        ]
       },
       {
         title: "Client Management",
-        to: "client",
+        
         icon: <PersonOutlinedIcon />,
+        subItems: [
+          { title: "View Client", to: "/registrar/viewclient", icon: <PersonOutlinedIcon /> },
+          { title: "View Advocator", to: "/registrar/viewadvocator", icon: <PersonOutlinedIcon /> },
+          { title: "Add Client", to: "/registrar/addclient", icon: <PersonOutlinedIcon /> },
+          { title: "Add Advocator", to: "/registrar/addadvocator", icon: <PersonOutlinedIcon /> },
+        ]
       },
       {
         title: "Appointment",
@@ -222,16 +228,9 @@ const Sidebar = ({ role, name, userId }) => {
         icon: <ReceiptOutlinedIcon />,
       },
       {
-        title: "Income",
-        icon: <PaidIcon />,
-        subItems: [
-          { title: "Invoices", to: "invoices", icon: <ReceiptOutlinedIcon /> },
-          {
-            title: "Services",
-            to: "services",
-            icon: <ReceiptOutlinedIcon />,
-          },
-        ],
+        title: "Invoices Balances",
+        to: "invoices",
+        icon: <ReceiptOutlinedIcon />,
       },
       {
         title: "Contact Information",
@@ -243,13 +242,6 @@ const Sidebar = ({ role, name, userId }) => {
         to: "calendar",
         icon: <CalendarTodayOutlinedIcon />,
       },
-      {
-        title: "Settings",
-        icon: <SettingsIcon />,
-        subItems: [
-          { title: "Case Type", to: "casetype", icon: <AccountBalanceIcon /> },
-        ],
-      },
     ],
   };
 
@@ -259,7 +251,7 @@ const Sidebar = ({ role, name, userId }) => {
         "& .pro-sidebar-inner": {
           background: `${colors.primary[400]} !important`,
           color: `${colors.primary[900]}!important`,
-          borderRight: "none",
+          borderRight: "none"
         },
         "& .pro-icon-wrapper": {
           backgroundColor: "transparent !important",
@@ -349,7 +341,7 @@ const Sidebar = ({ role, name, userId }) => {
                 icon={item.icon}
                 selected={selected}
                 setSelected={setSelected}
-                subItems={item.subItems}
+                subItems={item.subItems} // Pass subItems to the Item component
               />
             ))}
           </Box>
