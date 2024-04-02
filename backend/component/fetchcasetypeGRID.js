@@ -7,7 +7,7 @@ const FetchCaseTypeGrid = async (req, res) => {
             cst.id AS case_subtype_id,
             cst.sub_type_name
           FROM
-            case_type ct
+            case ct
           LEFT JOIN
             case_sub_type cst ON ct.id = cst.case_type_id
         `);

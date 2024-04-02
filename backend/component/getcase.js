@@ -1,7 +1,7 @@
 const GetCases = async (req, res) => {
     try {
       const [results] = await global.pool.query(
-        "SELECT `case_id`, `case_type` FROM `case`"
+        "SELECT `case_id`, `case_type` FROM `cases`"
       );
       console.log(results); // Log SQL results
       res.json(results);

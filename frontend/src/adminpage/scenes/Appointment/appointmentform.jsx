@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
-import { Autocomplete, TextField, Typography, Box, Button } from "@mui/material";
+import { Autocomplete, TextField, Typography, Box, Button, colors, useTheme } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import axios from "axios"; // Import Axios for making HTTP requests
+import { tokens } from "../../../theme";
+  
 
 const Appointmentform = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const [cases, setCases] = useState([]);
   const [selectedCase, setSelectedCase] = useState(null);
@@ -21,6 +25,7 @@ const Appointmentform = () => {
     try {
       const response = await fetch("http://localhost:8081/api/cases");
       const data = await response.json();
+      console.log("data",data)
       setCases(data);
     } catch (error) {
       console.error("Error fetching cases:", error);
@@ -78,7 +83,7 @@ const Appointmentform = () => {
   };
   
   return (
-    <Box padding="20px" mb="10px">
+    <Box padding="20px" mb="10px" backgroundColor={colors.blueAccent[900]}>
       <Box display="flex" justifyContent="end" mt="10px">
         <Button
           type="button"

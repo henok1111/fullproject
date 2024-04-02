@@ -198,22 +198,20 @@ const Sidebar = ({ role, name, userId }) => {
         icon: <CalendarTodayOutlinedIcon />,
       },
     ],
-    registrar: [
+    registrar : [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
       { title: "Manage Team", to: "team", icon: <PeopleOutlinedIcon /> },
       { title: "Profile Form", to: "form", icon: <PersonOutlinedIcon /> },
       {
-        title: "Case Management", // Submenu title
-        icon: <GavelIcon />, // Icon for the submenu
+        title: "Case Management",
+        icon: <GavelIcon />,
         subItems: [
           { title: "View Cases", to: "/registrar/addcase", icon: <PersonOutlinedIcon /> },
           { title: "Add Case", to: "/registrar/caseform", icon: <PersonOutlinedIcon /> },
-          // Add more submenu items as needed
         ]
       },
       {
         title: "Client Management",
-        
         icon: <PersonOutlinedIcon />,
         subItems: [
           { title: "View Client", to: "/registrar/viewclient", icon: <PersonOutlinedIcon /> },
@@ -228,9 +226,12 @@ const Sidebar = ({ role, name, userId }) => {
         icon: <ReceiptOutlinedIcon />,
       },
       {
-        title: "Invoices Balances",
-        to: "invoices",
-        icon: <ReceiptOutlinedIcon />,
+        title: "Income",
+        icon: <PersonOutlinedIcon />,
+        subItems: [
+          { title: "Invoices", to: "invoices", icon: <ReceiptOutlinedIcon /> },
+          { title: "Services", to: "services", icon: <ReceiptOutlinedIcon /> },
+        ],
       },
       {
         title: "Contact Information",
@@ -242,7 +243,14 @@ const Sidebar = ({ role, name, userId }) => {
         to: "calendar",
         icon: <CalendarTodayOutlinedIcon />,
       },
-    ],
+      {
+        title: "Settings",
+        icon: <PersonOutlinedIcon />,
+        subItems: [
+          { title: "Case Type", to: "casetype", icon: <PersonOutlinedIcon/> },
+        ],
+      },
+    ]
   };
 
   return (

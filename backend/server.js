@@ -1,5 +1,3 @@
-// server.js
-
 import express from "express";
 import cors from "cors";
 import mysql from "mysql2/promise";
@@ -42,6 +40,10 @@ import { AddAppointment } from "./component/addappointment.js";
 import getAdvocatorData from "./component/getadvocators.js";
 import editAdvocator from "./component/editadvocator.js";
 import deleteAdvocator from "./component/deleteadvocator.js";
+import { getCaseAdvocates,getCaseClients } from "./component/getcaseclientandadvocator.js";
+import FetchCaseSubType from "./component/getsubcasetype.js";
+import GetCaseCount from "./component/countcase.js";
+import Fetchjudge from "./component/fetchjudge.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -130,6 +132,9 @@ app.get("/api/getServices", async (req, res) => {
 app.get("/api/getCaseType", async (req, res) => {
   await FetchCaseType(req, res);
 });
+app.get("/api/judge", async (req, res) => {
+  await Fetchjudge(req, res);
+});
 
 app.get("/api/getCaseTypeGrid", async (req, res) => {
   await FetchCaseTypeGrid(req, res);
@@ -180,6 +185,12 @@ app.get("/api/getJoinedClientData", async (req, res) => {
 app.get("/api/getAdvocatorData", async (req, res) => {
   await getAdvocatorData(db, req, res);
 });
+app.get("/api/caseclients", async (req, res) => {
+  await getCaseClients(db, req, res);
+});
+app.get("/api/caseadvocators", async (req, res) => {
+  await getCaseAdvocates(db, req, res);
+});
 app.get("/api/checkemail", async (req, res) => {
   await checkEmail(db, req, res);
 });
@@ -221,6 +232,14 @@ app.get("/api/petitioners/:caseId", async (req, res) => {
 
 app.get("/api/respondents/:caseId", async (req, res) => {
   await GetRespondents(db, req, res);
+});
+
+// New endpoint to fetch case sub types based on case type
+app.get("/api/getCaseSubType", async (req, res) => {
+  await FetchCaseSubType(req, res);
+});
+app.get("/api/getcasecout", async (req, res) => {
+  await GetCaseCount(req, res);
 });
 
 app.listen(PORT, () => {
