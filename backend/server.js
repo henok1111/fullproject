@@ -35,12 +35,18 @@ import FetchCaseType from "./component/fetchcasetype.js";
 import AddCasesubType from "./component/addcasesubtype.js";
 import FetchCaseTypeGrid from "./component/fetchcasetypeGRID.js";
 import GetCases from "./component/getcase.js";
-import { GetPetitioners,GetRespondents } from "./component/getpetionerandrespondant.js";
+import {
+  GetPetitioners,
+  GetRespondents,
+} from "./component/getpetionerandrespondant.js";
 import { AddAppointment } from "./component/addappointment.js";
 import getAdvocatorData from "./component/getadvocators.js";
 import editAdvocator from "./component/editadvocator.js";
 import deleteAdvocator from "./component/deleteadvocator.js";
-import { getCaseAdvocates,getCaseClients } from "./component/getcaseclientandadvocator.js";
+import {
+  getCaseAdvocates,
+  getCaseClients,
+} from "./component/getcaseclientandadvocator.js";
 import FetchCaseSubType from "./component/getsubcasetype.js";
 import GetCaseCount from "./component/countcase.js";
 import Fetchjudge from "./component/fetchjudge.js";
@@ -77,7 +83,7 @@ app.use((err, req, res, next) => {
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "1234",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
