@@ -22,3 +22,24 @@ export const getCaseClients = async (db, req, res) => {
     }
   };
   
+  export const getCaseProsecutors = async (db, req, res) => {
+    try {
+      // Log the SQL query
+   
+      
+      const prosecutors = await db.query("SELECT * FROM users WHERE role = 'Proscuter'");
+      
+      // Log the prosecutors result
+     
+      // Send the prosecutors data as JSON response
+      res.json(prosecutors);
+    } catch (error) {
+      // Log any errors that occur during the process
+      console.error("Error fetching prosecutors:", error);
+      
+      // Send an error response if an error occurs
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+  
+  

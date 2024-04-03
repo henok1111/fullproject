@@ -17,14 +17,7 @@ const FetchCaseSubType = async (req, res) => {
         [caseType]
       );
   
-      // Log the SQL response
-      console.log("SQL response:", results);
-  
-      // Extract case sub types from the results
-      const caseSubTypes = results.map((row) => row.sub_type_name);
-  
-      // Log the fetched case types
-      console.log("Fetched case sub types:", caseSubTypes);
+    
   
       // Send the fetched case sub types in the response
       res.json(results);

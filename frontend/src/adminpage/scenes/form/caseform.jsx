@@ -120,16 +120,28 @@ const CaseForm = () => {
   };
   const fetchProsecutors = async () => {
     try {
-      const response = await fetch("http://localhost:8081/api/prosecutors");
+      const response = await fetch("http://localhost:8081/api/caseproscuter");
       if (!response.ok) {
         throw new Error("Failed to fetch prosecutors");
       }
       const data = await response.json();
-      setProsecutors(data);
+      console.log("Fetched prosecutors:", data);
+  
+      // Flatten the nested array
+      const flattenedProsecutors = data.flatMap(arr => arr);
+  
+      // Filter out unwanted objects
+      const filteredProsecutors = flattenedProsecutors.filter(prosecutor => prosecutor.id && prosecutor.first_name);
+  
+      console.log("Filtered Prosecutors:", filteredProsecutors);
+  
+      setProsecutors(filteredProsecutors);
     } catch (error) {
       console.error("Error fetching prosecutors:", error);
     }
   };
+  
+  
   const fetchJudges = async () => {
     try {
       const response = await fetch("http://localhost:8081/api/judge");
@@ -178,6 +190,44 @@ const CaseForm = () => {
       console.error("Error fetching case types:", error);
     }
   };
+  const handleDocumentChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            // Extracting the file name
+            const fileName = file.name;
+
+            // Extracting the case ID from the case count state
+            const caseId = caseCount + 1;
+
+            // Append the file name and case ID to the FormData object
+            formData.append("fileName", fileName);
+            formData.append("caseId", caseId);
+
+            // Log case ID and file name
+            console.log("Case ID:", caseId);
+            console.log("File Name:", fileName);
+
+            // Make a POST request to upload the file and associated data to the server
+            const response = await fetch("http://localhost:8081/api/uploaddocument", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await response.json();
+
+            // Handle the response as needed
+        } catch (error) {
+            console.error("Error uploading file:", error);
+        }
+    }
+};
+
+
+
+
   const fetchCaseCount = async () => {
     try {
       const response = await fetch("http://localhost:8081/api/getcasecout");
@@ -304,7 +354,7 @@ const CaseForm = () => {
                     </Select>
 
                     <Typography variant="h6" sx={{ mt: 2 }}>
-                      Advocate for Petitioner
+                      {selectedCaseType === "criminal" ? 'proscuter for petioner' : "Advocator for petioner"}
                     </Typography>
                     <Select
   id="petitionerAdvocate"
@@ -326,7 +376,8 @@ const CaseForm = () => {
   autoHighlight
 >
   {/* Conditionally render options based on selected case type */}
-  {selectedCaseType === "Criminal" ? (
+  {console.log("selected case type from the place where i wanna be " ,selectedCaseType)}
+  {selectedCaseType === "criminal" ? (
     // Render prosecutor dynamically if case type is Criminal
     prosecutors.map((prosecutor) => (
       <MenuItem key={prosecutor.id} value={prosecutor.id}>
@@ -594,28 +645,25 @@ const CaseForm = () => {
     ))}
   </TextField>
   <Grid container justifyContent="flex-end" alignItems="flex-start">
-    <label htmlFor="file-upload">
-      <input
-        id="file-upload"
-        type="file"
-        style={{ display: "none", }}
-        onChange={(event) => {
-          const fileName = event.target.files[0].name;
-          console.log("Selected file:", fileName);
-          // Handle file upload logic here
-        }}
-      />
-      <Button
-        component="span"
-        variant="contained"
-        color="primary"
-        size="large" 
-        sx={{ mt: "10px" }}
-      >
-        <DescriptionOutlinedIcon /> Add Document
-      </Button>
-    </label>
-  </Grid>
+  <label htmlFor="file-upload">
+    <input
+      id="file-upload"
+      type="file"
+      style={{ display: "none" }}
+      onChange={handleDocumentChange} // Attach handleDocumentChange function here
+    />
+    <Button
+      component="span"
+      variant="contained"
+      color="primary"
+      size="large"
+      sx={{ mt: "10px" }}
+    >
+      <DescriptionOutlinedIcon /> Add Document
+    </Button>
+  </label>
+</Grid>
+
 </Box>
 
               </Box>

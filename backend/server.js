@@ -40,10 +40,11 @@ import { AddAppointment } from "./component/addappointment.js";
 import getAdvocatorData from "./component/getadvocators.js";
 import editAdvocator from "./component/editadvocator.js";
 import deleteAdvocator from "./component/deleteadvocator.js";
-import { getCaseAdvocates,getCaseClients } from "./component/getcaseclientandadvocator.js";
+import { getCaseAdvocates,getCaseClients,getCaseProsecutors } from "./component/getcaseclientandadvocator.js";
 import FetchCaseSubType from "./component/getsubcasetype.js";
 import GetCaseCount from "./component/countcase.js";
 import Fetchjudge from "./component/fetchjudge.js";
+import uploadFilePath from "./component/uploadcasedocument.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -113,8 +114,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Handle file upload route
-app.post("/api/upload", upload.single("file"), (req, res) =>
-  uploadImage(db, req, res)
+app.post("/api/uploaddocument", upload.single("file"), (req, res) =>
+  uploadFilePath(db, req, res)
 );
 
 app.post("/api/login", async (req, res) => {
@@ -190,6 +191,9 @@ app.get("/api/caseclients", async (req, res) => {
 });
 app.get("/api/caseadvocators", async (req, res) => {
   await getCaseAdvocates(db, req, res);
+});
+app.get("/api/caseproscuter", async (req, res) => {
+  await getCaseProsecutors(db, req, res);
 });
 app.get("/api/checkemail", async (req, res) => {
   await checkEmail(db, req, res);

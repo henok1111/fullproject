@@ -22,7 +22,7 @@ const Form = () => {
     "Court_Manager",
   ]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-
+  const [judgeType, setJudgeType] = useState("");
   const handleCloseSnackbar = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -40,6 +40,7 @@ const Form = () => {
     password: "",
     confirm_password: "",
     role: "",
+    judge_type: "",
   };
   const isEmailUnique = async (email) => {
     try {
@@ -77,6 +78,7 @@ const Form = () => {
         password: values.password,
         confirm_password: values.confirm_password,
         role: values.role,
+        judge_type: values.judge_type,
       };
 
       // Log the created object
@@ -254,6 +256,27 @@ const Form = () => {
                   </MenuItem>
                 ))}
               </TextField>
+              {values.role === "Judge" && ( // Only show if role is Judge
+  <TextField
+    fullWidth
+    variant="filled"
+    select
+    label="Judge Type"
+    onBlur={handleBlur}
+    onChange={(e) => {
+      handleChange(e);
+      setJudgeType(e.target.value); // Update judge type state
+    }}
+    value={values.judge_type}
+    name="judge_type"
+    error={!!touched.judge_type && !!errors.judge_type}
+    helperText={touched.judge_type && errors.judge_type}
+    sx={{ gridColumn: "span 4" }}
+  >
+    <MenuItem value="Criminal">Criminal</MenuItem>
+    <MenuItem value="Civil">Civil</MenuItem>
+  </TextField>
+)}
             </Box>
             <Box display="flex" justifyContent="space-between" mt="20px">
               <Button

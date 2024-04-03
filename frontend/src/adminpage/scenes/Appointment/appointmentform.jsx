@@ -64,11 +64,16 @@ const Appointmentform = () => {
       setRespondents([]);
     }
   };
-
   const handleSaveAppointment = async () => {
     try {
+      // Extract phone numbers from the fetched petitioner and respondent data
+      const petitionerPhoneNumbers = petitioners.map(petitioner => petitioner.mobile_number).join(", ");
+      const respondentPhoneNumbers = respondents.map(respondent => respondent.mobile_number).join(", ");
+  
       const appointmentData = {
         case_id: selectedCase.case_id,
+        petitioner_phone_numbers: petitionerPhoneNumbers, // Include petitioner's phone numbers
+        respondent_phone_numbers: respondentPhoneNumbers, // Include respondent's phone numbers
         date: date,
         time: time,
         note: note
