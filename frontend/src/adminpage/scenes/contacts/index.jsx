@@ -176,29 +176,42 @@ const Contacts = () => {
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
-
   const handleEditFormSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const token = localStorage.getItem("token");
-
+  
       if (!token) {
         console.error("No token found");
         return;
       }
-
+  
+      const userData = {
+        id: editFormData.id,
+        first_name: editFormData.first_name,
+        last_name: editFormData.last_name,
+        email: editFormData.email,
+        phone_number: editFormData.phone_number,
+        address: editFormData.address,
+        role: editFormData.role,
+      };
+  
+      // Log the userData before sending the request
+      console.log("Sending userData:", userData);
+  
       const response = await axios.post(
         "http://localhost:8081/api/editUser",
-        editFormData,
+      // Send userData object as the request body
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          body:JSON.stringify({userData})
         }
       );
-
+  
       if (response.status === 200) {
         console.log("User edited successfully!");
         setOpenSnackbar(true);
@@ -209,7 +222,7 @@ const Contacts = () => {
     } catch (error) {
       console.error("Error editing user:", error.message);
     }
-
+  
     setEditFormData({
       id: null,
       first_name: "",
@@ -219,10 +232,11 @@ const Contacts = () => {
       address: "",
       role: "",
     });
-
+  
     setAnchorEl(null);
   };
-
+  
+  
   const handleCancelEdit = () => {
     setEditFormData({
       id: null,

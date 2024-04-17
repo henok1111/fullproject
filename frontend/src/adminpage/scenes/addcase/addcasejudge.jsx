@@ -10,12 +10,12 @@ import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-
+import { jwtDecode } from "jwt-decode";
 const initialValues = {};
 
 const checkoutSchema = yup.object().shape({});
 
-const AddCase = () => {
+const AddCaseJudge = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const colors = tokens(theme.palette.mode);
@@ -49,18 +49,38 @@ const AddCase = () => {
 
     const fetchCaseCount = async () => {
         try {
-            const response = await fetch("http://localhost:8081/api/fetchcaseinformation");
+          const accessToken = localStorage.getItem("accessToken");
+      
+          if (accessToken) {
+            // Decode the token to get the user details
+            const decodedToken = jwtDecode(accessToken);
+      
+            // Extract the first_name and last_name from the decoded token and concatenate them
+            const fullName = `${decodedToken.first_name} ${decodedToken.last_name}`;
+            console.log("Full Name:", fullName);
+      
+            const response = await fetch("http://localhost:8081/api/fetchcaseinformation", {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`, // Include authorization token if needed
+              },
+              body: JSON.stringify({ assignedJudge: fullName }),
+            });
+      
             if (!response.ok) {
-                throw new Error("Failed to fetch case count");
+              throw new Error("Failed to fetch case count");
             }
+            
             const data = await response.json();
             console.log("Fetched case count:", data);
             setFetchedCases(data);
-
+          }
         } catch (error) {
-            console.error("Error fetching case count:", error);
+          console.error("Error fetching case count:", error);
         }
-    };
+      };
+      
 
     const toggleCaseDetails = (caseId) => {
         setExpandedCases((prev) => ({
@@ -417,4 +437,4 @@ const AddCase = () => {
   );
 };
 
-export default AddCase;
+export default AddCaseJudge;

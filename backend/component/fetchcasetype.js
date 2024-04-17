@@ -1,7 +1,7 @@
 const FetchCaseType = async (req, res) => {
   try {
     const [results] = await global.pool.query(
-      "SELECT  case_type FROM cases"
+      "SELECT DISTINCT case_type FROM cases"
     );
     res.json(results);
   } catch (error) {

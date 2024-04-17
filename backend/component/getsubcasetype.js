@@ -13,7 +13,7 @@ const FetchCaseSubType = async (req, res) => {
   
       // Fetch case sub types based on the provided case type
       const [results, fields] = await global.pool.query(
-        "SELECT sub_type_name FROM case_sub_type WHERE case_type = ?",
+        "SELECT DISTINCT sub_type_name FROM case_sub_type WHERE case_type = ?",
         [caseType]
       );
   

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Grid, TextField, Typography, IconButton, InputAdornment, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { Form, Formik } from "formik";
 import * as yup from "yup";
 import SearchIcon from "@mui/icons-material/Search";
@@ -10,12 +9,13 @@ import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
+import { Box, Button, Grid, TextField, Typography, IconButton, InputAdornment, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, MenuItem } from "@mui/material"; // Import MenuItem component
 
 const initialValues = {};
 
 const checkoutSchema = yup.object().shape({});
 
-const AddCase = () => {
+const AddCourtRegistrarCase = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const colors = tokens(theme.palette.mode);
@@ -30,23 +30,54 @@ const AddCase = () => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [caseToDelete, setCaseToDelete] = useState(null);
-
+    const [criminalJudges, setCriminalJudges] = useState([]);
+    const [civilJudges, setCivilJudges] = useState([]);
+    const [selectedJudgeType, setSelectedJudgeType] = useState("");
+    const [selectedJudge, setSelectedJudge] = useState('');
+    const [selectedCaseId, setSelectedCaseId] = useState("");
+    const [submitSuccess, setSubmitSuccess] = useState(false);
     const handleClick = () => {
         navigate(`/registrar/caseform`);
     };
 
     useEffect(() => {
         fetchCaseCount();
-    }, []);
+        fetchJudge();
+    }, [submitSuccess]);
 
     const handleSnackbarOpen = () => {
         setSnackbarOpen(true);
     };
-
+    const handleSelectCase = (caseId) => {
+      setSelectedCaseId(caseId); // Step 2
+  };
     const handleSnackbarClose = () => {
         setSnackbarOpen(false);
     };
-
+   
+    const fetchJudge = async () => {
+      try {
+        const response = await fetch("http://localhost:8081/api/judge");
+        if (!response.ok) {
+          throw new Error("Failed to fetch judge information");
+        }
+        const data = await response.json();
+        console.log("Fetched judge information:", data);
+  
+        // Filter judges into criminal and civil categories
+        const criminalJudgesData = data.filter(judge => judge.judge_type.toLowerCase() === 'criminal');
+        console.log("Filtered Criminal Judges:", criminalJudgesData);
+  
+        const civilJudgesData = data.filter(judge => judge.judge_type.toLowerCase() === 'civil');
+        console.log("Filtered Civil Judges:", civilJudgesData);
+  
+        setCriminalJudges(criminalJudgesData);
+        setCivilJudges(civilJudgesData);
+      } catch (error) {
+        console.error("Error fetching judge information:", error);
+      }
+    };
+  
     const fetchCaseCount = async () => {
         try {
             const response = await fetch("http://localhost:8081/api/fetchcaseinformation");
@@ -127,6 +158,54 @@ const AddCase = () => {
             setErrorMessage("the case number you entered does not match");
         }
     };
+    const handleSubmitc = async (selectedCaseId) => { // Receive selectedCaseId as an argument
+      // Make sure selectedJudge and selectedCaseId have values before submitting
+      if (selectedJudge && selectedCaseId) {
+          try {
+              // Log the selected judge's value
+              console.log("Selected Judge:", selectedJudge);
+  
+              // Log the selected case ID
+              console.log("Selected Case ID:", selectedCaseId);
+  
+              // Prepare the POST data
+              const postData = {
+                  selectedJudge: selectedJudge,
+                  selectedCaseId: selectedCaseId // Include selected case ID in the data
+              };
+  
+              // Perform the API POST request with the selected judge's full name and case ID
+              const response = await fetch('http://localhost:8081/api/judgeassign', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(postData),
+              });
+              setSubmitSuccess(true);
+              // Check if the request was successful
+              if (!response.ok) {
+                  throw new Error('Failed to submit data');
+              }
+  
+              // Handle success response
+              const data = await response.json();
+              console.log('Submitted data:', data);
+  
+              // Optionally, reset the selectedJudge state after submission
+              setSelectedJudge('');
+  
+          } catch (error) {
+              console.error('Error submitting data:', error);
+              // Handle error state if needed
+          }
+      } else {
+          // Handle case where no judge or case is selected
+          console.error('No judge or case selected');
+      }
+  };
+  
+  
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Case Management" subtitle="" />
@@ -255,6 +334,47 @@ const AddCase = () => {
     )}
   </>
 )}
+{caseData.assigned_judge === null ? (
+  // Render select dropdown to choose a judge
+  <>
+    <TextField
+      select
+      label="Judge Type"
+      value={selectedJudge}
+      onChange={(e) => setSelectedJudge(e.target.value)}
+      variant="outlined"
+      fullWidth
+      style={{ marginTop: '10px' }}
+    >
+      {caseData.case_type === "criminal" ?
+        criminalJudges.map((judge) => (
+          <MenuItem key={judge.id} value={`${judge.first_name} ${judge.last_name}`}>
+            {judge.first_name} {judge.last_name}
+          </MenuItem>
+        )) :
+        civilJudges.map((judge) => (
+          <MenuItem key={judge.id} value={`${judge.first_name} ${judge.last_name}`}>
+            {judge.first_name} {judge.last_name}
+          </MenuItem>
+        ))}
+    </TextField>
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={() => handleSubmitc(caseData.case_id)}
+      style={{ marginTop: '10px' }}
+    >
+      Submit
+    </Button>
+  </>
+) : (
+  // Render assigned judge's name
+  <Typography variant="h4" margin={1} color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
+    Assigned Judge: <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{caseData.assigned_judge}</span>
+  </Typography>
+)}
+
+
 
   {caseData.petitioner_advocate_info && caseData.petitioner_advocate_info.first_name && caseData.petitioner_advocate_info.last_name && (
     <Typography variant="h4" margin={1}  color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
@@ -270,19 +390,6 @@ const AddCase = () => {
     Respondent Advocate {caseData.respondent_advocate_info ? <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{`${caseData.respondent_advocate_info.first_name} ${caseData.respondent_advocate_info.last_name}`}</span> : 'N/A'}
   </Typography>
 
-  {caseData.file_path && ( // Check if file_path exists
-        <>
-         
-    
-          {/* Display the document icon with a link to download the file */}
-          <a href={`http://localhost:8081/${caseData.file_path}`} download>
-             <Button component="span" variant="contained"  size="large" >
-                       <DescriptionOutlinedIcon style={{ fontSize: "30px" }} />
- viaw case Document
-                      </Button>
-          </a>
-        </>
-      )} 
 </Box>
 
                      </Grid>
@@ -417,4 +524,4 @@ const AddCase = () => {
   );
 };
 
-export default AddCase;
+export default AddCourtRegistrarCase;

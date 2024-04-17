@@ -165,7 +165,7 @@ const AddClient = () => {
   };
 
   return (
-    <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
+    <Box padding="30px"  backgroundColor={colors.blueAccent[900]}>
       <Header title="Client Management" subtitle="Add Client" />
       <form onSubmit={formik.handleSubmit}>
         <Box

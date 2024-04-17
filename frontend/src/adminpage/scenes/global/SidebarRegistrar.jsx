@@ -157,8 +157,9 @@ const Sidebar = ({ role, name, userId }) => {
           const decodedToken = jwtDecode(accessToken);
 
           // Extract the first_name from the decoded token
-          const userFirstName = decodedToken.name;
-
+          const c = decodedToken.first_name;
+          const userLastName = decodedToken.last_name;
+          const  userFirstName  = c + ' ' + userLastName ;
           // Set the first_name state with the extracted value
           setFirstName(userFirstName);
         } else {
@@ -186,7 +187,7 @@ const Sidebar = ({ role, name, userId }) => {
       },
     ],
     judge: [
-      { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
+     
       {
         title: "Contact Information",
         to: "contacts",
@@ -196,12 +197,13 @@ const Sidebar = ({ role, name, userId }) => {
         title: "Calendar",
         to: "calendar",
         icon: <CalendarTodayOutlinedIcon />,
-      },
+      }, { title: "Profile Form", to: "casecourtmanager", icon: <PersonOutlinedIcon /> },
     ],
     registrar : [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
       { title: "Manage Team", to: "team", icon: <PeopleOutlinedIcon /> },
-      { title: "Profile Form", to: "form", icon: <PersonOutlinedIcon /> },
+      { title: "Prom", to: "form", icon: <PersonOutlinedIcon /> }, 
+      { title: "Profile Form", to: "casecourtmanager", icon: <PersonOutlinedIcon /> },
       {
         title: "Case Management",
         icon: <GavelIcon />,

@@ -41,10 +41,14 @@ import getAdvocatorData from "./component/getadvocators.js";
 import editAdvocator from "./component/editadvocator.js";
 import deleteAdvocator from "./component/deleteadvocator.js";
 import { getCaseAdvocates,getCaseClients,getCaseProsecutors } from "./component/getcaseclientandadvocator.js";
+import deleteCase from "./component/deletecase.js";
+import FetchAllCasesInformation from "./component/fetchfullcaseinfo.js";
 import FetchCaseSubType from "./component/getsubcasetype.js";
 import GetCaseCount from "./component/countcase.js";
 import Fetchjudge from "./component/fetchjudge.js";
 import uploadFilePath from "./component/uploadcasedocument.js";
+import AddCase from "./component/addcase.js";
+import assignJudgeToCase from "./component/assignedcase.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -117,7 +121,10 @@ const upload = multer({ storage: storage });
 app.post("/api/uploaddocument", upload.single("file"), (req, res) =>
   uploadFilePath(db, req, res)
 );
-
+uploadImage
+app.post("/api/upload", upload.single("file"), (req, res) =>
+uploadImage(db, req, res)
+);
 app.post("/api/login", async (req, res) => {
   await Login(db, req, res);
 });
@@ -137,6 +144,9 @@ app.get("/api/judge", async (req, res) => {
   await Fetchjudge(req, res);
 });
 
+app.get("/api/fetchcaseinformation", async (req, res) => {
+  await FetchAllCasesInformation(req, res);
+});
 app.get("/api/getCaseTypeGrid", async (req, res) => {
   await FetchCaseTypeGrid(req, res);
 });
@@ -165,6 +175,10 @@ app.post("/api/addservice", async (req, res) => {
 
 app.post("/api/addcasetype", async (req, res) => {
   await AddCaseType(db, req, res);
+});
+
+app.post("/api/addcase", async (req, res) => {
+  await AddCase(db, req, res);
 });
 
 app.post("/api/addcasesubtype", async (req, res) => {
@@ -203,6 +217,12 @@ app.get("/api/checkuseremail", async (req, res) => {
 });
 app.post("/api/deleteClient", async (req, res) => {
   await deleteClient(db, req, res);
+});
+app.post("/api/judgeassign", async (req, res) => {
+  await assignJudgeToCase(db, req, res);
+});
+app.post("/api/deletecase", async (req, res) => {
+  await deleteCase(db, req, res);
 });
 
 app.post("/api/deleteadvocator", async (req, res) => {

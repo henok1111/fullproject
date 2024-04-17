@@ -31,14 +31,14 @@ export default async function Login(db, req, res) {
     }
 
     // Extract user information
-    const { id, first_name, role, status } = userResults[0];
+    const { id, first_name, role, last_name , status } = userResults[0];
 
     // If role_name is null, assign it as 'student'
     const userRole = role;
 
     // Generate a JWT token for authentication with additional user information
     const token = jwt.sign(
-      { userId: id, name: first_name, email, role_name: userRole, status },
+      { userId: id, first_name: first_name,last_name:last_name, email, role_name: userRole, status },
       SECRET_KEY,
       { expiresIn: "30m" }
     );
@@ -47,7 +47,7 @@ export default async function Login(db, req, res) {
     res.status(200).json({
       success: true,
       token,
-      user: { id, first_name, email, role_name: userRole, status },
+      user: { id, first_name, last_name, email, role_name: userRole, status },
     });
   } catch (error) {
     console.error("Error in login route:", error);

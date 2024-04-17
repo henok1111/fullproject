@@ -17,63 +17,24 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 // Define your initialValues and validation schema
 const initialValues = {
   clientDetail: {
-    petitioners: [],
-    petitionerAdvocate: [],
+    selectedPetitioners: [],
+    petitionerAdvocate: "", // Single value for petitioner advocate
     respondents: [],
-    respondentAdvocate: [],
+    respondentAdvocate: "", // Single value for respondent advocate
+    documentFileName: "", 
+   
   },
   caseDetails: {
-    caseNumber: "",
+  
     caseType: "",
     caseSubType: "",
-    caseStage: "",
-    casePriority: "",
-    act: "",
-    filingNumber: "",
-    filingDate: "",
-    registrationNumber: "",
-    registrationDate: "",
-    firstHearingDate: "",
-    CNRNumber: "",
     description: "",
     policeStation: "",
     FIRNumber: "",
     FIRDate: "",
+    registrationDate:"",
   },
-  assignedTo: "",
 };
-
-const checkoutSchema = yup.object().shape({
-  clientDetail: yup.object().shape({
-    petitioners: yup.array().required("Petitioner(s) are required"),
-    petitionerAdvocate: yup
-      .array()
-      .required("Advocate for Petitioner(s) are required"),
-    respondents: yup.array().required("Respondent(s) are required"),
-    respondentAdvocate: yup
-      .array()
-      .required("Advocate for Respondent(s) are required"),
-  }),
-  caseDetails: yup.object().shape({
-    caseNumber: yup.string().required("Case Number is required"),
-    caseType: yup.string().required("Case Type is required"),
-    caseSubType: yup.string().required("Case Sub Type is required"),
-    caseStage: yup.string().required("Case Stage is required"),
-    casePriority: yup.string().required("Case Priority is required"),
-    act: yup.string().required("Act is required"),
-    filingNumber: yup.string().required("Filing Number is required"),
-    filingDate: yup.date().required("Filing Date is required"),
-    registrationNumber: yup.string().required("Registration Number is required"),
-    registrationDate: yup.date().required("Registration Date is required"),
-    firstHearingDate: yup.date().required("First Hearing Date is required"),
-    CNRNumber: yup.string().required("CNR Number is required"),
-    description: yup.string().required("Description is required"),
-    policeStation: yup.string().required("Police Station is required"),
-    FIRNumber: yup.string().required("FIR Number is required"),
-    FIRDate: yup.date().required("FIR Date is required"),
-  }),
-  assignedTo: yup.string().required("Assigned To is required"),
-});
 
 const CaseForm = () => {
   const theme = useTheme();
@@ -88,36 +49,77 @@ const CaseForm = () => {
   const [caseCount, setCaseCount] = useState(0);  
   const [selectedPetitioners, setSelectedPetitioners] = useState([]);
   const [selectedRespondents, setSelectedRespondents] = useState([]);
+  const [selectedAdvocateRespondents, setSelectedAdvocateRespondents] = useState([]);
+  const [selectedAdvocatePetioner, setSelectedAdvocatePetioner] = useState([]);
+  const [selectedProscutorPetioner, setSelectedProsctorPetioner] = useState([]);
   const [selectedCaseType, setSelectedCaseType] = useState("");
-  useEffect(() => {
-    // Fetch advocates
-    fetchAdvocates();
-    // Fetch clients
-    fetchCaseCount()
-    fetchCaseTypes();
-    fetchClients();
-    fetchCaseSubTypes();
-    fetchJudges();
-    fetchProsecutors();
-  }, []);
-  const fetchAdvocates = async () => {
-    try {
-      const response = await fetch("http://localhost:8081/api/caseadvocators");
-      if (!response.ok) {
-        throw new Error('Failed to fetch advocates');
-      }
-      const data = await response.json();
-      console.log("Fetched advocates:", data); // Log the fetched data
-      // Flatten the nested array
-      const flattenedAdvocates = data.flatMap(arr => arr);
-      // Filter out unwanted objects
-      const filteredAdvocates = flattenedAdvocates.filter(advocate => advocate.middle_name && advocate.first_name);
-      console.log("Filtered Advocates:", filteredAdvocates); 
-      setAdvocates(filteredAdvocates);
-    } catch (error) {
-      console.error("Error fetching advocates:", error);
-    }
+  const [selectedCaseSubType, setSelectedCaseSubType] = useState("");
+  const [petitionerAdvocates, setPetitionerAdvocates] = useState([]);
+const [respondentAdvocates, setRespondentAdvocates] = useState([]);
+const [documentFileName, setDocumentFileName] = useState("");
+const [registrationDate, setRegistrationDate] = useState(""); // State for registration date
+  const [description, setDescription] = useState(null); // State for description
+  const [policeStation, setPoliceStation] = useState(""); // State for police station
+  const [FIRNumber, setFIRNumber] = useState(""); // State for FIR number
+  const [FIRDate, setFIRDate] = useState(""); // State for FIR date
+  const handleRegistrationDateChange = (event) => {
+    setRegistrationDate(event.target.value); // Update registration date state
   };
+
+  // Function to handle changes in description
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value); // Update description state
+  };
+
+  // Function to handle changes in police station
+  const handlePoliceStationChange = (event) => {
+    setPoliceStation(event.target.value); // Update police station state
+  };
+
+  // Function to handle changes in FIR number
+  const handleFIRNumberChange = (event) => {
+    setFIRNumber(event.target.value); // Update FIR number state
+  };
+
+  // Function to handle changes in FIR date
+  const handleFIRDateChange = (event) => {
+    setFIRDate(event.target.value); // Update FIR date state
+  };
+useEffect(() => {
+  // Fetch advocates
+  fetchAdvocates();
+  // Fetch clients
+  fetchCaseCount()
+  fetchCaseTypes();
+  fetchClients();
+  fetchCaseSubTypes();
+  fetchProsecutors();
+}, []);
+
+const fetchAdvocates = async () => {
+  try {
+    const response = await fetch("http://localhost:8081/api/caseadvocators");
+    if (!response.ok) {
+      throw new Error('Failed to fetch advocates');
+    }
+    const data = await response.json();
+    console.log("Fetched advocates:", data);
+
+    // Flatten the nested array
+    const flattenedAdvocates = data.flatMap(arr => arr);
+    // Filter out unwanted objects
+    const filteredAdvocates = flattenedAdvocates.filter(advocate => advocate.middle_name && advocate.first_name);
+    console.log("Filtered Advocates:", filteredAdvocates); 
+
+    // Set petitioner advocates and respondent advocates based on the case type
+    setPetitionerAdvocates(filteredAdvocates);
+    setRespondentAdvocates(filteredAdvocates);
+  } catch (error) {
+    console.error("Error fetching advocates:", error);
+  }
+};
+
+
   const fetchProsecutors = async () => {
     try {
       const response = await fetch("http://localhost:8081/api/caseproscuter");
@@ -142,19 +144,7 @@ const CaseForm = () => {
   };
   
   
-  const fetchJudges = async () => {
-    try {
-      const response = await fetch("http://localhost:8081/api/judge");
-      if (!response.ok) {
-        throw new Error('Failed to fetch judges');
-      }
-      const data = await response.json();
-      console.log("fetched  Judges: ", data);
-      setJudges(data);
-    } catch (error) {
-      console.error("Error fetching judges:", error);
-    }
-  };
+
 
   
   const fetchClients = async () => {
@@ -199,7 +189,7 @@ const CaseForm = () => {
 
             // Extracting the file name
             const fileName = file.name;
-
+            setDocumentFileName(fileName);
             // Extracting the case ID from the case count state
             const caseId = caseCount + 1;
 
@@ -255,17 +245,72 @@ const CaseForm = () => {
       console.error("Error fetching case sub types:", error);
     }
   };
+  const handleFormSubmit = async (values) => {
+    console.log("Form submitted!");
+    
+    try {
+      console.log("the dynamic intial value is  ", dynamicInitialValues); // Log the form values before sending to the server
   
-
-  const handleFormSubmit = (values) => {
-    console.log(values);
-    // Perform form submission logic here
+      // Perform form submission logic here, such as sending the form data to the server
+      const response = await fetch("http://localhost:8081/api/addcase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dynamicInitialValues),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to save case");
+      }
+  
+      // If the form submission is successful, you can show a success message or navigate to another page
+      console.log("Case saved successfully!");
+  
+      // Example: Navigate to another page after successful form submission
+      // navigate("/success-page");
+  
+      // Handle document upload
+      // You can include logic for uploading documents here
+      // Ensure that you have implemented the handleDocumentChange function to handle file upload
+    } catch (error) {
+      console.error("Error saving case:", error);
+      // Handle error, show error message, or perform any necessary actions
+    }
   };
-
+  ;
+  
   const handleBackButtonClick = () => {
     navigate("/registrar/addcase");
   };
+  const [dynamicInitialValues, setDynamicInitialValues] = useState(initialValues);
 
+  useEffect(() => {
+    // Update clientDetail in dynamicInitialValues
+    setDynamicInitialValues(prevValues => ({
+      ...prevValues,
+      clientDetail: {
+        ...prevValues.clientDetail,
+        selectedPetitioners: selectedPetitioners,
+        respondents: selectedRespondents,
+        respondentAdvocate: selectedAdvocateRespondents,
+        documentFileName: documentFileName,
+        // Include petitionerAdvocate if case type is civil, otherwise include petiionerProscutor
+        ...(selectedCaseType === "civil" ? { petitionerAdvocate: selectedAdvocatePetioner } : { petiionerProscutor: selectedProscutorPetioner }),
+      },
+      caseDetails: {
+        ...prevValues.caseDetails,
+        caseType: selectedCaseType,
+        caseSubType: selectedCaseSubType,
+        registrationDate: registrationDate,
+        description: description,
+        policeStation: policeStation,
+        FIRNumber: FIRNumber,
+        FIRDate: FIRDate,
+      },
+    }));
+  }, [selectedPetitioners, selectedRespondents, selectedAdvocateRespondents, selectedAdvocatePetioner, selectedCaseSubType, documentFileName, selectedProscutorPetioner, selectedCaseType, registrationDate, description, policeStation, FIRNumber, FIRDate]);
+  
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Box display="flex" justifyContent="flex-end" mt="20px">
@@ -282,8 +327,8 @@ const CaseForm = () => {
       <Header title="Add Case" subtitle="" />
       <Formik
         onSubmit={handleFormSubmit}
-        initialValues={initialValues}
-        validationSchema={checkoutSchema}
+        initialValues={dynamicInitialValues}
+       
       >
         {({
           values,
@@ -294,7 +339,7 @@ const CaseForm = () => {
           handleSubmit,
           setFieldValue,
         }) => (
-          <Form onSubmit={handleSubmit}>
+          <Form  onSubmit={handleSubmit}>
             <Box display="grid" gridRow="span 10" gap="2px" padding="20px">
               <Box
                 sx={{ backgroundColor: `${colors.primary[400]}75` }}
@@ -307,171 +352,198 @@ const CaseForm = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <Typography variant="h6">Petitioner</Typography>
-                    <Select
-                      id="petitioners"
-                      value={selectedPetitioners}
-                      onChange={(event) => {
-                        const selectedPetitioner = event.target.value;
-                        setSelectedPetitioners(selectedPetitioner);
-                        // Remove the selected petitioner from respondents
-                        setSelectedRespondents((prev) =>
-                          prev.filter((client) => client !== selectedPetitioner)
-                        );
-                      }}
-                      // Render dynamically based on available clients
-                      renderValue={(selected) =>
-                        selected
-                          .map((id) => {
-                            const selectedClient = clients.find((client) => client.id === id);
-                            return `${selectedClient.first_name} ${selectedClient.last_name}`;
-                          })
-                          .join(', ')
-                      }
-                      // Dynamic options based on available clients
-                      MenuProps={{
-                        PaperProps: {
-                          style: {
-                            maxHeight: 300,
-                            width: 250,
-                            backgroundColor:`${colors.blueAccent[900]}`
-                          },
-                        },
-                      }}
-                      multiple
-                      fullWidth
-                      autoHighlight
-                    >
-                      {clients
-                        .filter(
-                          (client) =>
-                            !selectedRespondents.includes(client.id)
-                        )
-                        .map((client) => (
-                          <MenuItem key={client.id} value={client.id}>
-                            {`${client.first_name} ${client.middle_name} ${client.email}`}
-                          </MenuItem>
-                        ))}
-                    </Select>
+                    <TextField
+  id="petitioners"
+  select
+  label="Select Petitioner*"
+  value={selectedPetitioners}
+  onChange={(event) => {
+    const selectedPetitioner = event.target.value;
+    console.log("Selected Petitioner:", selectedPetitioner);
+    setSelectedPetitioners(selectedPetitioner);
+    // Remove the selected petitioner from respondents
+    setSelectedRespondents((prev) =>
+      prev.filter((client) => client !== selectedPetitioner)
+    );
+  }}
+  variant="outlined"
+  fullWidth
+  SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        style: {
+          maxHeight: 300,
+          width: 250,
+          backgroundColor: `${colors.blueAccent[900]}`,
+        },
+      },
+    },
+    multiple: true,
+    autoHighlight: true,
+  }}
+>
+  <MenuItem value="" disabled>
+    Select Petitioner
+  </MenuItem>
+  {clients
+    .filter(
+      (client) =>
+        !selectedRespondents.includes(client.id)
+    )
+    .map((client) => (
+      <MenuItem key={client.id} value={client.id}>
+        {`${client.first_name} ${client.middle_name} ${client.email}`}
+      </MenuItem>
+    ))}
+</TextField>
+
+
 
                     <Typography variant="h6" sx={{ mt: 2 }}>
                       {selectedCaseType === "criminal" ? 'proscuter for petioner' : "Advocator for petioner"}
                     </Typography>
-                    <Select
+                    <TextField
   id="petitionerAdvocate"
+  select
+  label= {selectedCaseType === "criminal" ? 'select proscuter for petioner*' : "select Advocator for petioner*"}
   value={values.clientDetail.petitionerAdvocate}
   onChange={(event) => {
-    setFieldValue("clientDetail.petitionerAdvocate", event.target.value);
-    console.log("Selected Case Type for Petitioner Advocate:", selectedCaseType); // Log the selected case type for Petitioner Advocate
+    const selectedProsecutor = event.target.value;
+    if (selectedCaseType === "criminal") {
+      console.log("Selected Prosecutor:", selectedProsecutor.id);
+      setSelectedProsctorPetioner(selectedProsecutor.id)
+    } else {
+      console.log("Selected Petitioner Advocate:", selectedProsecutor.advocator_id);
+      setSelectedAdvocatePetioner(selectedProsecutor.advocator_id)
+    }
+    setFieldValue("clientDetail.petitionerAdvocate", selectedProsecutor);
+    setRespondentAdvocates((prev) =>
+      prev.filter((advocate) => advocate.advocator_id !== selectedProsecutor.advocator_id)
+    );
   }}
-  MenuProps={{
-    PaperProps: {
-      style: {
-        maxHeight: 300,
-        width: 250,
-        backgroundColor: `${colors.blueAccent[900]}`,
+  variant="outlined"
+  fullWidth
+  SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        style: {
+          maxHeight: 300,
+          width: 250,
+          backgroundColor: `${colors.blueAccent[900]}`,
+        },
       },
     },
+    autoHighlight: true,
   }}
-  fullWidth
-  autoHighlight
 >
   {/* Conditionally render options based on selected case type */}
-  {console.log("selected case type from the place where i wanna be " ,selectedCaseType)}
   {selectedCaseType === "criminal" ? (
-    // Render prosecutor dynamically if case type is Criminal
+    // Render prosecutors if case type is Criminal
     prosecutors.map((prosecutor) => (
-      <MenuItem key={prosecutor.id} value={prosecutor.id}>
-        {`${prosecutor.first_name} ${prosecutor.middle_name} ${prosecutor.email}`}
+      <MenuItem key={prosecutor.advocator_id} value={prosecutor}>
+        {`${prosecutor.first_name} ${prosecutor.last_name} ${prosecutor.email}`}
       </MenuItem>
     ))
   ) : (
-    // Render other advocates for civil cases
-    advocates.map((advocate) => (
-      <MenuItem key={advocate.id} value={advocate.first_name}>
-        {`${advocate.first_name} ${advocate.middle_name} ${advocate.email}`}
+    // Render advocates for civil cases
+    petitionerAdvocates.map((advocate) => (
+      <MenuItem key={advocate.advocator_id} value={advocate}>
+        {`${advocate.first_name} ${advocate.middle_name} ${advocate.last_name}`}
       </MenuItem>
     ))
   )}
-</Select>
+</TextField>
+
+
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="h6">Respondent</Typography>
-                    <Select
-                      id="respondents"
-                      value={selectedRespondents}
-                      onChange={(event) => {
-                        const selectedRespondent = event.target.value;
-                        setSelectedRespondents(selectedRespondent);
-                        // Remove the selected respondent from petitioners
-                        setSelectedPetitioners((prev) =>
-                          prev.filter((client) => client !== selectedRespondent)
-                        );
-                      }}
-                      // Render dynamically based on available clients
-                      renderValue={(selected) =>
-                        selected
-                          .map((id) => {
-                            const selectedClient = clients.find((client) => client.id === id);
-                            return `${selectedClient.first_name} ${selectedClient.last_name}`;
-                          })
-                          .join(', ')
-                      }
-                      // Dynamic options based on available clients
-                      MenuProps={{
-                        PaperProps: {
-                          style: {
-                            maxHeight: 300,
-                            width: 250,
-                            backgroundColor:`${colors.blueAccent[900]}`
-                          },
-                        },
-                      }}
-                      multiple
-                      fullWidth
-                      autoHighlight
-                    >
-                      {clients
-                        .filter(
-                          (client) =>
-                            !selectedPetitioners.includes(client.id)
-                        )
-                        .map((client) => (
-                          <MenuItem key={client.id} value={client.id}>
-                            {`${client.first_name} ${client.middle_name} ${client.email}`}
-                          </MenuItem>
-                        ))}
-                    </Select>
+                    <TextField
+  id="respondents"
+  select
+  label="Select Respondents"
+  value={selectedRespondents}
+  required
+  onChange={(event) => {
+    const selectedRespondent = event.target.value;
+    console.log("Selected Respondent:", selectedRespondent); // Log selected respondent
+    setSelectedRespondents(selectedRespondent);
+    setSelectedPetitioners((prev) =>
+      prev.filter((client) => client !== selectedRespondent)
+    );
+  }}
+  variant="outlined"
+  fullWidth
+  SelectProps={{
+    renderValue: (selected) =>
+      selected
+        .map((id) => {
+          const selectedClient = clients.find((client) => client.id === id);
+          return `${selectedClient.first_name} ${selectedClient.last_name}`;
+        })
+        .join(", "),
+    MenuProps: {
+      PaperProps: {
+        style: {
+          maxHeight: 300,
+          width: 250,
+          backgroundColor: `${colors.blueAccent[900]}`,
+        },
+      },
+    },
+    multiple: true,
+    autoHighlight: true,
+  }}
+>
+  {clients
+    .filter((client) => !selectedPetitioners.includes(client.id))
+    .map((client) => (
+      <MenuItem key={client.id} value={client.id}>
+        {`${client.first_name} ${client.middle_name} ${client.email}`}
+      </MenuItem>
+    ))}
+</TextField>
+
 
                     <Typography variant="h6" sx={{ mt: 2 }}>
                       Advocate for Respondent
                     </Typography>
-                    <Select
+                    <TextField
   id="respondentAdvocate"
+  select
+  label="Select Respondent Advocate"
   value={values.clientDetail.respondentAdvocate}
-  onChange={(event) =>
-    setFieldValue(
-      "clientDetail.respondentAdvocate",
-      event.target.value
-    )
-  }
-  MenuProps={{
-    PaperProps: {
-      style: {
-        maxHeight: 300,
-        width: 250,
-        backgroundColor:`${colors.blueAccent[900]}`
+  onChange={(event) => {
+    const selectedAdvocate = event.target.value;
+    setSelectedAdvocateRespondents(selectedAdvocate.advocator_id);
+    console.log("Selected Respondent Advocate:", selectedAdvocate.advocator_id); // Log selected respondent advocate
+    setFieldValue("clientDetail.respondentAdvocate", selectedAdvocate);
+    setPetitionerAdvocates((prev) =>
+      prev.filter((advocate) => advocate.advocator_id !== selectedAdvocate.advocator_id)
+    );
+  }}
+  variant="outlined"
+  fullWidth
+  required
+  autoHighlight
+  SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        style: {
+          maxHeight: 300,
+          width: 250,
+          backgroundColor: `${colors.blueAccent[900]}`,
+        },
       },
     },
   }}
-  fullWidth
-  autoHighlight
 >
-  {advocates.map((advocate) => (
-    <MenuItem key={advocate.id} value={advocate.first_name}>
-      {`${advocate.first_name} ${advocate.middle_name} ${advocate.email}`}
+  {respondentAdvocates.map((advocate) => (
+    <MenuItem key={advocate.advocator_id} value={advocate}>
+      {`${advocate.first_name} ${advocate.middle_name} ${advocate.last_name}`}
     </MenuItem>
   ))}
-</Select>
+</TextField>
 
                   </Grid>
                 </Grid>
@@ -502,15 +574,14 @@ const CaseForm = () => {
   value={values.caseDetails.caseType}
   onChange={(event) => {
     const selectedCaseType = event.target.value;
-    setSelectedCaseType(selectedCaseType); // Update selected case type state
+    setSelectedCaseType(selectedCaseType);
     setFieldValue("caseDetails.caseType", selectedCaseType);
-    fetchCaseSubTypes(selectedCaseType); // Fetch subtypes based on the selected case type
-    console.log("Selected Case Type: rom the casetype", selectedCaseType); // Log the selected case type
+    fetchCaseSubTypes(selectedCaseType);
   }}
+ 
   variant="outlined"
   margin="normal"
   fullWidth
-  required
 >
   {caseTypes.map((caseType) => (
     <MenuItem key={caseType.case_type} value={caseType.case_type}>
@@ -520,15 +591,19 @@ const CaseForm = () => {
 </TextField>
 
 
+
 <TextField
   id="caseSubType"
   select
   label="Case Sub Type"
   value={values.caseDetails.caseSubType}
   onChange={(event) => {
+    const selectedCaseSubType = event.target.value;
+     setSelectedCaseSubType(selectedCaseSubType);
+      // Update selected case sub
+      console.log("case sub type ",selectedCaseSubType)
     setFieldValue("caseDetails.caseSubType", event.target.value);
   }}
-  onBlur={handleBlur}
   variant="outlined"
   margin="normal"
   fullWidth
@@ -540,43 +615,42 @@ const CaseForm = () => {
     </MenuItem>
   ))}
 </TextField>
-
-
-                </Box>
-                
-                
+                </Box>                
                 <Box sx={{ display: "flex" }}>
                   <Typography variant="body1" sx={{ mt: "20px", ml: "10px" }}>
                     Registration Date:
                   </Typography>
                   <TextField
-                    name="registrationDate"
-                    type="date"
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    required
-                    sx={{ ml: "20px" }}
-                  />
+  name="registrationDate"
+  type="date"
+  variant="outlined"
+  margin="normal"
+  fullWidth
+  required
+  value={registrationDate}
+  onChange={handleRegistrationDateChange}
+  
+/>
+
                   
                 </Box>
                 <Box sx={{ display: "flex" }}>
                   
-                  <TextField
-                    multiline
-                    rows={4}
-                    fullWidth
-                    id="description"
-                    name="description"
-                    label="Description"
-                    variant="outlined"
-                    value={values.description}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.description && Boolean(errors.description)}
-                    helperText={touched.description && errors.description}
-                    sx={{ mt: 2, ml: "20px" }}
-                  />
+                <TextField
+                    required
+          multiline
+          rows={4}
+          fullWidth
+          id="description"
+          name="description"
+          label="Description"
+          variant="outlined"
+          value={description}
+          onChange={handleDescriptionChange}
+          onBlur={handleBlur} // Add onBlur event handler
+         
+          sx={{ mt: 2, ml: "20px" }}
+        />
                 </Box>
               </Box>
               <Box
@@ -588,35 +662,42 @@ const CaseForm = () => {
                   FIR Detail
                 </Typography>
                 <Box sx={{ display: "flex" }}>
-                  <TextField
-                    name="policeStation"
-                    label="Police Station"
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    required
-                  />
-                  <TextField
-                    name="FIRNumber"
-                    label="FIR Number"
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    required
-                    sx={{ ml: "20px" }}
-                  />
+                <TextField
+            name="policeStation"
+            label="Police Station"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            required
+            value={policeStation} // Assign value from state
+            onChange={handlePoliceStationChange} // Call appropriate handler function
+          />
+                    <TextField
+            name="FIRNumber"
+            label="FIR Number"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            required
+            sx={{ ml: "20px" }}
+            value={FIRNumber} // Assign value from state
+            onChange={handleFIRNumberChange} // Call appropriate handler function
+          />
                   <Typography variant="body1" sx={{ mt: "20px", ml: "20px" }}>
                     FIR Date:
                   </Typography>
                   <TextField
-                    name="FIRDate"
-                    type="date"
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    required
-                    sx={{ ml: "20px" }}
-                  />
+            name="FIRDate"
+            type="date"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            required
+            sx={{ ml: "20px" }}
+            value={FIRDate} // Assign value from state
+            onChange={handleFIRDateChange} // Call appropriate handler function
+            
+          />
                 </Box>
               </Box>
               <Box
@@ -625,26 +706,11 @@ const CaseForm = () => {
                 padding="30px"
               >
                 <Typography color={colors.greenAccent[500]} variant="h3">
-                  Assign To
+                Add Document
                 </Typography>
                 <Box sx={{ display: "flex" }}>
-  <TextField
-    id="assignedTo"
-    select
-    label="Assign Case To"
-    defaultValue="Assign Case To"
-    margin="normal"
-    sx={{ width: "500px" }}
-    value={values.assignedTo}
-    onChange={(event) => setFieldValue("assignedTo", event.target.value)}
-  >
-    {judges.map((judge) => (
-      <MenuItem key={judge.id} value={judge.id}>
-        {`${judge.first_name} ${judge.last_name}`}
-      </MenuItem>
-    ))}
-  </TextField>
-  <Grid container justifyContent="flex-end" alignItems="flex-start">
+ 
+  <Grid container justifyContent="center" alignItems="flex-start">
   <label htmlFor="file-upload">
     <input
       id="file-upload"
@@ -684,14 +750,15 @@ const CaseForm = () => {
                   Cancel
                 </Button>
                 <Button
-                  type="submit"
-                  variant="contained"
-                  color="success"
-                  sx={{ mt: "10px", ml: "10px" }}
-                  startIcon={<SaveIcon />}
-                >
-                  Save
-                </Button>
+                
+  type="submit"
+  variant="contained"
+  color="success"
+  sx={{ mt: "10px", ml: "10px" }}
+  startIcon={<SaveIcon />}
+>
+  Save
+</Button>
               </Box>
             </Box>
           </Form>

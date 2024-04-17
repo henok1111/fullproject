@@ -166,8 +166,6 @@ const Casetype = () => {
         setcasesubtypeerror(validationErrors.casesubtype || false);
       });
   };
-  
-
   useEffect(() => {
     axios
       .get("http://localhost:8081/api/getCaseTypeGrid")

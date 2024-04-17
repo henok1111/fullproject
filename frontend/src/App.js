@@ -30,6 +30,7 @@ import Appointmentform from "./adminpage/scenes/Appointment/appointmentform";
 import Appointment from "./adminpage/scenes/Appointment";
 import Client from "./adminpage/scenes/client";
 import AddCase from "./adminpage/scenes/addcase/addcase";
+import AddCourtRegistrarCase from "./adminpage/scenes/addcase/addcasecourtmanager";
 import Caseform from "./adminpage/scenes/form/caseform";
 import ProfilePage from "./adminpage/scenes/profile";
 
@@ -148,6 +149,7 @@ const RegistrarRoutes = () => {
         <Route path="/profilepage" element={<ProfilePage />} />
         <Route path="/casetype" element={<Casetype />} />
         <Route path="/services" element={<AddServices />} />
+        <Route path="/casecourtmanager" element={<AddCourtRegistrarCase/>} />
       </Route>
     </Routes>
   );
@@ -157,40 +159,8 @@ const JudgeRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Admins />}>
-        <Route
-          index
-          element={
-            <RegistrarDashboard
-              showRecentTransactions={true}
-              showCampaign={true}
-              showCalendar={true}
-              statBoxes={[
-                {
-                  title: "431,225",
-                  subtitle: "Total Case",
-                  progress: "0.50",
-                  increase: "+21%",
-                  icon: <GavelRounded />,
-                },
-                {
-                  title: "Your Title",
-                  subtitle: "Your Subtitle",
-                  progress: "0.75",
-                  increase: "+15%",
-                  icon: <HailRounded />,
-                },
-                {
-                  title: "Fuck",
-                  subtitle: "Henok",
-                  progress: "0.75",
-                  increase: "+15%",
-                  icon: <PedalBikeOutlined />,
-                },
-                // Add more objects as needed
-              ]}
-            />
-          }
-        />
+      
+      <Route path="/casecourtmanager" element={<AddCourtRegistrarCase/>} />
         <Route path="team" element={<Team />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="form" element={<Form />} />
