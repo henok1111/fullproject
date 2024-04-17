@@ -92,9 +92,10 @@ const Contacts = () => {
       address: params.address,
       role: params.role,
     });
-
+  
     setAnchorEl(null);
   };
+  
 
   const handleDeleteClick = (params) => {
     setSelectedUserToDelete(params);
@@ -113,9 +114,7 @@ const Contacts = () => {
       });
 
       if (response.ok) {
-        console.log(
-          `User with ID ${selectedUserToDelete.id} deleted successfully!`
-        );
+        console.log(`User with ID ${selectedUserToDelete.id} deleted successfully!`);
         setOpenSnackbar(true);
         fetchUsers();
       } else {
@@ -176,42 +175,29 @@ const Contacts = () => {
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
+
   const handleEditFormSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       const token = localStorage.getItem("token");
-  
+
       if (!token) {
         console.error("No token found");
         return;
       }
-  
-      const userData = {
-        id: editFormData.id,
-        first_name: editFormData.first_name,
-        last_name: editFormData.last_name,
-        email: editFormData.email,
-        phone_number: editFormData.phone_number,
-        address: editFormData.address,
-        role: editFormData.role,
-      };
-  
-      // Log the userData before sending the request
-      console.log("Sending userData:", userData);
-  
+
       const response = await axios.post(
         "http://localhost:8081/api/editUser",
-      // Send userData object as the request body
+        editFormData,
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body:JSON.stringify({userData})
         }
       );
-  
+
       if (response.status === 200) {
         console.log("User edited successfully!");
         setOpenSnackbar(true);
@@ -222,7 +208,7 @@ const Contacts = () => {
     } catch (error) {
       console.error("Error editing user:", error.message);
     }
-  
+
     setEditFormData({
       id: null,
       first_name: "",
@@ -232,11 +218,10 @@ const Contacts = () => {
       address: "",
       role: "",
     });
-  
+
     setAnchorEl(null);
   };
-  
-  
+
   const handleCancelEdit = () => {
     setEditFormData({
       id: null,
@@ -280,12 +265,11 @@ const Contacts = () => {
       renderCell: (params) => (
         <>
           <IconButton aria-label="edit" onClick={() => handleEditClick(params)}>
-            <EditIcon style={{ color: "yellowgreen" }} />
+
+            <EditIcon style={{ color: "yellowgreen" }}/>
+
           </IconButton>
-          <IconButton
-            aria-label="delete"
-            onClick={() => handleDeleteClick(params)}
-          >
+          <IconButton aria-label="delete" onClick={() => handleDeleteClick(params)}>
             <DeleteIcon />
           </IconButton>
         </>
@@ -339,11 +323,13 @@ const Contacts = () => {
       <Dialog
         open={deleteConfirmationOpen}
         onClose={handleCancelDelete}
+
+   
         sx={{
           "& .MuiDialog-paper": {
             backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
           },
-        }}
+        }} 
       >
         <DialogTitle id="alert-dialog-title" color={"red"}>
           {"Are you sure you want to delete this client?"}
