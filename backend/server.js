@@ -2,14 +2,11 @@ import express from "express";
 import cors from "cors";
 import mysql from "mysql2/promise";
 import bluebird from "bluebird";
-import bodyParser from "body-parser";
-import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { promisify } from "util";
 import AddClient from "./component/addclient.js";
 import AddAdvocator from "./component/addadvocator.js";
 import AddUser from "./component/adduser.js";
@@ -36,7 +33,10 @@ import FetchCaseType from "./component/fetchcasetype.js";
 import AddCasesubType from "./component/addcasesubtype.js";
 import FetchCaseTypeGrid from "./component/fetchcasetypeGRID.js";
 import GetCases from "./component/getcase.js";
-import { GetPetitioners,GetRespondents } from "./component/getpetionerandrespondant.js";
+import {
+  GetPetitioners,
+  GetRespondents,
+} from "./component/getpetionerandrespondant.js";
 import { AddAppointment } from "./component/addappointment.js";
 import getAdvocatorData from "./component/getadvocators.js";
 import editAdvocator from "./component/editadvocator.js";
@@ -83,7 +83,7 @@ app.use((err, req, res, next) => {
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "1234",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
