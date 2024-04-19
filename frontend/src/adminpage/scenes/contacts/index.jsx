@@ -38,6 +38,7 @@ const Contacts = () => {
     phone_number: "",
     address: "",
     role: "Judge",
+    judgeType: "",
   });
 
   const [userData, setUserData] = useState([]);
@@ -45,7 +46,7 @@ const Contacts = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [selectedUserToDelete, setSelectedUserToDelete] = useState(null);
-
+  const [showJudgeTypeDropdown, setShowJudgeTypeDropdown] = useState(false);
   const fetchUsers = async () => {
     try {
       const response = await fetch("http://localhost:8081/api/getUsers");
@@ -78,6 +79,7 @@ const Contacts = () => {
       phone_number: editFormData.phone_number,
       address: editFormData.address,
       role: editFormData.role,
+      judgeType: editFormData.judgeType,
     }));
   }, [editFormData]);
 
@@ -91,8 +93,9 @@ const Contacts = () => {
       phone_number: params.phone_number,
       address: params.address,
       role: params.role,
+      judgeType: params.judgeType || "", 
     });
-  
+    setShowJudgeTypeDropdown(params.role === "Judge"); 
     setAnchorEl(null);
   };
   
@@ -420,6 +423,20 @@ const Contacts = () => {
               {/* Add other roles as needed */}
             </Select>
           </FormControl>
+          {editFormData.role === "Judge" && ( // Render judge type dropdown only if role is Judge
+  <FormControl fullWidth variant="outlined" margin="normal">
+    <InputLabel htmlFor="judge-type">Judge Type</InputLabel>
+    <Select
+      label="Judge Type"
+      name="judgeType"
+      value={editFormData.judgeType || ""}
+      onChange={handleEditFormChange}
+    >
+      <MenuItem value="criminal">Criminal</MenuItem>
+      <MenuItem value="civil">Civil</MenuItem>
+    </Select>
+  </FormControl>
+)}
           <Button
             type="submit"
             variant="contained"

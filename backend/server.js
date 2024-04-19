@@ -17,6 +17,7 @@ import Login from "./login.js";
 import Getuser from "./component/getuser.js";
 import Getrole from "./component/getrole.js";
 import EditUser from "./component/EditUser.js";
+import FetchCasesByJudge from "./component/fetchfullcasebuyjudge.js";
 import DeleteUser from "./component/deleteUser.js";
 import EditUserStatus from "./component/EditUserStatus.js";
 import { checkEmail } from "./component/checkemail.js";
@@ -147,6 +148,10 @@ app.get("/api/judge", async (req, res) => {
 app.get("/api/fetchcaseinformation", async (req, res) => {
   await FetchAllCasesInformation(req, res);
 });
+
+app.post("/api/fetchcasebyjudge", async (req, res) => {
+  await FetchCasesByJudge(req,db, res);
+});
 app.get("/api/getCaseTypeGrid", async (req, res) => {
   await FetchCaseTypeGrid(req, res);
 });
@@ -159,7 +164,7 @@ app.post("/api/editUserStatus", async (req, res) => {
 });
 
 app.post("/api/editUser", async (req, res) => {
-  await EditUser(req, res);
+  await EditUser(db,req, res);
 });
 
 app.post("/api/editservice", async (req, res) => {

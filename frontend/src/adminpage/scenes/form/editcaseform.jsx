@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
+import { Box, Button, Grid, TextField, Typography, IconButton, InputAdornment, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { Form, Formik } from "formik";
 import * as yup from "yup";
 import SearchIcon from "@mui/icons-material/Search";
@@ -9,13 +10,12 @@ import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Button, Grid, TextField, Typography, IconButton, InputAdornment, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, MenuItem } from "@mui/material"; // Import MenuItem component
-
+import CaseForm from "../form/caseform";
 const initialValues = {};
 
 const checkoutSchema = yup.object().shape({});
 
-const AddCourtRegistrarCase = () => {
+const EditCase = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const colors = tokens(theme.palette.mode);
@@ -30,54 +30,29 @@ const AddCourtRegistrarCase = () => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [caseToDelete, setCaseToDelete] = useState(null);
-    const [criminalJudges, setCriminalJudges] = useState([]);
-    const [civilJudges, setCivilJudges] = useState([]);
-    const [selectedJudgeType, setSelectedJudgeType] = useState("");
-    const [selectedJudge, setSelectedJudge] = useState('');
-    const [selectedCaseId, setSelectedCaseId] = useState("");
-    const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+    const [openCaseFormDialog, setOpenCaseFormDialog] = useState(false);
+
+    // State variable to store the case ID
+    const [selectedCaseId, setSelectedCaseId] = useState(null);
     const handleClick = () => {
         navigate(`/registrar/caseform`);
     };
+    
+    
 
     useEffect(() => {
         fetchCaseCount();
-        fetchJudge();
-    }, [submitSuccess]);
+    }, []);
 
     const handleSnackbarOpen = () => {
         setSnackbarOpen(true);
     };
-    const handleSelectCase = (caseId) => {
-      setSelectedCaseId(caseId); // Step 2
-  };
+
     const handleSnackbarClose = () => {
         setSnackbarOpen(false);
     };
-   
-    const fetchJudge = async () => {
-      try {
-        const response = await fetch("http://localhost:8081/api/judge");
-        if (!response.ok) {
-          throw new Error("Failed to fetch judge information");
-        }
-        const data = await response.json();
-        console.log("Fetched judge information:", data);
-  
-        // Filter judges into criminal and civil categories
-        const criminalJudgesData = data.filter(judge => judge.judge_type.toLowerCase() === 'criminal');
-        console.log("Filtered Criminal Judges:", criminalJudgesData);
-  
-        const civilJudgesData = data.filter(judge => judge.judge_type.toLowerCase() === 'civil');
-        console.log("Filtered Civil Judges:", civilJudgesData);
-  
-        setCriminalJudges(criminalJudgesData);
-        setCivilJudges(civilJudgesData);
-      } catch (error) {
-        console.error("Error fetching judge information:", error);
-      }
-    };
-  
+
     const fetchCaseCount = async () => {
         try {
             const response = await fetch("http://localhost:8081/api/fetchcaseinformation");
@@ -104,11 +79,15 @@ const AddCourtRegistrarCase = () => {
             [caseId]: !prev[caseId],
         }));
     };
-
+   
+    
+    // Function to handle editing a case
     const handleEditCase = (caseId) => {
-        console.log("Editing case with ID:", caseId);
-    };
-
+      setSelectedCaseId(caseId); // Set the selected case ID
+      setIsEditFormOpen(true); // Open the CaseForm
+      setOpenCaseFormDialog(true); // Open the dialog box
+  };
+  
     const deleteCase = (caseId) => {
         setCaseToDelete(caseId);
         setOpenDeleteDialog(true);
@@ -158,59 +137,10 @@ const AddCourtRegistrarCase = () => {
             setErrorMessage("the case number you entered does not match");
         }
     };
-    const handleSubmitc = async (selectedCaseId) => {
-      // Make sure selectedJudge and selectedCaseId have values before submitting
-      if (selectedJudge && selectedCaseId) {
-          try {
-              // Log the selected judge's value
-              console.log("Selected Judge:", selectedJudge);
-  
-              // Log the selected case ID
-              console.log("Selected Case ID:", selectedCaseId);
-  
-              // Prepare the POST data with only the selected judge's ID
-              const postData = {
-                  selectedJudgeId: selectedJudge, // Change to selectedJudgeId
-                  selectedCaseId: selectedCaseId,
-              };
-  
-              // Perform the API POST request with the selected judge's ID
-              const response = await fetch('http://localhost:8081/api/judgeassign', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(postData),
-              });
-  
-              setSubmitSuccess(true);
-              // Check if the request was successful
-              if (!response.ok) {
-                  throw new Error('Failed to submit data');
-              }
-  
-              // Handle success response
-              const data = await response.json();
-              console.log('Submitted data:', data);
-  
-              // Optionally, reset the selectedJudge state after submission
-              setSelectedJudge('');
-  
-          } catch (error) {
-              console.error('Error submitting data:', error);
-              // Handle error state if needed
-          }
-      } else {
-          // Handle case where no judge or case is selected
-          console.error('No judge or case selected');
-      }
-  };
-  
-  
-  
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Case Management" subtitle="" />
+     
       <Box display="flex" justifyContent="end" mt="10px">
         <Button
           variant="contained"
@@ -274,6 +204,29 @@ const AddCourtRegistrarCase = () => {
     <Typography color="error"  padding={3} mt={1}>{errorMessage}</Typography>
   )}
             {/* DataGrid */}
+            <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
+        {/* Other code remains the same */}
+        <Dialog
+            open={openCaseFormDialog}
+            onClose={() => setOpenCaseFormDialog(false)}
+            aria-labelledby="form-dialog-title"
+            fullWidth
+            maxWidth="md"
+            
+        >
+            <DialogTitle  bgcolor={colors.blueAccent[900]} id="form-dialog-title">Edit Case</DialogTitle>
+            <DialogContent style={{backgroundColor:`${colors.blueAccent[900]}`}}>
+                {/* Render the CaseForm component */}
+                {isEditFormOpen && <CaseForm caseId={selectedCaseId} />}
+            </DialogContent>
+            <DialogActions  style={{backgroundColor:`${colors.blueAccent[900]}`}}>
+                <Button onClick={() => setOpenCaseFormDialog(false)} color="info">
+                    Cancel
+                </Button>
+                {/* You can handle form submission or other actions here */}
+            </DialogActions>
+        </Dialog>
+    </Box>
             <Box
               sx={{ mt: "10px" }}
               padding="5px"
@@ -336,46 +289,7 @@ const AddCourtRegistrarCase = () => {
     )}
   </>
 )}
-{caseData.first_name === null ? (
-  // Render select dropdown to choose a judge
-  <>
-   <TextField
-    select
-    label="Judge Type"
-    value={selectedJudge}
-    onChange={(e) => setSelectedJudge(e.target.value)} // Change this line
-    variant="outlined"
-    fullWidth
-    style={{ marginTop: '10px' }}
->
-    {caseData.case_type === "criminal" ?
-        criminalJudges.map((judge) => (
-            <MenuItem key={judge.id} value={judge.id}> {/* Change value to judge.id */}
-                {` ${judge.id}  ${judge.first_name} ${judge.last_name}`}
-            </MenuItem>
-        )) :
-        civilJudges.map((judge) => (
-            <MenuItem key={judge.id} value={judge.id}> {/* Change value to judge.id */}
-                {`${judge.id}  ${judge.first_name} ${judge.last_name}`}
-            </MenuItem>
-        ))}
-</TextField>
 
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={() => handleSubmitc(caseData.case_id)}
-      style={{ marginTop: '10px' }}
-    >
-      Submit
-    </Button>
-  </>
-) : (
-  // Render assigned judge's name
-  <Typography variant="h4" margin={1} color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-    Assigned Judge: <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{` ${caseData.id} / ${caseData.first_name}/ ${caseData.last_name}`}</span>
-  </Typography>
-)}
   {caseData.petitioner_advocate_info && caseData.petitioner_advocate_info.first_name && caseData.petitioner_advocate_info.last_name && (
     <Typography variant="h4" margin={1}  color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
       Petitioner Advocate <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{`${caseData.petitioner_advocate_info.first_name} ${caseData.petitioner_advocate_info.last_name}`}</span>
@@ -390,6 +304,19 @@ const AddCourtRegistrarCase = () => {
     Respondent Advocate {caseData.respondent_advocate_info ? <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{`${caseData.respondent_advocate_info.first_name} ${caseData.respondent_advocate_info.last_name}`}</span> : 'N/A'}
   </Typography>
 
+  {caseData.file_path && ( // Check if file_path exists
+        <>
+         
+    
+          {/* Display the document icon with a link to download the file */}
+          <a href={`http://localhost:8081/${caseData.file_path}`} download>
+             <Button component="span" variant="contained"  size="large" >
+                       <DescriptionOutlinedIcon style={{ fontSize: "30px" }} />
+ viaw case Document
+                      </Button>
+          </a>
+        </>
+      )} 
 </Box>
 
                      </Grid>
@@ -403,6 +330,7 @@ const AddCourtRegistrarCase = () => {
                                 <Typography style={{ fontWeight: 'bold', fontSize: '1.1.1em' }} variant="body1"  color={colors.grey[100]}>
   Full Name   <span style={{ fontWeight: 'bold', fontSize: '1.1em', color: colors.greenAccent[300] }}>{`${petitioner.first_name} ${petitioner.middle_name} ${petitioner.last_name}`}</span>
 </Typography>
+
                                 {expandedCases[caseData.case_id] && (
               <>
                 <Typography variant="body1"  color={colors.grey[100]}>{`Email:  ${petitioner.email}`}</Typography>
@@ -523,4 +451,4 @@ const AddCourtRegistrarCase = () => {
   );
 };
 
-export default AddCourtRegistrarCase;
+export default EditCase;

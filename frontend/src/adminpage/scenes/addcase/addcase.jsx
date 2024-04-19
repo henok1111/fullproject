@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { Box, Button, Grid, TextField, Typography, IconButton, InputAdornment, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { Form, Formik } from "formik";
 import * as yup from "yup";
@@ -10,7 +10,7 @@ import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-
+import EditCase from "../form/editcaseform";
 const initialValues = {};
 
 const checkoutSchema = yup.object().shape({});
@@ -30,10 +30,16 @@ const AddCase = () => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [caseToDelete, setCaseToDelete] = useState(null);
+    const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+    const [openCaseFormDialog, setOpenCaseFormDialog] = useState(false);
 
+    // State variable to store the case ID
+    const [selectedCaseId, setSelectedCaseId] = useState(null);
     const handleClick = () => {
         navigate(`/registrar/caseform`);
     };
+    
+    
 
     useEffect(() => {
         fetchCaseCount();
@@ -73,11 +79,15 @@ const AddCase = () => {
             [caseId]: !prev[caseId],
         }));
     };
-
+   
+    
+    // Function to handle editing a case
     const handleEditCase = (caseId) => {
-        console.log("Editing case with ID:", caseId);
-    };
-
+      setSelectedCaseId(caseId); // Set the selected case ID
+      setIsEditFormOpen(true); // Open the CaseForm
+      setOpenCaseFormDialog(true); // Open the dialog box
+  };
+  
     const deleteCase = (caseId) => {
         setCaseToDelete(caseId);
         setOpenDeleteDialog(true);
@@ -130,6 +140,7 @@ const AddCase = () => {
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Case Management" subtitle="" />
+     
       <Box display="flex" justifyContent="end" mt="10px">
         <Button
           variant="contained"
@@ -193,6 +204,29 @@ const AddCase = () => {
     <Typography color="error"  padding={3} mt={1}>{errorMessage}</Typography>
   )}
             {/* DataGrid */}
+            <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
+        {/* Other code remains the same */}
+        <Dialog
+            open={openCaseFormDialog}
+            onClose={() => setOpenCaseFormDialog(false)}
+            aria-labelledby="form-dialog-title"
+            fullWidth
+            maxWidth="md"
+            
+        >
+            <DialogTitle  bgcolor={colors.blueAccent[900]} id="form-dialog-title">Edit Case</DialogTitle>
+            <DialogContent style={{backgroundColor:`${colors.blueAccent[900]}`}}>
+                {/* Render the CaseForm component */}
+                {isEditFormOpen && <EditCase caseId={selectedCaseId} />}
+            </DialogContent>
+            <DialogActions  style={{backgroundColor:`${colors.blueAccent[900]}`}}>
+                <Button onClick={() => setOpenCaseFormDialog(false)} color="info">
+                    Cancel
+                </Button>
+                {/* You can handle form submission or other actions here */}
+            </DialogActions>
+        </Dialog>
+    </Box>
             <Box
               sx={{ mt: "10px" }}
               padding="5px"

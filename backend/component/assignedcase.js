@@ -4,7 +4,7 @@ const assignJudgeToCase = async (db, req, res) => {
     // Extracting data from request body
     const d = req.body;
   console.log(d);
-  const assignedJudge = req.body.selectedJudge;
+  const assignedJudge = req.body.selectedJudgeId;
   const caseId = req.body.selectedCaseId;
     try {
       // Log the received case id and assigned judge

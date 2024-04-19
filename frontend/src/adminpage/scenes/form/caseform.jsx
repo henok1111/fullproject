@@ -36,7 +36,7 @@ const initialValues = {
   },
 };
 
-const CaseForm = () => {
+const CaseForm = ({caseId}) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();

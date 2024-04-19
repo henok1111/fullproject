@@ -31,6 +31,8 @@ import Appointment from "./adminpage/scenes/Appointment";
 import Client from "./adminpage/scenes/client";
 import AddCase from "./adminpage/scenes/addcase/addcase";
 import AddCourtRegistrarCase from "./adminpage/scenes/addcase/addcasecourtmanager";
+
+import AddCaseJudge from "./adminpage/scenes/addcase/addcasejudge";
 import Caseform from "./adminpage/scenes/form/caseform";
 import ProfilePage from "./adminpage/scenes/profile";
 
@@ -160,7 +162,7 @@ const JudgeRoutes = () => {
     <Routes>
       <Route path="/" element={<Admins />}>
       
-      <Route path="/casecourtmanager" element={<AddCourtRegistrarCase/>} />
+      <Route path="/casejudge" element={<AddCaseJudge/>} />
         <Route path="team" element={<Team />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="form" element={<Form />} />

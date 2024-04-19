@@ -48,38 +48,37 @@ const AddCaseJudge = () => {
     };
 
     const fetchCaseCount = async () => {
-        try {
+      try {
           const accessToken = localStorage.getItem("accessToken");
-      
           if (accessToken) {
-            // Decode the token to get the user details
-            const decodedToken = jwtDecode(accessToken);
-      
-            // Extract the first_name and last_name from the decoded token and concatenate them
-            const fullName = `${decodedToken.first_name} ${decodedToken.last_name}`;
-            console.log("Full Name:", fullName);
-      
-            const response = await fetch("http://localhost:8081/api/fetchcaseinformation", {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`, // Include authorization token if needed
-              },
-              body: JSON.stringify({ assignedJudge: fullName }),
-            });
-      
-            if (!response.ok) {
-              throw new Error("Failed to fetch case count");
-            }
-            
-            const data = await response.json();
-            console.log("Fetched case count:", data);
-            setFetchedCases(data);
+              const decodedToken = jwtDecode(accessToken);
+              const judgeId = decodedToken.userId
+              ;           
+              console.log("Sending judge ID to backend:", judgeId); // Log the judge ID before sending to the backend
+
+              const response = await fetch(`http://localhost:8081/api/fetchcasebyjudge`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ assignedJudgeId: judgeId }),
+              });
+
+              if (!response.ok) {
+                  throw new Error("Failed to fetch cases");
+              }
+
+              const data = await response.json();
+              console.log("Fetched cases:", data);
+              setFetchedCases(data);
+          } else {
+              console.warn("Access token not found in local storage");
           }
-        } catch (error) {
-          console.error("Error fetching case count:", error);
-        }
-      };
+      } catch (error) {
+          console.error("Error fetching cases:", error);
+      }
+  };
+
       
 
     const toggleCaseDetails = (caseId) => {

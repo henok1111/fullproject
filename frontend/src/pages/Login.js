@@ -90,15 +90,16 @@ const LoginForm = () => {
       width: "100%", // Ensure container fills the viewport width
       marginTop: "0px",
       // Remove background color to allow animation to fill the space
+      backgroundColor:`${colors.primary[600]}`
     },
     form: {
       padding: "20px",
       borderRadius: "8px",
       maxWidth: "380px",
       width: "100%",
-      boxShadow: "0 0 50px rgba(0, 0, 0, 0.5)",
+      boxShadow: "0 0 90px rgba(0, 0, 0, 0.9)",
       backdropFilter: "blur(10px)",
-      backgroundColor: `${colors.primary[400]}60`,
+      backgroundColor: `${colors.primary[400]}90`,
      
       marginLeft: "30%",
     },

@@ -96,7 +96,7 @@ const RegistrarDashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title="32,441"
+            title={`name is ${ 1+1 }`}
             subtitle="New Clients"
             progress="0.30"
             increase="+5%"

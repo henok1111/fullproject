@@ -197,7 +197,7 @@ const Sidebar = ({ role, name, userId }) => {
         title: "Calendar",
         to: "calendar",
         icon: <CalendarTodayOutlinedIcon />,
-      }, { title: "Profile Form", to: "casecourtmanager", icon: <PersonOutlinedIcon /> },
+      }, { title: "Profile Form", to: "casejudge", icon: <PersonOutlinedIcon /> },
     ],
     registrar : [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
