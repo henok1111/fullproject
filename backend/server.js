@@ -1,23 +1,20 @@
-// server.js
-
 import express from "express";
 import cors from "cors";
 import mysql from "mysql2/promise";
 import bluebird from "bluebird";
-import bodyParser from "body-parser";
-import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { promisify } from "util";
 import AddClient from "./component/addclient.js";
+import AddAdvocator from "./component/addadvocator.js";
 import AddUser from "./component/adduser.js";
 import Login from "./login.js";
 import Getuser from "./component/getuser.js";
 import Getrole from "./component/getrole.js";
 import EditUser from "./component/EditUser.js";
+import FetchCasesByJudge from "./component/fetchfullcasebuyjudge.js";
 import DeleteUser from "./component/deleteUser.js";
 import EditUserStatus from "./component/EditUserStatus.js";
 import { checkEmail } from "./component/checkemail.js";
@@ -35,7 +32,24 @@ import AddCaseType from "./component/addcasetype.js";
 import FetchCaseType from "./component/fetchcasetype.js";
 import AddCasesubType from "./component/addcasesubtype.js";
 import FetchCaseTypeGrid from "./component/fetchcasetypeGRID.js";
-
+import GetCases from "./component/getcase.js";
+import {
+  GetPetitioners,
+  GetRespondents,
+} from "./component/getpetionerandrespondant.js";
+import { AddAppointment } from "./component/addappointment.js";
+import getAdvocatorData from "./component/getadvocators.js";
+import editAdvocator from "./component/editadvocator.js";
+import deleteAdvocator from "./component/deleteadvocator.js";
+import { getCaseAdvocates,getCaseClients,getCaseProsecutors } from "./component/getcaseclientandadvocator.js";
+import deleteCase from "./component/deletecase.js";
+import FetchAllCasesInformation from "./component/fetchfullcaseinfo.js";
+import FetchCaseSubType from "./component/getsubcasetype.js";
+import GetCaseCount from "./component/countcase.js";
+import Fetchjudge from "./component/fetchjudge.js";
+import uploadFilePath from "./component/uploadcasedocument.js";
+import AddCase from "./component/addcase.js";
+import assignJudgeToCase from "./component/assignedcase.js";
 const app = express();
 const PORT = 8081;
 const router = express.Router();
@@ -105,10 +119,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Handle file upload route
-app.post("/api/upload", upload.single("file"), (req, res) =>
-  uploadImage(db, req, res)
+app.post("/api/uploaddocument", upload.single("file"), (req, res) =>
+  uploadFilePath(db, req, res)
 );
-
+uploadImage
+app.post("/api/upload", upload.single("file"), (req, res) =>
+uploadImage(db, req, res)
+);
 app.post("/api/login", async (req, res) => {
   await Login(db, req, res);
 });
@@ -124,7 +141,17 @@ app.get("/api/getServices", async (req, res) => {
 app.get("/api/getCaseType", async (req, res) => {
   await FetchCaseType(req, res);
 });
+app.get("/api/judge", async (req, res) => {
+  await Fetchjudge(req, res);
+});
 
+app.get("/api/fetchcaseinformation", async (req, res) => {
+  await FetchAllCasesInformation(req, res);
+});
+
+app.post("/api/fetchcasebyjudge", async (req, res) => {
+  await FetchCasesByJudge(req,db, res);
+});
 app.get("/api/getCaseTypeGrid", async (req, res) => {
   await FetchCaseTypeGrid(req, res);
 });
@@ -137,7 +164,7 @@ app.post("/api/editUserStatus", async (req, res) => {
 });
 
 app.post("/api/editUser", async (req, res) => {
-  await EditUser(req, res);
+  await EditUser(db,req, res);
 });
 
 app.post("/api/editservice", async (req, res) => {
@@ -155,16 +182,38 @@ app.post("/api/addcasetype", async (req, res) => {
   await AddCaseType(db, req, res);
 });
 
+app.post("/api/addcase", async (req, res) => {
+  await AddCase(db, req, res);
+});
+
 app.post("/api/addcasesubtype", async (req, res) => {
   await AddCasesubType(db, req, res);
 });
 app.post("/api/addclient", async (req, res) => {
   await AddClient(db, req, res);
 });
+app.post("/api/addadvocator", async (req, res) => {
+  await AddAdvocator(db, req, res);
+});
+
+app.post("/api/addappointments", async (req, res) => {
+  await AddAppointment(db, req, res);
+});
 app.get("/api/getJoinedClientData", async (req, res) => {
   await getJoinedClientData(db, req, res);
 });
-
+app.get("/api/getAdvocatorData", async (req, res) => {
+  await getAdvocatorData(db, req, res);
+});
+app.get("/api/caseclients", async (req, res) => {
+  await getCaseClients(db, req, res);
+});
+app.get("/api/caseadvocators", async (req, res) => {
+  await getCaseAdvocates(db, req, res);
+});
+app.get("/api/caseproscuter", async (req, res) => {
+  await getCaseProsecutors(db, req, res);
+});
 app.get("/api/checkemail", async (req, res) => {
   await checkEmail(db, req, res);
 });
@@ -173,6 +222,16 @@ app.get("/api/checkuseremail", async (req, res) => {
 });
 app.post("/api/deleteClient", async (req, res) => {
   await deleteClient(db, req, res);
+});
+app.post("/api/judgeassign", async (req, res) => {
+  await assignJudgeToCase(db, req, res);
+});
+app.post("/api/deletecase", async (req, res) => {
+  await deleteCase(db, req, res);
+});
+
+app.post("/api/deleteadvocator", async (req, res) => {
+  await deleteAdvocator(db, req, res);
 });
 app.post("/api/deleteUser", async (req, res) => {
   await DeleteUser(db, req, res);
@@ -184,12 +243,34 @@ app.post("/api/deleteService", async (req, res) => {
 app.post("/api/editClient", async (req, res) => {
   await editClient(db, req, res);
 });
+app.post("/api/editAdvocator", async (req, res) => {
+  await editAdvocator(db, req, res);
+});
 app.post("/api/adduser", async (req, res) => {
   await AddUser(db, req, res);
+});
+app.get("/api/cases", async (req, res) => {
+  await GetCases(req, res); // Call GetCases function with req and res parameters
 });
 app.post("/api/updateUser/:userId", async (req, res) => {
   await EditSpecificUser(db, req, res);
 });
+app.get("/api/petitioners/:caseId", async (req, res) => {
+  await GetPetitioners(db, req, res);
+});
+
+app.get("/api/respondents/:caseId", async (req, res) => {
+  await GetRespondents(db, req, res);
+});
+
+// New endpoint to fetch case sub types based on case type
+app.get("/api/getCaseSubType", async (req, res) => {
+  await FetchCaseSubType(req, res);
+});
+app.get("/api/getcasecout", async (req, res) => {
+  await GetCaseCount(req, res);
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

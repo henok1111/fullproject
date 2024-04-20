@@ -138,16 +138,17 @@ const Casetype = () => {
     // Validate form fields
     subtypeValidationSchema
       .validate({ casesubtype }, { abortEarly: false })
-      .then(() => {
+      .then(() => {  
         // If validation succeeds, proceed with saving
         console.log("Validation successful. Sending request...");
         axios
           .post("http://localhost:8081/api/addcasesubtype", {
-            case_type_id: value.id,
+            case_type: value.case_type,
             sub_type_name: casesubtype,
           })
+          
           .then((response) => {
-            console.log("Case subtype saved successfully");
+            console.log("Case subtype saved successfully",);
             handleclosecasesubtype();
             window.location.reload();
           })
@@ -165,7 +166,6 @@ const Casetype = () => {
         setcasesubtypeerror(validationErrors.casesubtype || false);
       });
   };
-
   useEffect(() => {
     axios
       .get("http://localhost:8081/api/getCaseTypeGrid")
@@ -264,7 +264,7 @@ const Casetype = () => {
                   setInputValue(newInputValue);
                 }}
                 options={CaseType}
-                getOptionLabel={(option) => option.case_type_name}
+                getOptionLabel={(option) => option.case_type}
                 renderInput={(params) => (
                   <TextField
                     {...params}

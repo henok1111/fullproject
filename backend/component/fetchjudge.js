@@ -1,14 +1,27 @@
-const Fetchjudge = () => async (req, res) => {
+const FetchJudges = async (req, res) => {
   try {
-    const query =
-      "SELECT id, first_name, last_name FROM judge WHERE status = $1";
-    const result = await pool.query(query, ["active"]); // Assuming 'active' is a valid status for judges
-
-    res.json(result.rows);
+    const query = `
+      SELECT 
+        u.id,
+        u.first_name,
+        u.last_name,
+        ujt.judge_type
+      FROM 
+        users u
+      INNER JOIN 
+        users_judge_type ujt ON u.id = ujt.judge_id
+      WHERE 
+        u.role = 'judge'
+    `;
+    const [results] = await global.pool.query(query);
+    res.json(results);
   } catch (error) {
-    console.error("Error fetching judges:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    if (res.status) {
+      res.status(500).json({ error: error.message || "Internal Server Error" });
+    } else {
+      console.error("res object does not have status method");
+    }
   }
 };
 
-export default Fetchjudge;
+export default FetchJudges;

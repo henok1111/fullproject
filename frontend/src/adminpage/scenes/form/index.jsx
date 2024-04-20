@@ -22,7 +22,8 @@ const Form = () => {
     "Court_Manager",
   ]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-
+  const [judgeType, setJudgeType] = useState("");
+  const [emailResponse, setEmailResponse] = useState(""); // State to hold email response
   const handleCloseSnackbar = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -40,6 +41,7 @@ const Form = () => {
     password: "",
     confirm_password: "",
     role: "",
+    judge_type: "",
   };
   const isEmailUnique = async (email) => {
     try {
@@ -47,6 +49,7 @@ const Form = () => {
         `http://localhost:8081/api/checkuseremail?email=${email}`
       );
       const data = await response.json();
+      setEmailResponse(data.message); // Set email response message
       return data.isUnique;
     } catch (error) {
       console.error("Error checking email uniqueness:", error);
@@ -77,6 +80,7 @@ const Form = () => {
         password: values.password,
         confirm_password: values.confirm_password,
         role: values.role,
+        judge_type: values.judge_type,
       };
 
       // Log the created object
@@ -165,22 +169,26 @@ const Form = () => {
                 helperText={touched.last_name && errors.last_name}
                 sx={{ gridColumn: "span 2" }}
               />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="email"
-                label="Email"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.email}
-                name="email"
-                error={!!touched.email && (!!errors.email || emailExists)}
-                helperText={
-                  (touched.email && errors.email) ||
-                  (emailExists && "This email is already in use.")
-                }
-                sx={{ gridColumn: "span 4" }}
-              />
+            <TextField
+  fullWidth
+  variant="filled"
+  type="email"
+  label="Email"
+  onBlur={handleBlur}
+  onChange={handleChange}
+  value={values.email}
+  name="email"
+  error={
+    !!touched.email && 
+    (!!errors.email || emailExists) // Check if emailExists state is true
+  }
+  helperText={
+    (touched.email && errors.email) ||
+    (emailExists && "Email is already in use.") // Display error message
+  }
+  sx={{ gridColumn: "span 4" }}
+/>
+
 
               <TextField
                 fullWidth
@@ -254,6 +262,27 @@ const Form = () => {
                   </MenuItem>
                 ))}
               </TextField>
+              {values.role === "Judge" && ( // Only show if role is Judge
+  <TextField
+    fullWidth
+    variant="filled"
+    select
+    label="Judge Type"
+    onBlur={handleBlur}
+    onChange={(e) => {
+      handleChange(e);
+      setJudgeType(e.target.value); // Update judge type state
+    }}
+    value={values.judge_type}
+    name="judge_type"
+    error={!!touched.judge_type && !!errors.judge_type}
+    helperText={touched.judge_type && errors.judge_type}
+    sx={{ gridColumn: "span 4" }}
+  >
+    <MenuItem value="Criminal">Criminal</MenuItem>
+    <MenuItem value="Civil">Civil</MenuItem>
+  </TextField>
+)}
             </Box>
             <Box display="flex" justifyContent="space-between" mt="20px">
               <Button

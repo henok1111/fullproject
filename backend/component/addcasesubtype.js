@@ -3,8 +3,8 @@ const AddCasesubType = async (db, req, res) => {
 
   try {
     const [results] = await db.query(
-      "INSERT INTO case_sub_type (case_type_id, sub_type_name) VALUES (?, ?)",
-      [subtypedata.case_type_id, subtypedata.sub_type_name]
+      "INSERT INTO case_sub_type (case_type, sub_type_name) VALUES (?, ?)",
+      [subtypedata.case_type, subtypedata.sub_type_name]
     );
     res.json({
       message: "Case sub Type inserted successfully",

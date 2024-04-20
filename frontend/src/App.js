@@ -24,12 +24,18 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import AddInvoices from "./adminpage/scenes/invoices/addinvoices";
 import AddClient from "./adminpage/scenes/addclient/addclient";
+import Advocator from "./adminpage/scenes/advocator/viewadvocator";
+import AddAdvocator from "./adminpage/scenes/advocator/addAdvocator";
 import Appointmentform from "./adminpage/scenes/Appointment/appointmentform";
 import Appointment from "./adminpage/scenes/Appointment";
 import Client from "./adminpage/scenes/client";
 import AddCase from "./adminpage/scenes/addcase/addcase";
+import AddCourtRegistrarCase from "./adminpage/scenes/addcase/addcasecourtmanager";
+
+import AddCaseJudge from "./adminpage/scenes/addcase/addcasejudge";
 import Caseform from "./adminpage/scenes/form/caseform";
 import ProfilePage from "./adminpage/scenes/profile";
+
 import NotFound from "./adminpage/scenes/global/pagenotfound";
 import Casetype from "./adminpage/scenes/case/casetype";
 import {
@@ -137,12 +143,15 @@ const RegistrarRoutes = () => {
         <Route path="/bar" element={<Bar />} />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/addclient" element={<AddClient />} />
-        <Route path="/client" element={<Client />} />
+        <Route path="/addadvocator" element={<AddAdvocator />} />
+        <Route path="/viewadvocator" element={<Advocator />} />
+        <Route path="/viewclient" element={<Client />} />
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/appointmentform" element={<Appointmentform />} />
         <Route path="/profilepage" element={<ProfilePage />} />
         <Route path="/casetype" element={<Casetype />} />
         <Route path="/services" element={<AddServices />} />
+        <Route path="/casecourtmanager" element={<AddCourtRegistrarCase/>} />
       </Route>
     </Routes>
   );
@@ -152,40 +161,8 @@ const JudgeRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Admins />}>
-        <Route
-          index
-          element={
-            <RegistrarDashboard
-              showRecentTransactions={true}
-              showCampaign={true}
-              showCalendar={true}
-              statBoxes={[
-                {
-                  title: "431,225",
-                  subtitle: "Total Case",
-                  progress: "0.50",
-                  increase: "+21%",
-                  icon: <GavelRounded />,
-                },
-                {
-                  title: "Your Title",
-                  subtitle: "Your Subtitle",
-                  progress: "0.75",
-                  increase: "+15%",
-                  icon: <HailRounded />,
-                },
-                {
-                  title: "Fuck",
-                  subtitle: "Henok",
-                  progress: "0.75",
-                  increase: "+15%",
-                  icon: <PedalBikeOutlined />,
-                },
-                // Add more objects as needed
-              ]}
-            />
-          }
-        />
+      
+      <Route path="/casejudge" element={<AddCaseJudge/>} />
         <Route path="team" element={<Team />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="form" element={<Form />} />

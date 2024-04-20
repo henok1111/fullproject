@@ -13,9 +13,9 @@
     width: 34px;
     height: 34px;
     border: 8px solid;
-    border-color: #3d5af1 transparent #3d5af1 transparent;
+    border-color: #002aff transparent #002aff transparent;
     border-radius: 50%;
-    animation: spin-anim 1.2s linear infinite;
+    animation: spin-anim 1.2s linear infinite alternate;
 }
 
 @keyframes spin-anim {

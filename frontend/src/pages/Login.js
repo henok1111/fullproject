@@ -11,9 +11,10 @@ import { ColorModeContext, tokens } from "../theme";
 import Ap from "../image/court/ff.png";
 import Lottie from "react-lottie";
 import animationData from "../a.json";
-import { TextField, Button , InputLabel } from "@mui/material";
+import { TextField, Button , } from "@mui/material";
 import newAnimationData from "./newAnimationData.json";
 import "../components/navbar.css"
+import "./loader.css"
 // Background animation component with fixed positioning and higher z-index
 const BackgroundAnimation = () => {
   const defaultOptions = {
@@ -64,7 +65,7 @@ const Logo = () => (
         borderRadius: "10px",
       }}
     />
-    <h1 style={{ textAlign: "center", marginBottom: "3px", }}>Login</h1>
+    <h1 className="text" style={{ textAlign: "center", marginBottom: "3px", }}>LOGIN</h1>
   </div>
 );
 const getUserRoleFromToken = (token) => {
@@ -89,15 +90,16 @@ const LoginForm = () => {
       width: "100%", // Ensure container fills the viewport width
       marginTop: "0px",
       // Remove background color to allow animation to fill the space
+      backgroundColor:`${colors.primary[600]}`
     },
     form: {
       padding: "20px",
       borderRadius: "8px",
       maxWidth: "380px",
       width: "100%",
-      boxShadow: "0 0 50px rgba(0, 0, 0, 0.5)",
+      boxShadow: "0 0 90px rgba(0, 0, 0, 0.9)",
       backdropFilter: "blur(10px)",
-      backgroundColor: `${colors.primary[400]}60`,
+      backgroundColor: `${colors.primary[400]}90`,
      
       marginLeft: "30%",
     },
@@ -188,7 +190,7 @@ const LoginForm = () => {
       // Set loading to false after a delay (2000 milliseconds)
       setTimeout(() => {
         setLoadingButton(false);
-      }, 3000);
+      }, 25000);
     } catch (error) {
       setLoadingButton(false);
 
@@ -300,27 +302,18 @@ label="Email"
               <Button
                 type="submit"
                 variant="contained"
-                color="primary"
-                disabled={loading}
+                
+                disabled={loadingButton}
                 fullWidth
-                style={{ marginTop: "10px" }}
+                style={{ marginTop: "10px",backgroundColor: `${colors.primary[600]}` }}
               >
-                {loading ? (
-       <Lottie
-       options={{
-         loop: true,
-         autoplay: true,
-         animationData: newAnimationData,
-         rendererSettings: {
-           preserveAspectRatio: "xMidYMid slice",
-         },
-       }}
-       height={50}
-       width={50}
-     />
-    ): (
+                {loadingButton ? <div className=".loader-container">
+                  <div className="spinner">
+
+                  </div>
+                </div>: 
       "Login"
-    )}
+    }
               </Button>
             </form>
           </div>

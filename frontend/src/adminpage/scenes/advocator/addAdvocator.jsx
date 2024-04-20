@@ -27,12 +27,6 @@ const validationSchema = yup.object().shape({
   mobileNumber: yup.string().required("Mobile Number is required"),
   alternateNumber: yup.string(),
   address: yup.string().required("Address is required"),
-  references: yup.array().of(
-    yup.object().shape({
-      referenceName: yup.string(),
-      referenceMobile: yup.string(),
-    })
-  ),
 });
 
 const isEmailUnique = async (email) => {
@@ -55,14 +49,10 @@ const createUserObject = (values) => {
     mobile_number: values.mobileNumber,
     alternate_number: values.alternateNumber,
     address: values.address,
-    references: values.references.map((reference) => ({
-      reference_name: reference.referenceName,
-      reference_mobile: reference.referenceMobile,
-    })),
   };
 };
 
-const AddClient = () => {
+const AddAdvocator = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -77,23 +67,9 @@ const AddClient = () => {
       mobileNumber: "",
       alternateNumber: "",
       address: "",
-      references: [{ referenceName: "", referenceMobile: "" }],
     },
     onSubmit: (values) => handleSubmit(values, formik),
   });
-
-  const handleAddReference = () => {
-    formik.setFieldValue("references", [
-      ...formik.values.references,
-      { referenceName: "", referenceMobile: "" },
-    ]);
-  };
-
-  const handleRemoveReference = (index) => {
-    const updatedReferences = [...formik.values.references];
-    updatedReferences.splice(index, 1);
-    formik.setFieldValue("references", updatedReferences);
-  };
 
   const handleSubmit = async (values, formik) => {
     try {
@@ -111,29 +87,29 @@ const AddClient = () => {
       console.log("Form submitted");
       console.log("Formik Values:", values);
   
-      const userObject = createUserObject(values);
+      const advocatorObject = createUserObject(values);
   
-      console.log("User Object:", userObject);
+      console.log("Advocator Object:", advocatorObject);
   
       try {
-        JSON.parse(JSON.stringify(userObject));
-        console.log("User Object is a valid JSON");
+        JSON.parse(JSON.stringify(advocatorObject));
+        console.log("Advocator Object is a valid JSON");
       } catch (error) {
-        console.error("User Object is not a valid JSON:", error);
+        console.error("Advocator Object is not a valid JSON:", error);
         return;
       }
   
-      console.log("Sending request to:", "http://localhost:8081/api/addclient");
+      console.log("Sending request to:", "http://localhost:8081/api/addadvocator");
   
       let response;
   
       try {
-        response = await fetch("http://localhost:8081/api/addclient", {
+        response = await fetch("http://localhost:8081/api/addadvocator", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(userObject),
+          body: JSON.stringify(advocatorObject),
         });
   
         console.log("Response Status:", response.status);
@@ -165,8 +141,8 @@ const AddClient = () => {
   };
 
   return (
-    <Box padding="30px"  backgroundColor={colors.blueAccent[900]}>
-      <Header title="Client Management" subtitle="Add Client" />
+    <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
+      <Header title="Advocator Management" subtitle="Add Advocator" />
       <form onSubmit={formik.handleSubmit}>
         <Box
           padding="20px"
@@ -295,58 +271,6 @@ const AddClient = () => {
                 helperText={formik.touched.address && formik.errors.address}
               />
             </Box>
-            <Box sx={{ mt: "20px" }}>
-              <FormLabel component="legend">References</FormLabel>
-              {formik.values.references.map((reference, index) => (
-                <Box
-                  key={index}
-                  sx={{ display: "flex", gap: "20px", alignItems: "center" }}
-                >
-                  <TextField
-                    name={`references[${index}].referenceName`}
-                    label="Reference Name"
-                    variant="outlined"
-                    fullWidth
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={reference.referenceName}
-                  />
-                  <TextField
-                    name={`references[${index}].referenceMobile`}
-                    label="Reference Mobile"
-                    variant="outlined"
-                    fullWidth
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={reference.referenceMobile}
-                  />
-                  <Button
-                    type="button"
-                    color="secondary"
-                    variant="contained"
-                    onClick={() => handleRemoveReference(index)}
-                    startIcon={<DeleteOutlineIcon />}
-                    sx={{
-                      ml: "10px",
-                      width: "150px",
-                      height: "40px",
-                      backgroundColor: "gainsboro",
-                    }}
-                  >
-                    Remove
-                  </Button>
-                </Box>
-              ))}
-              <Button
-                type="button"
-                color="secondary"
-                variant="contained"
-                onClick={handleAddReference}
-                sx={{ mt: "10px" }}
-              >
-                Add Reference
-              </Button>
-            </Box>
           </Box>
           <Box
             sx={{
@@ -370,7 +294,7 @@ const AddClient = () => {
               startIcon={<AddOutlinedIcon />}
               sx={{ marginLeft: "10px" }}
             >
-              Add Client
+              Add Advocator
             </Button>
           </Box>
         </Box>
@@ -385,4 +309,4 @@ const AddClient = () => {
   );
 };
 
-export default AddClient;
+export default AddAdvocator;

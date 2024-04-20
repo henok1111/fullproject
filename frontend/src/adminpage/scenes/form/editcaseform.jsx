@@ -10,12 +10,12 @@ import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import EditCase from "../form/editcaseform";
+import CaseForm from "../form/caseform";
 const initialValues = {};
 
 const checkoutSchema = yup.object().shape({});
 
-const AddCase = () => {
+const EditCase = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const colors = tokens(theme.palette.mode);
@@ -217,7 +217,7 @@ const AddCase = () => {
             <DialogTitle  bgcolor={colors.blueAccent[900]} id="form-dialog-title">Edit Case</DialogTitle>
             <DialogContent style={{backgroundColor:`${colors.blueAccent[900]}`}}>
                 {/* Render the CaseForm component */}
-                {isEditFormOpen && <EditCase caseId={selectedCaseId} />}
+                {isEditFormOpen && <CaseForm caseId={selectedCaseId} />}
             </DialogContent>
             <DialogActions  style={{backgroundColor:`${colors.blueAccent[900]}`}}>
                 <Button onClick={() => setOpenCaseFormDialog(false)} color="info">
@@ -451,4 +451,4 @@ const AddCase = () => {
   );
 };
 
-export default AddCase;
+export default EditCase;
