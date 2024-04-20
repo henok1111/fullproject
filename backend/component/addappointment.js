@@ -1,7 +1,10 @@
 import twilio from "twilio";
 
 // Initialize Twilio client with your account SID and auth token
-const twilioClient = twilio("accout_sid", "auth_token");
+const twilioClient = twilio(
+  "AC355399ab03efa713c60be640368cd77e",
+  "61072e2c48690b73798c81c499334b95"
+);
 
 export const AddAppointment = async (db, req, res) => {
   try {
@@ -59,7 +62,7 @@ export const AddAppointment = async (db, req, res) => {
         try {
           await twilioClient.messages.create({
             body: `Hello! You have a court appointment scheduled for ${date} at ${time} and  Note: ${note}.`,
-            from: "twillio_number", // Your Twilio phone number
+            from: "+12513136308", // Your Twilio phone number
             to: phoneNumber,
           });
           console.log(`SMS sent successfully to petitioner ${phoneNumber}`);
