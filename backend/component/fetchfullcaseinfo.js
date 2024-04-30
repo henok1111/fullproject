@@ -82,18 +82,24 @@ const FetchAllCasesInformation = async (req, res) => {
             c.is_paid;
         `;
 
-        const [results] = await global.pool.query(query);
+    const [results] = await global.pool.query(query);
 
-        const uniqueResults = results.map(result => {
-            // Remove duplicates based on id in respondents_info
-            const uniqueRespondents = Array.from(new Set(result.respondents_info.map(respondent => respondent.id))).map(id => {
-                return result.respondents_info.find(respondent => respondent.id === id);
-            });
+    const uniqueResults = results.map((result) => {
+      const uniqueRespondents = Array.from(
+        new Set(result.respondents_info.map((respondent) => respondent.id))
+      ).map((id) => {
+        return result.respondents_info.find(
+          (respondent) => respondent.id === id
+        );
+      });
 
-            // Remove duplicates based on id in petitioners_info
-            const uniquePetitioners = Array.from(new Set(result.petitioners_info.map(petitioner => petitioner.id))).map(id => {
-                return result.petitioners_info.find(petitioner => petitioner.id === id);
-            });
+      const uniquePetitioners = Array.from(
+        new Set(result.petitioners_info.map((petitioner) => petitioner.id))
+      ).map((id) => {
+        return result.petitioners_info.find(
+          (petitioner) => petitioner.id === id
+        );
+      });
 
             // Remove duplicates based on id in other_documents_info
             const uniqueOtherDocuments = Array.from(new Set(result.other_documents_info.map(document => document.id))).map(id => {
@@ -103,11 +109,11 @@ const FetchAllCasesInformation = async (req, res) => {
             return { ...result, respondents_info: uniqueRespondents, petitioners_info: uniquePetitioners, other_documents_info: uniqueOtherDocuments };
         });
 
-        res.json(uniqueResults);
-    } catch (error) {
-        console.error("Error fetching all cases information:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+    res.json(uniqueResults);
+  } catch (error) {
+    console.error("Error fetching all cases information:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 export default FetchAllCasesInformation;
