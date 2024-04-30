@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { Form, Formik } from "formik";
-import * as yup from "yup";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme"; // Ensure this import is correct
 import { useTheme } from "@mui/material";
 import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
 import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/material/Radio";
 import SaveIcon from "@mui/icons-material/Save";
 import { useNavigate } from "react-router-dom";
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
@@ -36,7 +31,7 @@ const initialValues = {
   },
 };
 
-const CaseForm = ({caseId}) => {
+const CaseForm = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
@@ -180,7 +175,7 @@ const fetchAdvocates = async () => {
       console.error("Error fetching case types:", error);
     }
   };
-  const handleDocumentChange = async (event) => {
+ const handleDocumentChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
         try {
@@ -213,11 +208,7 @@ const fetchAdvocates = async () => {
             console.error("Error uploading file:", error);
         }
     }
-};
-
-
-
-
+}; 
   const fetchCaseCount = async () => {
     try {
       const response = await fetch("http://localhost:8081/api/getcasecout");
@@ -266,13 +257,6 @@ const fetchAdvocates = async () => {
   
       // If the form submission is successful, you can show a success message or navigate to another page
       console.log("Case saved successfully!");
-  
-      // Example: Navigate to another page after successful form submission
-      // navigate("/success-page");
-  
-      // Handle document upload
-      // You can include logic for uploading documents here
-      // Ensure that you have implemented the handleDocumentChange function to handle file upload
     } catch (error) {
       console.error("Error saving case:", error);
       // Handle error, show error message, or perform any necessary actions
@@ -310,7 +294,6 @@ const fetchAdvocates = async () => {
       },
     }));
   }, [selectedPetitioners, selectedRespondents, selectedAdvocateRespondents, selectedAdvocatePetioner, selectedCaseSubType, documentFileName, selectedProscutorPetioner, selectedCaseType, registrationDate, description, policeStation, FIRNumber, FIRDate]);
-  
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Box display="flex" justifyContent="flex-end" mt="20px">

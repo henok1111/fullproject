@@ -37,6 +37,8 @@ import {
   GetPetitioners,
   GetRespondents,
 } from "./component/getpetionerandrespondant.js";
+import ResetPassword from "./user_forgot_password.js/password_reset.js";
+import UpdateCase from "./component/editcase.js";
 import { AddAppointment } from "./component/addappointment.js";
 import getAdvocatorData from "./component/getadvocators.js";
 import editAdvocator from "./component/editadvocator.js";
@@ -50,7 +52,10 @@ import Fetchjudge from "./component/fetchjudge.js";
 import uploadFilePath from "./component/uploadcasedocument.js";
 import AddCase from "./component/addcase.js";
 import assignJudgeToCase from "./component/assignedcase.js";
+import UpdatePassword from "./user_forgot_password.js/password_update.js";
 const app = express();
+import uploadOtherCases from "./component/uploadothercasedocument.js";
+import uploadDocuments from "./component/othercase.js";
 const PORT = 8081;
 const router = express.Router();
 app.use(express.json());
@@ -83,8 +88,8 @@ app.use((err, req, res, next) => {
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "1234",
-  database: "court",
+  password: "",
+  database: "courts",
   Promise: bluebird,
   waitForConnections: true,
   connectionLimit: 10,
@@ -122,7 +127,13 @@ const upload = multer({ storage: storage });
 app.post("/api/uploaddocument", upload.single("file"), (req, res) =>
   uploadFilePath(db, req, res)
 );
-uploadImage
+app.post("/api/uploaddocumentss", upload.single("file"), (req, res) =>
+    uploadDocuments(db,req, res)
+);
+app.post("/api/uploadothercase", upload.single("file"), (req, res) =>
+uploadOtherCases(db, req, res)
+);
+
 app.post("/api/upload", upload.single("file"), (req, res) =>
 uploadImage(db, req, res)
 );
@@ -162,7 +173,14 @@ app.get("/api/getRole/:id", async (req, res) => {
 app.post("/api/editUserStatus", async (req, res) => {
   await EditUserStatus(db, req, res);
 });
+app.post("/user/resetPassword", async (req, res) => {
+  await ResetPassword( db, req, res);
+});
 
+
+app.post("/user/updatePassword", async (req, res) => {
+  await UpdatePassword( db, req, res);
+});
 app.post("/api/editUser", async (req, res) => {
   await EditUser(db,req, res);
 });
@@ -186,6 +204,9 @@ app.post("/api/addcase", async (req, res) => {
   await AddCase(db, req, res);
 });
 
+app.post("/api/editcase", async (req, res) => {
+  await UpdateCase(db, req, res);
+});
 app.post("/api/addcasesubtype", async (req, res) => {
   await AddCasesubType(db, req, res);
 });

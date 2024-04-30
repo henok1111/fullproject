@@ -31,7 +31,7 @@ import Appointment from "./adminpage/scenes/Appointment";
 import Client from "./adminpage/scenes/client";
 import AddCase from "./adminpage/scenes/addcase/addcase";
 import AddCourtRegistrarCase from "./adminpage/scenes/addcase/addcasecourtmanager";
-
+import ReceiveEmail from "./forgot_password/receive_user_email";
 import AddCaseJudge from "./adminpage/scenes/addcase/addcasejudge";
 import Caseform from "./adminpage/scenes/form/caseform";
 import ProfilePage from "./adminpage/scenes/profile";
@@ -46,6 +46,8 @@ import {
 
 import Deactive from "./pages/deactive";
 import AddServices from "./adminpage/scenes/services/addservices";
+import ConfirmedPage from "./forgot_password/confirmedPage";
+import ResetPassword from "./forgot_password/receive_new_password";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -114,6 +116,8 @@ const App = () => {
             )}
 
             <Route path="/deactive" element={<Deactive />} />
+            <Route path="/forgot-password" element={<ReceiveEmail/>} />
+            <Route path="/user/resetPassword/:token" element = {<ResetPassword/>} />
             <Route path="*" element={<NotFound />} />
             <Route
               path="/unauthorized"

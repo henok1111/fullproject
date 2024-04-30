@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -315,6 +316,7 @@ label="Email"
       "Login"
     }
               </Button>
+              <Link to="/forgot-password" style={{ textDecoration: "none" }}> forgot password</Link>
             </form>
           </div>
         </ThemeProvider>
