@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  TextField,
+  Typography,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { Form, Formik } from "formik";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme"; // Ensure this import is correct
@@ -13,9 +21,9 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 const initialValues = {
   clientDetail: {
     selectedPetitioners: [],
-    petitionerAdvocate: "", // Single value for petitioner advocate
+    petitionerAdvocate: "",
     respondents: [],
-    respondentAdvocate: "", // Single value for respondent advocate
+    respondentAdvocate: "",
     documentFileName: "",
   },
   caseDetails: {
@@ -52,6 +60,7 @@ const CaseForm = () => {
   const [respondentAdvocates, setRespondentAdvocates] = useState([]);
   const [documentFileName, setDocumentFileName] = useState("");
   const [registrationDate, setRegistrationDate] = useState(""); // State for registration date
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const [description, setDescription] = useState(null); // State for description
   const [policeStation, setPoliceStation] = useState(""); // State for police station
   const [FIRNumber, setFIRNumber] = useState(""); // State for FIR number
@@ -241,6 +250,14 @@ const CaseForm = () => {
       console.error("Error fetching case sub types:", error);
     }
   };
+  const resetForm = () => {
+    setDynamicInitialValues(initialValues);
+    setRegistrationDate("");
+    setDescription("");
+    setPoliceStation("");
+    setFIRNumber("");
+    setFIRDate("");
+  };
   const handleFormSubmit = async (values) => {
     console.log("Form submitted!");
 
@@ -261,6 +278,12 @@ const CaseForm = () => {
       }
 
       // If the form submission is successful, you can show a success message or navigate to another page
+      handleSnackbarOpen();
+      resetForm();
+      setSelectedPetitioners([]);
+      setSelectedRespondents([]);
+      setSelectedCaseType("");
+      setSelectedCaseSubType("");
       console.log("Case saved successfully!");
     } catch (error) {
       console.error("Error saving case:", error);
@@ -314,6 +337,18 @@ const CaseForm = () => {
     FIRNumber,
     FIRDate,
   ]);
+
+  const handleSnackbarOpen = () => {
+    setOpenSnackbar(true);
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Box display="flex" justifyContent="flex-end" mt="20px">
@@ -784,6 +819,16 @@ const CaseForm = () => {
           </Form>
         )}
       </Formik>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert elevation={6} s onClose={handleSnackbarClose} severity="success">
+          Case added successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
