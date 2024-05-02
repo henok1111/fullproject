@@ -12,10 +12,10 @@ import { ColorModeContext, tokens } from "../theme";
 import Ap from "../image/court/ff.png";
 import Lottie from "react-lottie";
 import animationData from "../a.json";
-import { TextField, Button , } from "@mui/material";
+import { TextField, Button } from "@mui/material";
 import newAnimationData from "./newAnimationData.json";
-import "../components/navbar.css"
-import "./loader.css"
+import "../components/navbar.css";
+import "./loader.css";
 // Background animation component with fixed positioning and higher z-index
 const BackgroundAnimation = () => {
   const defaultOptions = {
@@ -56,7 +56,7 @@ const Logo = () => (
       alignItems: "center",
     }}
   >
-    <img  
+    <img
       src={Ap}
       alt="Logo"
       style={{
@@ -66,12 +66,18 @@ const Logo = () => (
         borderRadius: "10px",
       }}
     />
-    <h1 className="text" style={{ textAlign: "center", marginBottom: "3px", }}>LOGIN</h1>
+    <h1 className="text" style={{ textAlign: "center", marginBottom: "3px" }}>
+      LOGIN
+    </h1>
   </div>
 );
 const getUserRoleFromToken = (token) => {
   const decodedToken = JSON.parse(atob(token.split(".")[1]));
   return decodedToken.role_name;
+};
+const getUSerID = (token) => {
+  const decodedToken = JSON.parse(atob(token.split(".")[1]));
+  return decodedToken.userId;
 };
 
 const LoginForm = () => {
@@ -80,7 +86,8 @@ const LoginForm = () => {
   const colors = tokens(theme.palette.mode) || {};
   const colorMode = useContext(ColorModeContext);
   const [loadingButton, setLoadingButton] = useState(false);
-  const [newAnimationDataState, setNewAnimationDataState] = useState(newAnimationData);
+  const [newAnimationDataState, setNewAnimationDataState] =
+    useState(newAnimationData);
 
   const styles = {
     container: {
@@ -91,7 +98,7 @@ const LoginForm = () => {
       width: "100%", // Ensure container fills the viewport width
       marginTop: "0px",
       // Remove background color to allow animation to fill the space
-      backgroundColor:`${colors.primary[600]}`
+      backgroundColor: `${colors.primary[600]}`,
     },
     form: {
       padding: "20px",
@@ -101,7 +108,7 @@ const LoginForm = () => {
       boxShadow: "0 0 90px rgba(0, 0, 0, 0.9)",
       backdropFilter: "blur(10px)",
       backgroundColor: `${colors.primary[400]}90`,
-     
+
       marginLeft: "30%",
     },
   };
@@ -174,10 +181,12 @@ const LoginForm = () => {
       // Get user status directly from the token and convert to lowercase
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userStatus = decodedToken.status.toLowerCase();
+      const userID = getUSerID(token);
 
       // Log the user role and status for debugging
       console.log("User Role:", role);
       console.log("User Status:", userStatus);
+      console.log("user id:", userID);
 
       // Perform additional checks based on the user's status
       if (userStatus === "activated") {
@@ -260,24 +269,23 @@ const LoginForm = () => {
               </div>
 
               <div style={{ marginBottom: "15px" }}>
-              <TextField
-   fullWidth
-  variant="standard"
-  id="email"
-  name="email"
-margin="normal"
-label="Email"
-  value={formData.email}
-  onChange={(e) =>
-    setFormData((prevData) => ({
-      ...prevData,
-      email: e.target.value,
-    }))
-  }
-  error={!!errors.email}
-  helperText={errors.email}
- 
-/>
+                <TextField
+                  fullWidth
+                  variant="standard"
+                  id="email"
+                  name="email"
+                  margin="normal"
+                  label="Email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      email: e.target.value,
+                    }))
+                  }
+                  error={!!errors.email}
+                  helperText={errors.email}
+                />
               </div>
 
               <div style={{ marginBottom: "5px" }}>
@@ -303,20 +311,25 @@ label="Email"
               <Button
                 type="submit"
                 variant="contained"
-                
                 disabled={loadingButton}
                 fullWidth
-                style={{ marginTop: "10px",backgroundColor: `${colors.primary[600]}` }}
+                style={{
+                  marginTop: "10px",
+                  backgroundColor: `${colors.primary[600]}`,
+                }}
               >
-                {loadingButton ? <div className=".loader-container">
-                  <div className="spinner">
-
+                {loadingButton ? (
+                  <div className=".loader-container">
+                    <div className="spinner"></div>
                   </div>
-                </div>: 
-      "Login"
-    }
+                ) : (
+                  "Login"
+                )}
               </Button>
-              <Link to="/forgot-password" style={{ textDecoration: "none" }}> forgot password</Link>
+              <Link to="/forgot-password" style={{ textDecoration: "none" }}>
+                {" "}
+                forgot password
+              </Link>
             </form>
           </div>
         </ThemeProvider>
