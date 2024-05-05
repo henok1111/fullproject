@@ -426,6 +426,7 @@ const AddCase = () => {
                   open={snackbarOpen}
                   autoHideDuration={6000} // Adjust as needed
                   onClose={handleSnackbarClose}
+                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
                   message="Case deleted successfully"
                 />
                 {/* Render CaseBoxes for each fetched case */}
