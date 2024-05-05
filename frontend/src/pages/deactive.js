@@ -7,13 +7,11 @@ import Topbar from '../components/Navbar';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { ColorModeContext, tokens } from '../theme';
 import { useTheme } from '@mui/material';
-
 function Deactive() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
   const navigate = useNavigate();
-
   const handleBackButtonClick = () => {
     navigate('/login');
   };
@@ -22,10 +20,8 @@ function Deactive() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-
         <Box>
-          <Topbar />
-         
+          <Topbar/>
           <Box height={669} bgcolor={colors.primary[800]}>
             <IconButton onClick={handleBackButtonClick} sx={{ position: 'absolute', top: 69, left: 0,  }}>
               <ArrowBack fontSize="large" color="secondary" />

@@ -7,16 +7,15 @@ import Topbar from "./scenes/global/Topbar";
 import { Outlet, Route, Routes } from "react-router-dom"; // Import Outlet from react-router-dom
 import RegistrarDashboard from "./scenes/dashboard";
 // ... (other imports)
-export default function Adminss( ) {
+export default function Invoiclerk( ) {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
-
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-          <Sidebar isSidebar={isSidebar} role="registrar" privateImage="" />
+          <Sidebar isSidebar={isSidebar} role="Invoice_Clerk" privateImage="" />
           <div style={{ flexGrow: 1, overflowY: "auto" }}>
             <Topbar setIsSidebar={setIsSidebar} />
             <div style={{ overflowY: "auto", height: "calc(100vh - 64px)", scrollbarWidth: "none", msOverflowStyle: "none" }}>

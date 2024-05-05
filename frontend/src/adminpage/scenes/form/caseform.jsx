@@ -438,7 +438,11 @@ const CaseForm = () => {
                     <TextField
                       id="petitionerAdvocate"
                       select
-                      required
+                      label={
+                        selectedCaseType === "criminal"
+                          ? "select proscuter for petioner*"
+                          : "select Advocator for petioner*"
+                      }
                       value={values.clientDetail.petitionerAdvocate}
                       onChange={(event) => {
                         const selectedProsecutor = event.target.value;

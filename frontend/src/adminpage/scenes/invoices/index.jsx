@@ -53,7 +53,7 @@ const Invoices = () => {
 
   const handleaddinvoicesbuttonClick = () => {
     // Navigate to another page (e.g., '/other-page')
-    navigate("/registrar/addinvoices");
+    navigate("/invoice_clerk/addinvoices");
   };
 
   return (

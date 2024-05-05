@@ -101,7 +101,7 @@ const AddInvoices = () => {
 
   const handlebackbuttonClick = () => {
     // Navigate to another page (e.g., '/other-page')
-    navigate("/registrar/invoices");
+    navigate("/invoice_clerk/invoices");
   };
   const services = ["Service A", "Service B", "Service C"];
 

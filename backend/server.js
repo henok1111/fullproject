@@ -57,6 +57,7 @@ import uploadFilePath from "./component/uploadcasedocument.js";
 import AddCase from "./component/addcase.js";
 import assignJudgeToCase from "./component/assignedcase.js";
 import UpdatePassword from "./user_forgot_password.js/password_update.js";
+import GetUserById from "./component/getuserbyid.js";
 const app = express();
 import uploadOtherCases from "./component/uploadothercasedocument.js";
 import uploadDocuments from "./component/othercase.js";
@@ -64,7 +65,12 @@ import http from "http";
 import { Server } from "socket.io";
 
 const PORT = 8081;
+import GetAppointmnetCases from "./component/getapppointmentcases.js";
+import GetAppointment from "./component/getappointment.js";
+import DeleteAppointment from "./component/deleteappointment.js";
+import UpdateAppointment from "./component/updateappointment.js";
 const router = express.Router();
+
 app.use(express.json());
 app.use(
   cors({
@@ -96,7 +102,7 @@ app.use(cors());
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "1234",
+  password: "",
   database: "court",
   Promise: bluebird,
   waitForConnections: true,
@@ -153,6 +159,9 @@ app.get("/api/getUsers", async (req, res) => {
   await Getuser(req, res);
 });
 
+app.post("/api/getUserbyid", async (req, res) => {
+  await GetUserById(req, res);
+});
 app.get("/api/getServices", async (req, res) => {
   await ViewServices(req, res);
 });
@@ -180,6 +189,10 @@ app.get("/api/getRole/:id", async (req, res) => {
 });
 app.post("/api/editUserStatus", async (req, res) => {
   await EditUserStatus(db, req, res);
+});
+
+app.post("/api/updateappointment", async (req, res) => {
+  await UpdateAppointment(db, req, res);
 });
 app.post("/user/resetPassword", async (req, res) => {
   await ResetPassword(db, req, res);
@@ -264,7 +277,9 @@ app.post("/api/deleteadvocator", async (req, res) => {
 app.post("/api/deleteUser", async (req, res) => {
   await DeleteUser(db, req, res);
 });
-
+app.post("/api/deleteappointment", async (req, res) => {
+  await DeleteAppointment(db, req, res);
+});
 app.post("/api/deleteService", async (req, res) => {
   await DeleteService(db, req, res);
 });
@@ -279,6 +294,14 @@ app.post("/api/adduser", async (req, res) => {
 });
 app.get("/api/cases", async (req, res) => {
   await GetCases(req, res); // Call GetCases function with req and res parameters
+});
+
+app.post("/api/appointmentcases", async (req, res) => {
+  await GetAppointmnetCases(req, res); // Call GetCases function with req and res parameters
+});
+
+app.post("/api/getappointment", async (req, res) => {
+  await GetAppointment(req, res); // Call GetCases function with req and res parameters
 });
 app.post("/api/updateUser/:userId", async (req, res) => {
   await EditSpecificUser(db, req, res);

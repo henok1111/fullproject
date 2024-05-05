@@ -161,7 +161,6 @@ const LoginForm = () => {
       const accessToken = response.data.token;
       localStorage.setItem("accessToken", accessToken);
 
-      // Call the function to log token information
       logTokenInfo();
 
       toast.success("Login successful", {
@@ -173,12 +172,10 @@ const LoginForm = () => {
         draggable: true,
       });
 
-      // Get user role and status from the token
       const token = localStorage.getItem("accessToken");
       const role_name = getUserRoleFromToken(token);
       const role = role_name.toLowerCase();
 
-      // Get user status directly from the token and convert to lowercase
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userStatus = decodedToken.status.toLowerCase();
       const userID = getUSerID(token);
@@ -186,21 +183,18 @@ const LoginForm = () => {
       // Log the user role and status for debugging
       console.log("User Role:", role);
       console.log("User Status:", userStatus);
-      console.log("user id:", userID);
 
       // Perform additional checks based on the user's status
       if (userStatus === "activated") {
-        // User is activated, proceed with navigation based on the role
         navigate(`/${role}`);
+        setTimeout(() => {
+          window.location.reload(); // Refresh the page after navigating
+        }, 1000); // Adjust the delay as needed
       } else {
-        // User is deactivated, navigate to /deactivated
         navigate("/deactive");
       }
 
-      // Set loading to false after a delay (2000 milliseconds)
-      setTimeout(() => {
-        setLoadingButton(false);
-      }, 25000);
+      setLoadingButton(false);
     } catch (error) {
       setLoadingButton(false);
 
