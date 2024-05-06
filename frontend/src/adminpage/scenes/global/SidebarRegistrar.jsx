@@ -15,6 +15,7 @@ import GavelIcon from "@mui/icons-material/Gavel";
 import { jwtDecode } from "jwt-decode";
 import henok from "./image.png";
 
+
 const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -31,15 +32,16 @@ const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
         active={selected === title}
         style={{
           color: colors.grey[100],
+          fontSize: "19px", // Customize the font size here
         }}
         onClick={subItems ? handleSubMenuClick : () => setSelected(title)}
         icon={icon}
       >
-        <Typography>{title}</Typography>
+        <Typography sx={{ fontSize: "inherit" }}>{title}</Typography>
         <Link to={to} />
       </MenuItem>
       {subItems && openSubMenu && (
-        <Menu iconShape="round">
+        <Menu iconShape="circle">
           {subItems.map((subItem, index) => (
             <MenuItem
               key={index}
@@ -49,17 +51,18 @@ const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
                 color: colors.grey[100],
                 border: "3px solid",
                 marginLeft: "30px",
-                marginRight: "30px",
+                marginRight: "20px",
                 borderTop: "transparent",
                 borderRight: "transparent",
                 padding: "0px",
                 marginBottom: ".6rem",
                 borderRadius: "8px",
-                borderColor: colors.greenAccent[600],
+                borderColor: colors.greenAccent[100],
+                fontSize: "19px", // Customize the font size here
               }}
               onClick={() => setSelected(subItem.title)}
             >
-              <Typography>{subItem.title}</Typography>
+              <Typography sx={{ fontSize: "inherit" }}>{subItem.title}</Typography>
               <Link to={subItem.to} />
             </MenuItem>
           ))}
@@ -186,6 +189,20 @@ const Sidebar = ({ role, name, userId }) => {
         icon: <ContactsOutlinedIcon />,
       },
     ],
+    proscutor:[
+      {
+        title: "Case Management",
+        icon: <GavelIcon />,
+        subItems: [
+          { title: "View Cases", to: "/proscuter/addcase", icon: <PersonOutlinedIcon /> },
+          { title: "Add Case", to: "/proscuter/caseform", icon: <PersonOutlinedIcon /> },
+        ]
+      }
+    ],
+    Invoice_Clerk:[
+      { title: "Invoices", to: "invoices", icon: <ReceiptOutlinedIcon /> },
+      { title: "Services", to: "services", icon: <ReceiptOutlinedIcon /> },
+    ],
     judge: [
      
       {
@@ -198,6 +215,15 @@ const Sidebar = ({ role, name, userId }) => {
         to: "calendar",
         icon: <CalendarTodayOutlinedIcon />,
       }, { title: "Profile Form", to: "casejudge", icon: <PersonOutlinedIcon /> },
+      {
+        title: "Appointment",
+        to: "appointment",
+        icon: <ReceiptOutlinedIcon />,
+      },
+    ],
+    court_manager:[
+
+{ title: "View Cases", to: "/court_manager/casecourtmanager", icon: <PersonOutlinedIcon /> },
     ],
     registrar : [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
@@ -267,7 +293,7 @@ const Sidebar = ({ role, name, userId }) => {
           backgroundColor: "transparent !important",
         },
         "& .pro-inner-item": {
-          padding: "5px 20px 5px 20px !important",
+          padding: "5px 20px 5px 10px !important",
         },
         "& .pro-inner-item:hover": {
           color: "#868dfb !important",
@@ -337,6 +363,9 @@ const Sidebar = ({ role, name, userId }) => {
                   {role === "admin" ? "Administrator" : ""}
                   {role === "judge" ? "Judge" : ""}
                   {role === "registrar" ? "Registrar" : ""}
+                  {role === "Invoice_Clerk" ? "Invoice clerk" : ""}
+                  {role === "court_manager" ? "Court Manager " : ""}
+                  {role === "proscutor" ? "Proscutor" : ""}
                 </Typography>
               </Box>
             </Box>

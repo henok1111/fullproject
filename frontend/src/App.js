@@ -9,6 +9,9 @@ import Login from "./pages/Login";
 import Admin from "./adminpage/admin";
 import Admins from "./adminpage/judge";
 import Adminss from "./adminpage/registrar";
+import CourtManager from "./adminpage/court_manager";
+import Invoiclerk from "./adminpage/invoice_clerk";
+import Proscutor from "./adminpage/proscutor";
 import Form from "./adminpage/scenes/form";
 import Team from "./adminpage/scenes/team";
 import Contacts from "./adminpage/scenes/contacts";
@@ -35,7 +38,7 @@ import ReceiveEmail from "./forgot_password/receive_user_email";
 import AddCaseJudge from "./adminpage/scenes/addcase/addcasejudge";
 import Caseform from "./adminpage/scenes/form/caseform";
 import ProfilePage from "./adminpage/scenes/profile";
-
+import ViewProfilePage  from "./adminpage/scenes/profile";
 import NotFound from "./adminpage/scenes/global/pagenotfound";
 import Casetype from "./adminpage/scenes/case/casetype";
 import {
@@ -48,6 +51,7 @@ import Deactive from "./pages/deactive";
 import AddServices from "./adminpage/scenes/services/addservices";
 import ConfirmedPage from "./forgot_password/confirmedPage";
 import ResetPassword from "./forgot_password/receive_new_password";
+import ViewProfilePages from "./adminpage/scenes/profile/profile";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -65,7 +69,9 @@ const App = () => {
 
   const getUserRoleFromToken = (token) => {
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    console.log(decodedToken.role_name);
     return decodedToken.role_name;
+  
   };
 
   const RedirectToDashboard = () => {
@@ -73,12 +79,13 @@ const App = () => {
       return <Navigate to="/login" />;
     } else {
       switch (userRole) {
-        case "Registrar":
-          return <Navigate to="/registrar" />;
+      
         case "Admin":
           return <Navigate to="/admin" />;
         case "Judge":
           return <Navigate to="/judge" />;
+        case "Proscutor":
+          return <Navigate to="/proscuter" />;
         default:
           return <Navigate to="/login" />;
       }
@@ -103,14 +110,25 @@ const App = () => {
             />
             {authenticated && (
               <>
-                {userRole === "Registrar" && (
-                  <Route path="/registrar/*" element={<RegistrarRoutes />} />
+                {userRole === "Proscuter" && (
+                  <Route path="/proscuter/*" element={<ProscutorRoutes/>} />
+                  
                 )}
                 {userRole === "Judge" && (
                   <Route path="/judge/*" element={<JudgeRoutes />} />
                 )}
                 {userRole === "Admin" && (
                   <Route path="/admin/*" element={<AdminRoutes />} />
+                )}
+                {userRole === "Registrar" && (
+                  <Route path="/registrar/*" element={<RegistrarRoutes />} />
+                )}
+                
+                {userRole === "Court_Manager" && (
+                  <Route path="/court_manager/*" element={<CortManagerRoutes />} />
+                )}
+                {userRole === "Invoice_Clerk" && (
+                  <Route path="/invoice_clerk/*" element={<InvoiceClerkRoutes />} />
                 )}
               </>
             )}
@@ -153,6 +171,7 @@ const RegistrarRoutes = () => {
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/appointmentform" element={<Appointmentform />} />
         <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/viewprofilepage" element={<ViewProfilePages />} />
         <Route path="/casetype" element={<Casetype />} />
         <Route path="/services" element={<AddServices />} />
         <Route path="/casecourtmanager" element={<AddCourtRegistrarCase/>} />
@@ -175,11 +194,84 @@ const JudgeRoutes = () => {
         <Route path="pie" element={<Pie />} />
         <Route path="geography" element={<Geography />} />
         <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/viewprofilepage" element={<ViewProfilePages />} />
+        <Route path="/caseform" element={<Caseform />} />
+        <Route path="/appointment" element={<Appointment />} />
+        <Route path="/appointmentform" element={<Appointmentform />} />
+
+      </Route>
+    </Routes>
+  );
+};
+const CortManagerRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<CourtManager/>}>
+      
+      <Route path="/casejudge" element={<AddCaseJudge/>} />
+        <Route path="team" element={<Team />} />
+        <Route path="contacts" element={<Contacts />} />
+        <Route path="form" element={<Form />} />
+        <Route path="calendar" element={<Calendar />} />
+        <Route path="faq" element={<FAQ />} />
+        <Route path="pie" element={<Pie />} />
+        <Route path="geography" element={<Geography />} />
+        <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/viewprofilepagefasdfa" element={<ViewProfilePages />} />
+        <Route path="/casecourtmanager" element={<AddCourtRegistrarCase/>} />
+
       </Route>
     </Routes>
   );
 };
 
+const InvoiceClerkRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Invoiclerk />}>
+      
+      <Route path="/casejudge" element={<AddCaseJudge/>} />
+        <Route path="team" element={<Team />} />
+        <Route path="contacts" element={<Contacts />} />
+        <Route path="form" element={<Form />} />
+        <Route path="calendar" element={<Calendar />} />
+        <Route path="faq" element={<FAQ />} />
+        <Route path="pie" element={<Pie />} />
+        <Route path="geography" element={<Geography />} />
+        <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/viewprofilepagefasdfa" element={<ViewProfilePages />} />
+        <Route path="/invoices" element={<Invoices />} />
+        <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/viewprofilepage" element={<ViewProfilePages />} />
+        <Route path="/services" element={<AddServices />} />
+        <Route path="/addinvoices" element={<AddInvoices />} />
+
+      </Route>
+    </Routes>
+  );
+};
+const ProscutorRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Proscutor />}>
+      
+      <Route path="/casejudge" element={<AddCaseJudge/>} />
+        <Route path="team" element={<Team />} />
+        <Route path="contacts" element={<Contacts />} />
+        <Route path="form" element={<Form />} />
+        <Route path="calendar" element={<Calendar />} />
+        <Route path="faq" element={<FAQ />} />
+        <Route path="pie" element={<Pie />} />
+        <Route path="geography" element={<Geography />} />
+        <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/viewprofilepagefasdfa" element={<ViewProfilePages />} />
+        <Route path="/caseform" element={<Caseform />} />
+        <Route path="/addcase" element={<AddCase />} />
+
+      </Route>
+    </Routes>
+  );
+};
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -196,6 +288,7 @@ const AdminRoutes = () => {
         <Route path="geography" element={<Geography />} />
         <Route path="addcase" element={<AddCase />} />
         <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/viewprofilepage" element={<ViewProfilePage />} />
       </Route>
     </Routes>
   );

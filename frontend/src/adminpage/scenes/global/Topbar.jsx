@@ -1,51 +1,29 @@
-import { Box, IconButton, useTheme } from "@mui/material";
-import { useContext } from "react";
-import { ColorModeContext, tokens } from "../../../theme";
-import InputBase from "@mui/material/InputBase";
+import React, { useState, useContext } from "react";
+import { Box, IconButton, useTheme, Menu, MenuItem, ListItemIcon, Dialog, DialogContent, Button } from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import SearchIcon from "@mui/icons-material/Search";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Navigate, Route, Routes } from "react-router-dom";
-import axios from "axios";
+import { ColorModeContext, tokens } from "../../../theme";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { Button, Popover, Typography } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import ProfilePage from "../profile";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+import ViewProfilePages from "../profile/profile";
 
 const Topbar = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+  const colors = tokens(theme.palette.mode);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Remove the token from local storage
     localStorage.removeItem("accessToken");
-    // Redirect to the login page (or any other appropriate action)
-    // window.location.reload()
     window.location.href = "/login";
   };
 
-  const getUserRoleFromToken = (token) => {
-    const decodedToken = JSON.parse(atob(token.split(".")[1]));
-    return decodedToken.role_name;
-  };
-
-  const token = localStorage.getItem("accessToken");
-  const role_name = getUserRoleFromToken(token);
-  const role = role_name.toLowerCase();
-
   const handleclickprofilebutton = () => {
-    navigate(`/${role}/profilepage`);
+    setOpenDialog(true);
   };
 
   const handleSettingsClick = (event) => {
@@ -55,7 +33,9 @@ const Topbar = () => {
   const handleClosePopover = () => {
     setAnchorEl(null);
   };
-
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
   const open = Boolean(anchorEl);
   const id = open ? "settings-popover" : undefined;
 
@@ -66,15 +46,6 @@ const Topbar = () => {
       p={2}
       backgroundColor={colors.blueAccent[900]}
     >
-      {/* SEARCH BAR */}
-      <Box display="flex" borderRadius="3px">
-        <div
-          backgroundColor={colors.primary[400]}
-          id="google_translate_element"
-        ></div>
-      </Box>
-
-      {/* ICONS */}
       <Box display="flex">
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? (
@@ -87,7 +58,7 @@ const Topbar = () => {
           <NotificationsOutlinedIcon />
         </IconButton>
         <IconButton onClick={handleSettingsClick}>
-          <PersonIcon />
+          <PersonOutlinedIcon />
         </IconButton>
         <Menu
           id={id}
@@ -129,24 +100,34 @@ const Topbar = () => {
             },
           }}
         >
-          <Box p={1}>
-            <MenuItem onClick={handleclickprofilebutton} variant="outlines">
-              <ListItemIcon>
-                <PersonOutlinedIcon fontSize="small" />
-              </ListItemIcon>
-              Profile
-            </MenuItem>
-          </Box>
-          <Box p={1}>
-            <MenuItem variant="outlines" onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" />
-              </ListItemIcon>
-              Logout
-            </MenuItem>
-          </Box>
+          <MenuItem onClick={handleclickprofilebutton} variant="outlines">
+            <ListItemIcon>
+              <PersonOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            Profile
+          </MenuItem>
+          <MenuItem variant="outlines" onClick={handleLogout}>
+            <ListItemIcon>
+              <LogoutIcon fontSize="small" />
+            </ListItemIcon>
+            Logout
+          </MenuItem>
         </Menu>
       </Box>
+      {/* Profile Dialog */}
+         {/* Edit Profile Dialog */}
+         <Dialog open={openDialog} onClose={handleCloseDialog}>
+  <DialogContent style={{ backgroundColor: colors.blueAccent[900] }}>
+    {/* Your profile editing form component */}
+    <ViewProfilePages />
+    <Box display="flex" justifyContent="flex-end" mt={2}>
+      <Button variant="text" color="error" onClick={handleCloseDialog}>
+        Cancel
+      </Button>
+    </Box>
+  </DialogContent>
+</Dialog>
+
     </Box>
   );
 };

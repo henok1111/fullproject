@@ -436,8 +436,6 @@ const fetchAdvocates = async () => {
     ))
   )}
 </TextField>
-
-
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="h6">Respondent</Typography>

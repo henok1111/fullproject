@@ -10,7 +10,6 @@ export const AddAppointment = async (db, req, res) => {
   try {
     console.log("AddAppointment API triggered");
 
-    // Extract appointment data from the request body
     const {
       case_id,
       date,
@@ -18,8 +17,9 @@ export const AddAppointment = async (db, req, res) => {
       note,
       petitioner_phone_numbers,
       respondent_phone_numbers,
+      user_id,
     } = req.body;
-
+    
     // Validate required fields
     if (
       !case_id ||
@@ -27,7 +27,8 @@ export const AddAppointment = async (db, req, res) => {
       !time ||
       !note ||
       !petitioner_phone_numbers ||
-      !respondent_phone_numbers
+      !respondent_phone_numbers ||
+      !user_id
     ) {
       console.error("Missing required fields:", req.body);
       return res.status(400).json({
@@ -36,17 +37,11 @@ export const AddAppointment = async (db, req, res) => {
       });
     }
 
-    // Insert appointment data into the appointments table
-    const [appointmentResults] = await db.query(
-      "INSERT INTO appointment SET ?",
-      {
-        case_id,
-        date,
-        time,
-        note,
-      }
-    );
-
+  // Insert appointment data into the appointments table
+const [appointmentResults] = await db.query(
+  "INSERT INTO appointment (case_id, date, time, note, judge_id) VALUES (?, ?, ?, ?, ?)",
+  [case_id, date, time, note, user_id] // Assuming judge_id is the same as user_id
+);
     const appointmentId = appointmentResults.insertId;
 
     // Process petitioner phone numbers
@@ -109,3 +104,4 @@ export const AddAppointment = async (db, req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+

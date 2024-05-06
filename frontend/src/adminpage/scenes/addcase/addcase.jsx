@@ -46,9 +46,6 @@ const AddCase = () => {
     };
     const [documentDescriptions, setDocumentDescriptions] = useState({}); // State variable to store document descriptions
     const [documentFiles, setDocumentFiles] = useState({}); // State variable to store document files
-
-    // Function to add a document row
-
     const addDocumentRow = (caseId) => {
       // Find the case by its ID
       const foundCase = fetchedCases.find((caseData) => caseData.case_id === caseId);
@@ -467,29 +464,7 @@ const AddCase = () => {
       )} 
 </Box>
 
-  {caseData.other_documents_info && caseData.other_documents_info.map((doc, index) => (
-    // Check if id is not null before displaying the document
-    doc.id !== null && (
-      <div key={index}>
-       <Grid  container borderRadius={3}  bgcolor={`${colors.primary[400]}40`} boxShadow={10}>
-         <Grid item xs={4}  padding={1}>
-            <a href={`http://localhost:8081/${doc.file_path}`} download>
-              <Button component="span" variant="contained" size="large">
-                <DescriptionOutlinedIcon style={{ fontSize: "30px" }} />
-                V {index + 1}
-              </Button>
-            </a>
-         </Grid>
-      
-           <Grid item xs={18}  justifyContent="flex-end" padding={1}>
-              <Typography variant="body1" color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em',justifyContent:"end" }}>
-                Document Description: <span style={{ color: colors.greenAccent[300] }}>{doc.description}</span>
-              </Typography>
-           </Grid>
-          </Grid>
-      </div>
-    )
-  ))}
+
   
 
 
@@ -568,6 +543,55 @@ const AddCase = () => {
     )}
   </Grid>
 </Grid>
+{expandedCases[caseData.case_id] && ( 
+  <Grid container m={0.1} boxShadow={10} padding={1}>
+  <Grid item xs={10 }  ><Typography variant="h3" color="#5bc0de" style={{ fontWeight: 'bold'}} >Case Information</Typography></Grid>
+  {caseData.other_documents_info && caseData.other_documents_info.length > 0 ? (
+    caseData.other_documents_info.map((doc, index) => (
+      // Check if id is not null before displaying the document
+      doc.id !== null ? (
+        <Grid item key={index} xs={12} sm={8} md={6} lg={7} padding={2} xl={6}> 
+          <Grid container borderRadius={3} spacing={0.1} padding={2} margin={1} bgcolor={`${colors.primary[400]}40`} boxShadow={10}>
+            <Grid item xs={7.9}>
+              <Typography variant="body1" color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em', marginBottom: '0.5em' }}>
+                Document Description <span style={{ color: colors.greenAccent[300] }}>{doc.description}</span>
+              </Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <a style={{ fontSize: "30px" }} href={`http://localhost:8081/${doc.file_path}`} download>
+                <Button
+                  component="span"
+                  variant="contained"
+                  size="large"
+                  style={{ width: '180px' }} // Adjust the width as needed
+                >
+                  <DescriptionOutlinedIcon style={{ fontSize: "25px" }} />
+                  <h5 style={{ fontSize: "12px" }}>{doc.file_path}</h5>
+                </Button>
+              </a>
+            </Grid>
+          </Grid>
+        </Grid>
+      ) : (
+        // Handle the case when id is null
+        <Grid item key={index} xs={12} sm={8} md={6} lg={7} padding={2} xl={6}>
+          <Typography variant="body1" color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
+            No data
+          </Typography>
+        </Grid>
+      )
+    ))
+  ) : (
+    // Handle the case when other_documents_info is empty or undefined
+    <Typography variant="body1" color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
+      No data
+    </Typography>
+  )}
+</Grid>
+)}
+
+
+
 <Grid container  justifyContent="flex-end" mt={2} pr={2}>
   <Grid  item boxShadow={10}>
     <Box mt={2}>
@@ -604,9 +628,6 @@ const AddCase = () => {
   ))}
 
 {/* Button to add a new document row */}
-
-
-
 {documentRows.map((rowId) => (
     <Grid container spacing={2} alignItems="center" key={rowId}>
         <Grid item xs={8}>
@@ -687,6 +708,7 @@ const AddCase = () => {
       },
     }}
 >
+
 <DialogTitle id="alert-dialog-title" color={"red"}>
             {"Are you sure you want to delete this Case"}
           </DialogTitle>

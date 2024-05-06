@@ -1,7 +1,8 @@
-const FetchCasesByJudge = async (req,db, res) => {
-    // Assuming assigned judge ID is sent in req.data
-console.log(req.body)
-const assignedJudgeId = req.body.assignedJudgeId
+const FetchCasesByJudge = async (req, db, res) => {
+    // Assuming assigned judge ID is sent in req.body
+    console.log(req.body);
+    const assignedJudgeId = req.body.assignedJudgeId;
+
     try {
         const query = `
             SELECT
@@ -53,15 +54,22 @@ const assignedJudgeId = req.body.assignedJudgeId
                     )
                 ) AS respondents_info,
                 (SELECT JSON_OBJECT('id', pa.advocator_id, 'first_name', pa.first_name, 'last_name', pa.last_name) 
-                FROM advocators pa 
-                WHERE pa.advocator_id IN (SELECT advocator_id FROM petitioner_case_map WHERE case_id = c.case_id) LIMIT 1) 
+                 FROM advocators pa 
+                 WHERE pa.advocator_id IN (SELECT advocator_id FROM petitioner_case_map WHERE case_id = c.case_id) LIMIT 1) 
                 AS petitioner_advocate_info,
                 (SELECT JSON_OBJECT('id', ra.advocator_id, 'first_name', ra.first_name, 'last_name', ra.last_name) 
-                FROM advocators ra 
-                WHERE ra.advocator_id IN (SELECT advocator_id FROM respondent_case_map WHERE case_id = c.case_id) LIMIT 1) 
+                 FROM advocators ra 
+                 WHERE ra.advocator_id IN (SELECT advocator_id FROM respondent_case_map WHERE case_id = c.case_id) LIMIT 1) 
                 AS respondent_advocate_info,
                 JSON_OBJECT('id', prosecutor.id, 'first_name', prosecutor.first_name, 'last_name', prosecutor.last_name, 'role', prosecutor.role) AS prosecutor_info,
-                cs.case_type AS sub_type_case_type
+                cs.case_type AS sub_type_case_type,
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'id', odc.id,
+                        'file_path', odc.file_path,
+                        'description', odc.description
+                    )
+                ) AS other_documents_info
             FROM 
                 cases c
             LEFT JOIN 
@@ -78,6 +86,8 @@ const assignedJudgeId = req.body.assignedJudgeId
                 users u ON c.assigned_judge = u.id 
             LEFT JOIN 
                 users prosecutor ON pc.prosecutor_id = prosecutor.id
+            LEFT JOIN 
+                otherdocumentcases odc ON c.case_id = odc.case_id
             WHERE 
                 c.assigned_judge = ?
             GROUP BY
@@ -95,7 +105,7 @@ const assignedJudgeId = req.body.assignedJudgeId
                 c.is_paid;
         `;
 
-        const [results] = await global.pool.query(query, [assignedJudgeId]);
+        const [results] = await db.query(query, [assignedJudgeId]);
 
         const uniqueResults = results.map(result => {
             const uniqueRespondents = Array.from(new Set(result.respondents_info.map(respondent => respondent.id))).map(id => {
@@ -106,7 +116,12 @@ const assignedJudgeId = req.body.assignedJudgeId
                 return result.petitioners_info.find(petitioner => petitioner.id === id);
             });
 
-            return { ...result, respondents_info: uniqueRespondents, petitioners_info: uniquePetitioners };
+            // Remove duplicates based on id in other_documents_info
+            const uniqueOtherDocuments = Array.from(new Set(result.other_documents_info.map(document => document.id))).map(id => {
+                return result.other_documents_info.find(document => document.id === id);
+            });
+
+            return { ...result, respondents_info: uniqueRespondents, petitioners_info: uniquePetitioners, other_documents_info: uniqueOtherDocuments };
         });
 
         res.json(uniqueResults);
