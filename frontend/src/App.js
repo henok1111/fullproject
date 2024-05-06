@@ -134,8 +134,11 @@ const App = () => {
             )}
 
             <Route path="/deactive" element={<Deactive />} />
-            <Route path="/forgot-password" element={<ReceiveEmail/>} />
-            <Route path="/user/resetPassword/:token" element = {<ResetPassword/>} />
+            <Route path="/forgot-password" element={<ReceiveEmail />} />
+            <Route
+              path="/user/resetPassword/:token"
+              element={<ResetPassword />}
+            />
             <Route path="*" element={<NotFound />} />
             <Route
               path="/unauthorized"
@@ -174,7 +177,7 @@ const RegistrarRoutes = () => {
         <Route path="/viewprofilepage" element={<ViewProfilePages />} />
         <Route path="/casetype" element={<Casetype />} />
         <Route path="/services" element={<AddServices />} />
-        <Route path="/casecourtmanager" element={<AddCourtRegistrarCase/>} />
+        <Route path="/casecourtmanager" element={<AddCourtRegistrarCase />} />
       </Route>
     </Routes>
   );
@@ -184,8 +187,7 @@ const JudgeRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Admins />}>
-      
-      <Route path="/casejudge" element={<AddCaseJudge/>} />
+        <Route path="/casejudge" element={<AddCaseJudge />} />
         <Route path="team" element={<Team />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="form" element={<Form />} />

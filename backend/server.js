@@ -43,7 +43,11 @@ import { AddAppointment } from "./component/addappointment.js";
 import getAdvocatorData from "./component/getadvocators.js";
 import editAdvocator from "./component/editadvocator.js";
 import deleteAdvocator from "./component/deleteadvocator.js";
-import { getCaseAdvocates,getCaseClients,getCaseProsecutors } from "./component/getcaseclientandadvocator.js";
+import {
+  getCaseAdvocates,
+  getCaseClients,
+  getCaseProsecutors,
+} from "./component/getcaseclientandadvocator.js";
 import deleteCase from "./component/deletecase.js";
 import FetchAllCasesInformation from "./component/fetchfullcaseinfo.js";
 import FetchCaseSubType from "./component/getsubcasetype.js";
@@ -57,13 +61,16 @@ import GetUserById from "./component/getuserbyid.js";
 const app = express();
 import uploadOtherCases from "./component/uploadothercasedocument.js";
 import uploadDocuments from "./component/othercase.js";
+import http from "http";
+import { Server } from "socket.io";
+
 const PORT = 8081;
 import GetAppointmnetCases from "./component/getapppointmentcases.js";
 import GetAppointment from "./component/getappointment.js";
 import DeleteAppointment from "./component/deleteappointment.js";
 import UpdateAppointment from "./component/updateappointment.js";
-  const router = express.Router();
-  
+const router = express.Router();
+
 app.use(express.json());
 app.use(
   cors({
@@ -89,13 +96,14 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Something went wrong!");
 });
+app.use(cors());
 
 // MySQL Connection
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "",
-  database: "courts",
+  database: "court",
   Promise: bluebird,
   waitForConnections: true,
   connectionLimit: 10,
@@ -134,14 +142,14 @@ app.post("/api/uploaddocument", upload.single("file"), (req, res) =>
   uploadFilePath(db, req, res)
 );
 app.post("/api/uploaddocumentss", upload.single("file"), (req, res) =>
-    uploadDocuments(db,req, res)
+  uploadDocuments(db, req, res)
 );
 app.post("/api/uploadothercase", upload.single("file"), (req, res) =>
-uploadOtherCases(db, req, res)
+  uploadOtherCases(db, req, res)
 );
 
 app.post("/api/upload", upload.single("file"), (req, res) =>
-uploadImage(db, req, res)
+  uploadImage(db, req, res)
 );
 app.post("/api/login", async (req, res) => {
   await Login(db, req, res);
@@ -170,7 +178,7 @@ app.get("/api/fetchcaseinformation", async (req, res) => {
 });
 
 app.post("/api/fetchcasebyjudge", async (req, res) => {
-  await FetchCasesByJudge(req,db, res);
+  await FetchCasesByJudge(req, db, res);
 });
 app.get("/api/getCaseTypeGrid", async (req, res) => {
   await FetchCaseTypeGrid(req, res);
@@ -183,20 +191,18 @@ app.post("/api/editUserStatus", async (req, res) => {
   await EditUserStatus(db, req, res);
 });
 
-
 app.post("/api/updateappointment", async (req, res) => {
   await UpdateAppointment(db, req, res);
 });
 app.post("/user/resetPassword", async (req, res) => {
-  await ResetPassword( db, req, res);
+  await ResetPassword(db, req, res);
 });
-
 
 app.post("/user/updatePassword", async (req, res) => {
-  await UpdatePassword( db, req, res);
+  await UpdatePassword(db, req, res);
 });
 app.post("/api/editUser", async (req, res) => {
-  await EditUser(db,req, res);
+  await EditUser(db, req, res);
 });
 
 app.post("/api/editservice", async (req, res) => {
@@ -291,12 +297,12 @@ app.get("/api/cases", async (req, res) => {
 });
 
 app.post("/api/appointmentcases", async (req, res) => {
-await   GetAppointmnetCases(req, res); // Call GetCases function with req and res parameters
+  await GetAppointmnetCases(req, res); // Call GetCases function with req and res parameters
 });
 
 app.post("/api/getappointment", async (req, res) => {
-  await   GetAppointment(req, res); // Call GetCases function with req and res parameters
-  });
+  await GetAppointment(req, res); // Call GetCases function with req and res parameters
+});
 app.post("/api/updateUser/:userId", async (req, res) => {
   await EditSpecificUser(db, req, res);
 });
@@ -315,6 +321,41 @@ app.get("/api/getCaseSubType", async (req, res) => {
 app.get("/api/getcasecout", async (req, res) => {
   await GetCaseCount(req, res);
 });
+
+const server = http.createServer(app);
+
+// Create Socket.IO server
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    method: ["GET", "POST"],
+  },
+});
+
+// Socket.IO event listeners
+io.on("connection", (socket) => {
+  console.log(`Socket ${socket.id} connected`);
+
+  socket.on("join_room", (room) => {
+    socket.join(room);
+    console.log(`Socket ${socket.id} joined room ${room}`);
+  });
+
+  socket.on("send_notification", (data) => {
+    console.log("Received notification data:", data);
+    io.to(data.room).emit("receive_notification", data.Notification);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`Socket ${socket.id} disconnected`);
+  });
+});
+
+io.on("connect_error", (error) => {
+  console.error("Socket.IO connection error:", error);
+});
+
+server.listen(3001, () => console.log("socket io is running on port 3001"));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

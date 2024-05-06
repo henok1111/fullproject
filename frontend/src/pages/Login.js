@@ -12,10 +12,10 @@ import { ColorModeContext, tokens } from "../theme";
 import Ap from "../image/court/ff.png";
 import Lottie from "react-lottie";
 import animationData from "../a.json";
-import { TextField, Button , } from "@mui/material";
+import { TextField, Button } from "@mui/material";
 import newAnimationData from "./newAnimationData.json";
-import "../components/navbar.css"
-import "./loader.css"
+import "../components/navbar.css";
+import "./loader.css";
 // Background animation component with fixed positioning and higher z-index
 const BackgroundAnimation = () => {
   const defaultOptions = {
@@ -56,7 +56,7 @@ const Logo = () => (
       alignItems: "center",
     }}
   >
-    <img  
+    <img
       src={Ap}
       alt="Logo"
       style={{
@@ -66,12 +66,18 @@ const Logo = () => (
         borderRadius: "10px",
       }}
     />
-    <h1 className="text" style={{ textAlign: "center", marginBottom: "3px", }}>LOGIN</h1>
+    <h1 className="text" style={{ textAlign: "center", marginBottom: "3px" }}>
+      LOGIN
+    </h1>
   </div>
 );
 const getUserRoleFromToken = (token) => {
   const decodedToken = JSON.parse(atob(token.split(".")[1]));
   return decodedToken.role_name;
+};
+const getUSerID = (token) => {
+  const decodedToken = JSON.parse(atob(token.split(".")[1]));
+  return decodedToken.userId;
 };
 
 const LoginForm = () => {
@@ -80,7 +86,8 @@ const LoginForm = () => {
   const colors = tokens(theme.palette.mode) || {};
   const colorMode = useContext(ColorModeContext);
   const [loadingButton, setLoadingButton] = useState(false);
-  const [newAnimationDataState, setNewAnimationDataState] = useState(newAnimationData);
+  const [newAnimationDataState, setNewAnimationDataState] =
+    useState(newAnimationData);
 
   const styles = {
     container: {
@@ -91,7 +98,7 @@ const LoginForm = () => {
       width: "100%", // Ensure container fills the viewport width
       marginTop: "0px",
       // Remove background color to allow animation to fill the space
-      backgroundColor:`${colors.primary[600]}`
+      backgroundColor: `${colors.primary[600]}`,
     },
     form: {
       padding: "20px",
@@ -101,7 +108,7 @@ const LoginForm = () => {
       boxShadow: "0 0 90px rgba(0, 0, 0, 0.9)",
       backdropFilter: "blur(10px)",
       backgroundColor: `${colors.primary[400]}90`,
-     
+
       marginLeft: "30%",
     },
   };
@@ -145,17 +152,17 @@ const LoginForm = () => {
   const handleLogin = async (e) => {
     try {
       setLoadingButton(true);
-  
+
       const response = await axios.post(
         "http://localhost:8081/api/login",
         formData
       );
-  
+
       const accessToken = response.data.token;
       localStorage.setItem("accessToken", accessToken);
-  
+
       logTokenInfo();
-  
+
       toast.success("Login successful", {
         position: "top-right",
         autoClose: 3000,
@@ -164,17 +171,20 @@ const LoginForm = () => {
         pauseOnHover: true,
         draggable: true,
       });
-  
+
       const token = localStorage.getItem("accessToken");
       const role_name = getUserRoleFromToken(token);
       const role = role_name.toLowerCase();
-  
+
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userStatus = decodedToken.status.toLowerCase();
-  
+      const userID = getUSerID(token);
+
+      // Log the user role and status for debugging
       console.log("User Role:", role);
       console.log("User Status:", userStatus);
-  
+
+      // Perform additional checks based on the user's status
       if (userStatus === "activated") {
         navigate(`/${role}`);
         setTimeout(() => {
@@ -183,11 +193,11 @@ const LoginForm = () => {
       } else {
         navigate("/deactive");
       }
-    
+
       setLoadingButton(false);
     } catch (error) {
       setLoadingButton(false);
-  
+
       if (error.response) {
         toast.error(`Login failed: ${error.response.data.message}`);
         if (error.response?.status === 401) {
@@ -201,7 +211,6 @@ const LoginForm = () => {
       }
     }
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -231,7 +240,7 @@ const LoginForm = () => {
 
   return (
     <>
-      <BackgroundAnimation/>
+      <BackgroundAnimation />
       <MainNavbar />
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
@@ -254,24 +263,23 @@ const LoginForm = () => {
               </div>
 
               <div style={{ marginBottom: "15px" }}>
-              <TextField
-   fullWidth
-  variant="standard"
-  id="email"
-  name="email"
-margin="normal"
-label="Email"
-  value={formData.email}
-  onChange={(e) =>
-    setFormData((prevData) => ({
-      ...prevData,
-      email: e.target.value,
-    }))
-  }
-  error={!!errors.email}
-  helperText={errors.email}
- 
-/>
+                <TextField
+                  fullWidth
+                  variant="standard"
+                  id="email"
+                  name="email"
+                  margin="normal"
+                  label="Email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      email: e.target.value,
+                    }))
+                  }
+                  error={!!errors.email}
+                  helperText={errors.email}
+                />
               </div>
 
               <div style={{ marginBottom: "5px" }}>
@@ -297,20 +305,25 @@ label="Email"
               <Button
                 type="submit"
                 variant="contained"
-                
                 disabled={loadingButton}
                 fullWidth
-                style={{ marginTop: "10px",backgroundColor: `${colors.primary[600]}` }}
+                style={{
+                  marginTop: "10px",
+                  backgroundColor: `${colors.primary[600]}`,
+                }}
               >
-                {loadingButton ? <div className=".loader-container">
-                  <div className="spinner">
-
+                {loadingButton ? (
+                  <div className=".loader-container">
+                    <div className="spinner"></div>
                   </div>
-                </div>: 
-      "Login"
-    }
+                ) : (
+                  "Login"
+                )}
               </Button>
-              <Link to="/forgot-password" style={{ textDecoration: "none" }}> forgot password</Link>
+              <Link to="/forgot-password" style={{ textDecoration: "none" }}>
+                {" "}
+                forgot password
+              </Link>
             </form>
           </div>
         </ThemeProvider>

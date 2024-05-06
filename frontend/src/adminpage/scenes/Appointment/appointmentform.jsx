@@ -5,6 +5,13 @@ import {
   Typography,
   Box,
   Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
   colors,
   useTheme,
 } from "@mui/material";
@@ -195,21 +202,55 @@ const fetchCases = async () => {
             <Typography variant="h6" sx={{ mt: "20px" }}>
               Petitioners:
             </Typography>
-            {petitioners.map((petitioner, index) => (
-              <Typography key={index}>
-                Name: {petitioner.first_name} - PhoneNumber:{" "}
-                {petitioner.mobile_number} - Email: {petitioner.email}
-              </Typography>
-            ))}
+            <TableContainer
+              component={Paper}
+              sx={{ mt: "10px", bgcolor: colors.blueAccent[900] }}
+            >
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Phone Number</TableCell>
+                    <TableCell>Email</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {petitioners.map((petitioner, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{petitioner.first_name}</TableCell>
+                      <TableCell>{petitioner.mobile_number}</TableCell>
+                      <TableCell>{petitioner.email}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
             <Typography variant="h6" sx={{ mt: "20px" }}>
               Respondents:
             </Typography>
-            {respondents.map((respondent, index) => (
-              <Typography key={index}>
-                Name: {respondent.first_name} - PhoneNumber:{" "}
-                {respondent.mobile_number} - Email: {respondent.email}
-              </Typography>
-            ))}
+            <TableContainer
+              component={Paper}
+              sx={{ mt: "10px", bgcolor: colors.blueAccent[900] }}
+            >
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Phone Number</TableCell>
+                    <TableCell>Email</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {respondents.map((respondent, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{respondent.first_name}</TableCell>
+                      <TableCell>{respondent.mobile_number}</TableCell>
+                      <TableCell>{respondent.email}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Box>
         )}
         <Box display="flex" gap="20px" mt="10px">

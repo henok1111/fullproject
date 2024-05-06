@@ -31,14 +31,21 @@ export default async function Login(db, req, res) {
     }
 
     // Extract user information
-    const { id, first_name, role, last_name , status } = userResults[0];
+    const { id, first_name, role, last_name, status } = userResults[0];
 
     // If role_name is null, assign it as 'student'
     const userRole = role;
 
     // Generate a JWT token for authentication with additional user information
     const token = jwt.sign(
-      { userId: id, first_name: first_name,last_name:last_name, email, role_name: userRole, status },
+      {
+        userId: id,
+        first_name: first_name,
+        last_name: last_name,
+        email,
+        role_name: userRole,
+        status,
+      },
       SECRET_KEY,
       { expiresIn: "30m" }
     );
