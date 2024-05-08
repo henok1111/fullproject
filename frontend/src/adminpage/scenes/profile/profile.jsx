@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, Typography, Dialog, DialogContent } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  Typography,
+  Dialog,
+  DialogContent,
+} from "@mui/material";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
@@ -28,7 +35,7 @@ const ViewProfilePages = () => {
         const accessToken = localStorage.getItem("accessToken");
         const decodedToken = jwtDecode(accessToken);
         const userId = decodedToken.userId;
-        
+
         const response = await fetch("http://localhost:8081/api/getUserbyid", {
           method: "POST",
           headers: {
@@ -36,14 +43,14 @@ const ViewProfilePages = () => {
           },
           body: JSON.stringify({ userId: userId }),
         });
-  
+
         const userData = await response.json();
         setUser(userData);
       } catch (error) {
         console.error("Error fetching user information:", error);
       }
     };
-  
+
     fetchUserData();
   }, []);
 
@@ -70,29 +77,113 @@ const ViewProfilePages = () => {
             />
           </Grid>
           <Grid item>
-            <Typography variant="h4" margin={0.9} color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-              First Name: <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{user.first_name}</span>
+            <Typography
+              variant="h4"
+              margin={0.9}
+              color={colors.grey[100]}
+              style={{ fontWeight: "bold", fontSize: "1.1em" }}
+            >
+              First Name:{" "}
+              <span
+                style={{
+                  color: colors.greenAccent[300],
+                  fontWeight: "bold",
+                  fontSize: "1.1em",
+                }}
+              >
+                {user.first_name}
+              </span>
             </Typography>
-            <Typography variant="h4" margin={0.9} color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-              Last Name: <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{user.last_name}</span>
+            <Typography
+              variant="h4"
+              margin={0.9}
+              color={colors.grey[100]}
+              style={{ fontWeight: "bold", fontSize: "1.1em" }}
+            >
+              Last Name:{" "}
+              <span
+                style={{
+                  color: colors.greenAccent[300],
+                  fontWeight: "bold",
+                  fontSize: "1.1em",
+                }}
+              >
+                {user.last_name}
+              </span>
             </Typography>
-            <Typography variant="h4" margin={0.9} color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-              Email: <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{user.email}</span>
+            <Typography
+              variant="h4"
+              margin={0.9}
+              color={colors.grey[100]}
+              style={{ fontWeight: "bold", fontSize: "1.1em" }}
+            >
+              Email:{" "}
+              <span
+                style={{
+                  color: colors.greenAccent[300],
+                  fontWeight: "bold",
+                  fontSize: "1.1em",
+                }}
+              >
+                {user.email}
+              </span>
             </Typography>
-            <Typography variant="h4" margin={0.9} color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-              Phone: <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{user.phone_number}</span>
+            <Typography
+              variant="h4"
+              margin={0.9}
+              color={colors.grey[100]}
+              style={{ fontWeight: "bold", fontSize: "1.1em" }}
+            >
+              Phone:{" "}
+              <span
+                style={{
+                  color: colors.greenAccent[300],
+                  fontWeight: "bold",
+                  fontSize: "1.1em",
+                }}
+              >
+                {user.phone_number}
+              </span>
             </Typography>
-            <Typography variant="h4" margin={0.9} color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-              Address: <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{user.address}</span>
+            <Typography
+              variant="h4"
+              margin={0.9}
+              color={colors.grey[100]}
+              style={{ fontWeight: "bold", fontSize: "1.1em" }}
+            >
+              Address:{" "}
+              <span
+                style={{
+                  color: colors.greenAccent[300],
+                  fontWeight: "bold",
+                  fontSize: "1.1em",
+                }}
+              >
+                {user.address}
+              </span>
             </Typography>
-            <Typography variant="h4" margin={0.9} color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-              Role: <span style={{ color: colors.greenAccent[300], fontWeight: 'bold', fontSize: '1.1em' }}>{user.role}</span>
+            <Typography
+              variant="h4"
+              margin={0.9}
+              color={colors.grey[100]}
+              style={{ fontWeight: "bold", fontSize: "1.1em" }}
+            >
+              Role:{" "}
+              <span
+                style={{
+                  color: colors.greenAccent[300],
+                  fontWeight: "bold",
+                  fontSize: "1.1em",
+                }}
+              >
+                {user.role}
+              </span>
             </Typography>
           </Grid>
         </Grid>
         <Box display="flex" justifyContent="flex-end" mt={2}>
           <Button
-            variant="contained"
+            variant="outlined"
             color="secondary"
             startIcon={<EditIcon />}
             onClick={handleEditClick}
@@ -104,17 +195,20 @@ const ViewProfilePages = () => {
 
       {/* Edit Profile Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-  <DialogContent style={{ backgroundColor: colors.blueAccent[900] }}>
-    {/* Your profile editing form component */}
-    <ProfilePage />
-    <Box display="flex" justifyContent="flex-end" mt={2}>
-      <Button variant="text" color="error" onClick={handleCloseDialog}>
-        Cancel
-      </Button>
-    </Box>
-  </DialogContent>
-</Dialog>
-
+        <DialogContent style={{ backgroundColor: colors.blueAccent[900] }}>
+          {/* Your profile editing form component */}
+          <ProfilePage />
+          <Box display="flex" justifyContent="flex-end" mt={2}>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleCloseDialog}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

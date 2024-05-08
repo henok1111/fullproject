@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-import React, { useState, useContext } from "react";
-import { Box, IconButton, useTheme, Menu, MenuItem, ListItemIcon, Dialog, DialogContent, Button } from "@mui/material";
-=======
 import {
   Box,
   IconButton,
@@ -10,50 +6,49 @@ import {
   Button,
   Popover,
   Typography,
+  Dialog,
+  DialogContent,
 } from "@mui/material";
 import React, { useContext, useState, useEffect } from "react";
 import { ColorModeContext, tokens } from "../../../theme";
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-<<<<<<< HEAD
-import LogoutIcon from "@mui/icons-material/Logout";
-import { ColorModeContext, tokens } from "../../../theme";
-import { useNavigate } from "react-router-dom";
-import ViewProfilePages from "../profile/profile";
-=======
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { io } from "socket.io-client";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import { useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
+import ViewProfilePages from "../profile/profile";
 
 const getUSerID = (token) => {
   const decodedToken = JSON.parse(atob(token.split(".")[1]));
   return decodedToken.userId;
 };
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
 
 const Topbar = () => {
   const theme = useTheme();
-  const colorMode = useContext(ColorModeContext);
   const colors = tokens(theme.palette.mode);
+  const colorMode = useContext(ColorModeContext);
   const [anchorEl, setAnchorEl] = useState(null);
-<<<<<<< HEAD
-  const [openDialog, setOpenDialog] = useState(false);
-=======
   const [notifications, setNotifications] = useState([]);
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
   const navigate = useNavigate();
-  const role = localStorage.getItem("role");
   const [unreadCount, setUnreadCount] = useState(0);
   const [anchorEl2, setAnchorEl2] = useState(null);
   const [socket, setSocket] = useState(null); // State to hold the socket object
   const token = localStorage.getItem("accessToken");
   const userId = getUSerID(token);
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const getUserRoleFromToken = (token) => {
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    return decodedToken.role_name;
+  };
+
+  const role_name = getUserRoleFromToken(token);
+  const role = role_name.toLowerCase();
 
   useEffect(() => {
     // Establish socket connection when the component mounts
@@ -93,14 +88,13 @@ const Topbar = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClosePopover = () => {
-    setAnchorEl(null);
-  };
-<<<<<<< HEAD
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
-=======
+
+  const handleClosePopover = () => {
+    setAnchorEl(null);
+  };
 
   const handleCloseNotificationPopover = () => {
     setAnchorEl2(null);
@@ -117,7 +111,6 @@ const Topbar = () => {
     window.location.reload();
   };
 
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
   const open = Boolean(anchorEl);
   const openNotification = Boolean(anchorEl2);
   const id = open ? "settings-popover" : undefined;
@@ -129,15 +122,12 @@ const Topbar = () => {
       p={2}
       backgroundColor={colors.blueAccent[900]}
     >
-<<<<<<< HEAD
-=======
       {/* SEARCH BAR */}
       <Box display="flex" borderRadius="3px">
         {/* Search bar content */}
       </Box>
 
       {/* ICONS */}
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
       <Box display="flex">
         {/* Dark/Light mode toggle */}
         <IconButton onClick={colorMode.toggleColorMode}>
@@ -240,20 +230,6 @@ const Topbar = () => {
             },
           }}
         >
-<<<<<<< HEAD
-          <MenuItem onClick={handleclickprofilebutton} variant="outlines">
-            <ListItemIcon>
-              <PersonOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            Profile
-          </MenuItem>
-          <MenuItem variant="outlines" onClick={handleLogout}>
-            <ListItemIcon>
-              <LogoutIcon fontSize="small" />
-            </ListItemIcon>
-            Logout
-          </MenuItem>
-=======
           {/* Menu items */}
           <Box p={1}>
             <MenuItem onClick={handleclickprofilebutton} variant="outlines">
@@ -271,23 +247,23 @@ const Topbar = () => {
               Logout
             </MenuItem>
           </Box>
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
         </Menu>
       </Box>
-      {/* Profile Dialog */}
-         {/* Edit Profile Dialog */}
-         <Dialog open={openDialog} onClose={handleCloseDialog}>
-  <DialogContent style={{ backgroundColor: colors.blueAccent[900] }}>
-    {/* Your profile editing form component */}
-    <ViewProfilePages />
-    <Box display="flex" justifyContent="flex-end" mt={2}>
-      <Button variant="text" color="error" onClick={handleCloseDialog}>
-        Cancel
-      </Button>
-    </Box>
-  </DialogContent>
-</Dialog>
-
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogContent style={{ backgroundColor: colors.blueAccent[900] }}>
+          {/* Your profile editing form component */}
+          <ViewProfilePages />
+          <Box display="flex" justifyContent="flex-end" mt={2}>
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={handleCloseDialog}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

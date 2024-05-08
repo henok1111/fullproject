@@ -5,7 +5,7 @@ import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { jwtDecode } from "jwt-decode";
-import { useFormik } from 'formik';
+import { useFormik } from "formik";
 import * as yup from "yup";
 import { Save } from "@mui/icons-material";
 
@@ -37,7 +37,7 @@ const ProfilePage = () => {
         const accessToken = localStorage.getItem("accessToken");
         const decodedToken = jwtDecode(accessToken);
         const userId = decodedToken.userId;
-        
+
         const response = await fetch("http://localhost:8081/api/getUserbyid", {
           method: "POST",
           headers: {
@@ -45,14 +45,14 @@ const ProfilePage = () => {
           },
           body: JSON.stringify({ userId: userId }),
         });
-  
+
         const userData = await response.json();
         setUser(userData);
       } catch (error) {
         console.error("Error fetching user information:", error);
       }
     };
-  
+
     fetchUserData();
   }, []);
 
@@ -60,28 +60,31 @@ const ProfilePage = () => {
     try {
       // Log the form values before sending them to the backend
       console.log("Form values:", values);
-  
+
       // Make a POST request to update user information
       const accessToken = localStorage.getItem("accessToken");
       const decodedToken = jwtDecode(accessToken);
       const userId = decodedToken.userId;
-  
-      const response = await fetch(`http://localhost:8081/api/updateUser/${userId}`, {
-        method: "POST",
-        body: JSON.stringify(values), // Send form values as JSON data
-        headers: {
-          "Content-Type": "application/json" // Set content type to JSON
+
+      const response = await fetch(
+        `http://localhost:8081/api/updateUser/${userId}`,
+        {
+          method: "POST",
+          body: JSON.stringify(values), // Send form values as JSON data
+          headers: {
+            "Content-Type": "application/json", // Set content type to JSON
+          },
         }
-      });
+      );
       const data = await response.json();
       console.log("User information updated:", data);
-  
+
       // Optionally, you can reset the form fields here
       formik.resetForm();
-  
+
       // Fetch user image after updating the information
       fetchUserImage();
-  
+
       // Check if the form is valid and the submission is successful
       if (response.ok) {
         // Refresh the page
@@ -91,7 +94,7 @@ const ProfilePage = () => {
       console.error("Error updating user information:", error);
     }
   };
-  
+
   const fetchUserImage = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken");
@@ -115,7 +118,7 @@ const ProfilePage = () => {
 
   const formik = useFormik({
     initialValues: {
-      firstName: user && user.first_name ,
+      firstName: user && user.first_name,
       lastName: user ? user.lastame : "",
       email: user ? user.email : "",
       phone: user ? user.phone : "",
@@ -167,10 +170,8 @@ const ProfilePage = () => {
 
   return (
     <Box padding="10px" backgroundColor={colors.blueAccent[900]}>
-       <Header title="Edit Profile" />
-      <Box
-       
-      >
+      <Header title="Edit Profile" />
+      <Box>
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={2}>
             <Box paddingLeft={22}>
@@ -191,7 +192,7 @@ const ProfilePage = () => {
                 />
               </label>
             </Box>
-            <Grid item xs={12} >
+            <Grid item xs={12}>
               <Box display="flex" gap={2}>
                 <TextField
                   label="First Name"
@@ -201,8 +202,12 @@ const ProfilePage = () => {
                   name="firstName"
                   value={formik.values.firstName}
                   onChange={formik.handleChange}
-                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                  helperText={formik.touched.firstName && formik.errors.firstName}
+                  error={
+                    formik.touched.firstName && Boolean(formik.errors.firstName)
+                  }
+                  helperText={
+                    formik.touched.firstName && formik.errors.firstName
+                  }
                 />
                 <TextField
                   label="Last Name"
@@ -212,7 +217,9 @@ const ProfilePage = () => {
                   name="lastName"
                   value={formik.values.lastName}
                   onChange={formik.handleChange}
-                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                  error={
+                    formik.touched.lastName && Boolean(formik.errors.lastName)
+                  }
                   helperText={formik.touched.lastName && formik.errors.lastName}
                 />
               </Box>
@@ -250,7 +257,9 @@ const ProfilePage = () => {
                   name="address"
                   value={formik.values.address}
                   onChange={formik.handleChange}
-                  error={formik.touched.address && Boolean(formik.errors.address)}
+                  error={
+                    formik.touched.address && Boolean(formik.errors.address)
+                  }
                   helperText={formik.touched.address && formik.errors.address}
                 />
               </Box>
@@ -264,7 +273,9 @@ const ProfilePage = () => {
                   name="password"
                   value={formik.values.password}
                   onChange={formik.handleChange}
-                  error={formik.touched.password && Boolean(formik.errors.password)}
+                  error={
+                    formik.touched.password && Boolean(formik.errors.password)
+                  }
                   helperText={formik.touched.password && formik.errors.password}
                 />
                 <TextField
@@ -276,8 +287,14 @@ const ProfilePage = () => {
                   name="confirmPassword"
                   value={formik.values.confirmPassword}
                   onChange={formik.handleChange}
-                  error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-                  helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
+                  error={
+                    formik.touched.confirmPassword &&
+                    Boolean(formik.errors.confirmPassword)
+                  }
+                  helperText={
+                    formik.touched.confirmPassword &&
+                    formik.errors.confirmPassword
+                  }
                 />
               </Box>
             </Grid>
@@ -285,7 +302,7 @@ const ProfilePage = () => {
           <Box display="flex" justifyContent="flex-end" mt={2}>
             <Button
               type="submit"
-              variant="contained"
+              variant="outlined"
               color="secondary"
               startIcon={<Save fontSize="small" />}
             >

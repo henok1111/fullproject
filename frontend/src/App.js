@@ -38,7 +38,7 @@ import ReceiveEmail from "./forgot_password/receive_user_email";
 import AddCaseJudge from "./adminpage/scenes/addcase/addcasejudge";
 import Caseform from "./adminpage/scenes/form/caseform";
 import ProfilePage from "./adminpage/scenes/profile";
-import ViewProfilePage  from "./adminpage/scenes/profile";
+import ViewProfilePage from "./adminpage/scenes/profile";
 import NotFound from "./adminpage/scenes/global/pagenotfound";
 import Casetype from "./adminpage/scenes/case/casetype";
 import {
@@ -52,6 +52,7 @@ import AddServices from "./adminpage/scenes/services/addservices";
 import ConfirmedPage from "./forgot_password/confirmedPage";
 import ResetPassword from "./forgot_password/receive_new_password";
 import ViewProfilePages from "./adminpage/scenes/profile/profile";
+import InvoiceDetail from "./adminpage/scenes/invoices/invoiceDetailspage";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -71,7 +72,6 @@ const App = () => {
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
     console.log(decodedToken.role_name);
     return decodedToken.role_name;
-  
   };
 
   const RedirectToDashboard = () => {
@@ -79,7 +79,6 @@ const App = () => {
       return <Navigate to="/login" />;
     } else {
       switch (userRole) {
-      
         case "Admin":
           return <Navigate to="/admin" />;
         case "Judge":
@@ -111,8 +110,7 @@ const App = () => {
             {authenticated && (
               <>
                 {userRole === "Proscuter" && (
-                  <Route path="/proscuter/*" element={<ProscutorRoutes/>} />
-                  
+                  <Route path="/proscuter/*" element={<ProscutorRoutes />} />
                 )}
                 {userRole === "Judge" && (
                   <Route path="/judge/*" element={<JudgeRoutes />} />
@@ -123,12 +121,18 @@ const App = () => {
                 {userRole === "Registrar" && (
                   <Route path="/registrar/*" element={<RegistrarRoutes />} />
                 )}
-                
+
                 {userRole === "Court_Manager" && (
-                  <Route path="/court_manager/*" element={<CortManagerRoutes />} />
+                  <Route
+                    path="/court_manager/*"
+                    element={<CortManagerRoutes />}
+                  />
                 )}
                 {userRole === "Invoice_Clerk" && (
-                  <Route path="/invoice_clerk/*" element={<InvoiceClerkRoutes />} />
+                  <Route
+                    path="/invoice_clerk/*"
+                    element={<InvoiceClerkRoutes />}
+                  />
                 )}
               </>
             )}
@@ -200,7 +204,6 @@ const JudgeRoutes = () => {
         <Route path="/caseform" element={<Caseform />} />
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/appointmentform" element={<Appointmentform />} />
-
       </Route>
     </Routes>
   );
@@ -208,9 +211,8 @@ const JudgeRoutes = () => {
 const CortManagerRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<CourtManager/>}>
-      
-      <Route path="/casejudge" element={<AddCaseJudge/>} />
+      <Route path="/" element={<CourtManager />}>
+        <Route path="/casejudge" element={<AddCaseJudge />} />
         <Route path="team" element={<Team />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="form" element={<Form />} />
@@ -220,8 +222,7 @@ const CortManagerRoutes = () => {
         <Route path="geography" element={<Geography />} />
         <Route path="/profilepage" element={<ProfilePage />} />
         <Route path="/viewprofilepagefasdfa" element={<ViewProfilePages />} />
-        <Route path="/casecourtmanager" element={<AddCourtRegistrarCase/>} />
-
+        <Route path="/casecourtmanager" element={<AddCourtRegistrarCase />} />
       </Route>
     </Routes>
   );
@@ -231,8 +232,7 @@ const InvoiceClerkRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Invoiclerk />}>
-      
-      <Route path="/casejudge" element={<AddCaseJudge/>} />
+        <Route path="/casejudge" element={<AddCaseJudge />} />
         <Route path="team" element={<Team />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="form" element={<Form />} />
@@ -247,7 +247,7 @@ const InvoiceClerkRoutes = () => {
         <Route path="/viewprofilepage" element={<ViewProfilePages />} />
         <Route path="/services" element={<AddServices />} />
         <Route path="/addinvoices" element={<AddInvoices />} />
-
+        <Route path="/invoicedetail/:invoiceId" element={<InvoiceDetail />} />
       </Route>
     </Routes>
   );
@@ -256,8 +256,7 @@ const ProscutorRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Proscutor />}>
-      
-      <Route path="/casejudge" element={<AddCaseJudge/>} />
+        <Route path="/casejudge" element={<AddCaseJudge />} />
         <Route path="team" element={<Team />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="form" element={<Form />} />
@@ -269,7 +268,6 @@ const ProscutorRoutes = () => {
         <Route path="/viewprofilepagefasdfa" element={<ViewProfilePages />} />
         <Route path="/caseform" element={<Caseform />} />
         <Route path="/addcase" element={<AddCase />} />
-
       </Route>
     </Routes>
   );

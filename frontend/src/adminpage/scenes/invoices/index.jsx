@@ -1,59 +1,195 @@
-import { Box, useTheme, Button, TextField, IconButton } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  Button,
+  TextField,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Snackbar,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../../theme";
 import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchIcon from "@mui/icons-material/Search";
+import DeleteIcon from "@mui/icons-material/Delete";
+import MuiAlert from "@mui/material/Alert";
 
 const Invoices = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [invoices, setInvoices] = useState([]);
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(); // Adjust format as needed
+  };
+
   const columns = [
-    { field: "No", headerName: "No", flex: 0.5 },
+    { field: "invoice_id", headerName: "Invoice ID", flex: 0.5 },
     {
-      field: "Invoice Number",
+      field: "invoice_number",
       headerName: "Invoice No",
-      flex: 1.7,
-    },
-    {
-      field: "Client Name",
-      headerName: "Client Name",
-      flex: 1.5,
-    },
-    {
-      field: "Total",
-      headerName: "Total",
       flex: 0.5,
     },
     {
-      field: "Paid",
-      headerName: "Paid",
+      field: "case_id",
+      headerName: "Case ID",
+      flex: 0.3,
+    },
+    {
+      field: "Services",
+      headerName: "Services",
+      flex: 1.2,
+      renderCell: (params) => (
+        <ul>
+          {params.row.items &&
+            params.row.items.map((item, index) => (
+              <li key={index}>
+                {item.service}: {item.amount}
+              </li>
+            ))}
+        </ul>
+      ),
+    },
+    {
+      field: "total_amount",
+      headerName: "Total Amount",
       flex: 0.7,
     },
     {
       field: "Due",
-      headerName: "Due",
-      flex: 1,
+      headerName: "Due Date",
+      flex: 0.8,
+      valueGetter: (params) => formatDate(params.row.due_date),
     },
     {
-      field: "status",
-      headerName: "Status",
+      field: "paid_status",
+      headerName: "Payment Status",
+      flex: 0.8,
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
       flex: 0.5,
-    },
-    {
-      field: "Action",
-      headerName: "Action",
-      flex: 0.4,
+      renderCell: (params) => (
+        <>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => handleDetailButtonClick(params.row.invoice_id)} // Pass invoice_id
+          >
+            Details
+          </Button>
+          <IconButton aria-label="delete">
+            <DeleteIcon
+              onClick={() => handleDeleteClick(params.row.invoice_id)} // Pass invoice_id
+              style={{ color: "#FD4653" }}
+            />
+          </IconButton>
+        </>
+      ),
     },
   ];
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmationOpen(false);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
+
+  const handleDeleteClick = (invoiceId) => {
+    setInvoiceToDelete(invoiceId); // Set selected invoice ID
+    setDeleteConfirmationOpen(true);
+  };
+
+  const handleDeleteConfirmation = async () => {
+    try {
+      if (!invoiceToDelete) {
+        console.error("Invoice ID is missing.");
+        return;
+      }
+
+      const response = await fetch("http://localhost:8081/api/deleteinvoice", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ invoiceId: invoiceToDelete }),
+      });
+
+      if (response.ok) {
+        fetchInvoices();
+        setDeleteConfirmationOpen(false);
+      } else {
+        console.error("Failed to delete invoice:", response.statusText);
+      }
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+    }
+  };
+
+  const fetchInvoices = async () => {
+    try {
+      let url = "http://localhost:8081/api/getinvoices";
+      if (searchQuery.trim() !== "") {
+        url += `?search=${searchQuery}`;
+      }
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        // Assuming each invoice object has a 'services' property
+        const invoicesWithServices = data.map((invoice) => ({
+          ...invoice,
+          services: invoice.services || [],
+        }));
+        setInvoices(invoicesWithServices);
+        console.log(data);
+      } else {
+        console.error("Failed to fetch invoices:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  const handleSearch = () => {
+    fetchInvoices();
+  };
 
   const handleaddinvoicesbuttonClick = () => {
     // Navigate to another page (e.g., '/other-page')
     navigate("/invoice_clerk/addinvoices");
+  };
+
+  const handleDetailButtonClick = (invoiceId) => {
+    navigate(`/invoice_clerk/invoicedetail/${invoiceId}`);
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      fetchInvoices();
+    }
   };
 
   return (
@@ -76,10 +212,11 @@ const Invoices = () => {
         <TextField
           id="search-bar"
           className="text"
-          onInput={(e) => {
+          onChange={(e) => {
             setSearchQuery(e.target.value);
           }}
-          label="Search by Client Name"
+          onKeyPress={handleKeyPress}
+          label="Search by Case ID or Invoice Number"
           variant="outlined"
           placeholder="Search..."
           size="small"
@@ -88,10 +225,54 @@ const Invoices = () => {
             width: "350px",
           }}
         />
-        <IconButton type="submit" aria-label="search">
+        <IconButton type="submit" aria-label="search" onClick={handleSearch}>
           <SearchIcon style={{ fill: "blue" }} />
         </IconButton>
       </Box>
+      <Dialog
+        open={deleteConfirmationOpen}
+        onClose={handleCancelDelete}
+        sx={{
+          "& .MuiDialog-paper": {
+            backgroundColor: `${colors.blueAccent[900]}`, // Set your preferred background color
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title" color="secondary">
+          {"Are you sure you want to delete this Invoice?"}
+        </DialogTitle>
+        <DialogActions>
+          <Button
+            onClick={handleCancelDelete}
+            variant="outlined"
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleDeleteConfirmation} // Call handleDeleteConfirmation
+            autoFocus
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Invoice Deleted Successfully
+        </MuiAlert>
+      </Snackbar>
       <Box
         m="40px 0 0 0"
         height="115vh"
@@ -122,7 +303,11 @@ const Invoices = () => {
           },
         }}
       >
-        <DataGrid checkboxSelection rows={[]} columns={columns} />
+        <DataGrid
+          rows={invoices}
+          columns={columns}
+          getRowId={(row) => row.invoice_id}
+        />
       </Box>
     </Box>
   );
