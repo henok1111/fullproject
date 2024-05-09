@@ -24,6 +24,14 @@ import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import EditCase from "../form/editcaseform";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  PDFDownloadLink,
+} from "@react-pdf/renderer"; // Import necessary modules
 const initialValues = {};
 
 const checkoutSchema = yup.object().shape({});
@@ -48,7 +56,33 @@ const AddCase = () => {
   const [isEditFormClosed, setIsEditFormClosed] = useState(false);
   const [documentRows, setDocumentRows] = useState([]); // State variable to store document rows
   const [showSubmitButton, setShowSubmitButton] = useState(false);
-
+  const [showPDF, setShowPDF] = React.useState(false);
+  // Function to toggle showing the PDF
+  const styles = StyleSheet.create({
+    page: {
+      flexDirection: "row",
+      backgroundColor: "#E4E4E4",
+    },
+    section: {
+      margin: 10,
+      padding: 10,
+      flexGrow: 1,
+      backgroundColor: `${colors.primary[600]}`,
+      color: `${colors.primary[100]}`,
+      borderRadius: "10px",
+    },
+  });
+  const PDFComponent = ({ judgeDecision }) => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.section}>
+          <Text>
+            <div dangerouslySetInnerHTML={{ __html: judgeDecision }} />
+          </Text>
+        </View>
+      </Page>
+    </Document>
+  );
   const [selectedCaseId, setSelectedCaseId] = useState(null);
   const handleClick = () => {
     navigate(`/registrar/caseform`);
@@ -449,6 +483,21 @@ const AddCase = () => {
                         >
                           Case Number {caseData.case_id}
                         </Typography>
+                        <Typography
+                          marginBottom={2}
+                          style={{
+                            fontWeight: "bold",
+                            color: colors.greenAccent[300],
+                          }}
+                          variant="h3"
+                          color="#5bc0de"
+                          flexGrow={1} // Grow to fill available space
+                        >
+                          Case Status{" "}
+                          <span style={{ color: colors.blueAccent[500] }}>
+                            {caseData.case_status}
+                          </span>
+                        </Typography>
                         <Box>
                           <Button
                             style={{ margin: "10px" }}
@@ -530,6 +579,7 @@ const AddCase = () => {
                               <span
                                 style={{
                                   color: colors.greenAccent[300],
+
                                   fontWeight: "bold",
                                   fontSize: "1.1em",
                                 }}
@@ -661,6 +711,40 @@ const AddCase = () => {
                                 "N/A"
                               )}
                             </Typography>
+                            {caseData.id && caseData.first_name ? (
+                              <Typography
+                                variant="h4"
+                                margin={1}
+                                color={colors.grey[100]}
+                                style={{
+                                  fontWeight: "bold",
+                                  fontSize: "1.1em",
+                                }}
+                              >
+                                Assigned Judge:{" "}
+                                <span
+                                  style={{
+                                    color: colors.greenAccent[300],
+                                    fontWeight: "bold",
+                                    fontSize: "1.1em",
+                                  }}
+                                >
+                                  {`${caseData.id} / ${caseData.first_name} / ${caseData.last_name}`}
+                                </span>
+                              </Typography>
+                            ) : (
+                              <Typography
+                                variant="h4"
+                                margin={1}
+                                color={colors.grey[100]}
+                                style={{
+                                  fontWeight: "bold",
+                                  fontSize: "1.1em",
+                                }}
+                              >
+                                Case is not assigned yet
+                              </Typography>
+                            )}
 
                             {caseData.file_path && ( // Check if file_path exists
                               <>
@@ -1134,17 +1218,42 @@ const AddCase = () => {
                       {expandedCases[caseData.case_id] && (
                         <>
                           <TextField
-                            style={{ margin: "10px" }}
+                            style={{
+                              margin: "10px",
+                              fontSize: "40px",
+                              backgroundColor: `${colors.blueAccent[900]}50`,
+                              color: `${colors.primary[100]}`,
+                            }}
                             multiline
-                            label="discrioption"
+                            label="intiate case discription"
                             fullWidth
                             disabled
-                            variant="outlined"
+                            variant="filled"
                             value={caseData.description}
                           />
                         </>
                       )}
-
+                      <div>
+                        {/* Your existing code */}
+                        {expandedCases[caseData.case_id] && (
+                          <div>
+                            {/* Other content */}
+                            {caseData.judge_decision && ( // Check if judge_decision is not null
+                              <div
+                                style={{
+                                  padding: "10px",
+                                  backgroundColor: `${colors.primary[600]}`,
+                                  color: `${colors.primary[100]}`,
+                                  borderRadius: "10px",
+                                }}
+                                dangerouslySetInnerHTML={{
+                                  __html: caseData.judge_decision,
+                                }}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </div>
                       <Button
                         variant="contained"
                         onClick={() => toggleCaseDetails(caseData.case_id)}

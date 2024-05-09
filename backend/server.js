@@ -13,7 +13,7 @@ import AddUser from "./component/adduser.js";
 import Login from "./login.js";
 import Getuser from "./component/getuser.js";
 import Getrole from "./component/getrole.js";
-import EditUser from "./component/EditUser.js";
+import EditUser from "./component/editUser.js";
 import FetchCasesByJudge from "./component/fetchfullcasebuyjudge.js";
 import DeleteUser from "./component/deleteUser.js";
 import EditUserStatus from "./component/EditUserStatus.js";
@@ -63,6 +63,7 @@ import uploadOtherCases from "./component/uploadothercasedocument.js";
 import uploadDocuments from "./component/othercase.js";
 import http from "http";
 import { Server } from "socket.io";
+import uploadProscutorCaseDocument from "./component/uploadeproscutoercasedocument.js";
 import InsertInvoiceAndItems from "./component/addinvoice.js";
 import HighestInvoice from "./component/gethighestinvoice.js";
 import GetInvoices from "./component/getinvoices.js";
@@ -78,6 +79,12 @@ import GetAppointmnetCases from "./component/getapppointmentcases.js";
 import GetAppointment from "./component/getappointment.js";
 import DeleteAppointment from "./component/deleteappointment.js";
 import UpdateAppointment from "./component/updateappointment.js";
+import FetchCasesByProsecutor from "./component/fetchfullcasebyproscutor.js";
+import FethcProscutorDocuments from "./component/fetchproscutordocument.js";
+import DeleteProscutorDocument from "./component/deleteproscutordocument.js";
+import fetchAllProsecutorDocuments from "./component/fetchallcasedocuemtofproscutor.js";
+import updateDocumentStatus from "./component/updatestatusofproscutordocument.js";
+import CaseDecision from "./component/updatecasedecision.js";
 const router = express.Router();
 
 app.use(express.json());
@@ -111,8 +118,8 @@ app.use(cors());
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "1234",
-  database: "court",
+  password: "",
+  database: "courts",
   Promise: bluebird,
   waitForConnections: true,
   connectionLimit: 10,
@@ -153,6 +160,10 @@ app.post("/api/uploaddocument", upload.single("file"), (req, res) =>
 app.post("/api/uploaddocumentss", upload.single("file"), (req, res) =>
   uploadDocuments(db, req, res)
 );
+
+app.post("/api/uploadproscutordocumentss", upload.single("file"), (req, res) =>
+  uploadProscutorCaseDocument(db, req, res)
+);
 app.post("/api/uploadothercase", upload.single("file"), (req, res) =>
   uploadOtherCases(db, req, res)
 );
@@ -168,6 +179,9 @@ app.get("/api/getUsers", async (req, res) => {
   await Getuser(req, res);
 });
 
+app.get("/api/proscutorcasedocuments", async (req, res) => {
+  await fetchAllProsecutorDocuments(req, res);
+});
 app.post("/api/getUserbyid", async (req, res) => {
   await GetUserById(req, res);
 });
@@ -193,6 +207,13 @@ app.get("/api/fetchcaseinformation", async (req, res) => {
 app.post("/api/fetchcasebyjudge", async (req, res) => {
   await FetchCasesByJudge(req, db, res);
 });
+
+app.post("/api/fetchcasebyproscutor", async (req, res) => {
+  await FetchCasesByProsecutor(req, db, res);
+});
+app.post("/api/fetchproscutorcases", async (req, res) => {
+  await FethcProscutorDocuments(req, db, res);
+});
 app.get("/api/getCaseTypeGrid", async (req, res) => {
   await FetchCaseTypeGrid(req, res);
 });
@@ -204,6 +225,12 @@ app.post("/api/editUserStatus", async (req, res) => {
   await EditUserStatus(db, req, res);
 });
 
+app.post("/api/editcasedecition", async (req, res) => {
+  await CaseDecision(db, req, res);
+});
+app.post("/api/updateDocumentStatus", async (req, res) => {
+  await updateDocumentStatus(db, req, res);
+});
 app.post("/api/edititem", async (req, res) => {
   await EditItem(db, req, res);
 });
@@ -298,6 +325,9 @@ app.post("/api/deleteClient", async (req, res) => {
   await deleteClient(db, req, res);
 });
 
+app.post("/api/deleteproscutordocument", async (req, res) => {
+  await DeleteProscutorDocument(db, req, res);
+});
 app.post("/api/deleteinvoice", async (req, res) => {
   await DeleteInvoice(db, req, res);
 });

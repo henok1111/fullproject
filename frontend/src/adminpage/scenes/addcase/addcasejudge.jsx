@@ -13,6 +13,16 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  PDFDownloadLink,
+} from "@react-pdf/renderer"; // Import necessary modules
 import { Form, Formik } from "formik";
 import * as yup from "yup";
 import SearchIcon from "@mui/icons-material/Search";
@@ -24,6 +34,7 @@ import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import "./cked.css";
 const initialValues = {};
 
 const checkoutSchema = yup.object().shape({});
@@ -43,18 +54,96 @@ const AddCaseJudge = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [caseToDelete, setCaseToDelete] = useState(null);
+  const [showDecisionForm, setShowDecisionForm] = useState(false);
+  const [decisionText, setDecisionText] = useState("");
+  const [selectedCaseId, setSelectedCaseId] = useState(null);
+  const [showPDF, setShowPDF] = React.useState(false);
 
-  const handleClick = () => {
-    navigate(`/registrar/caseform`);
+  // Function to toggle showing the PDF
+  const styles = StyleSheet.create({
+    page: {
+      flexDirection: "row",
+      backgroundColor: "#E4E4E4",
+    },
+    section: {
+      margin: 10,
+      padding: 10,
+      flexGrow: 1,
+      backgroundColor: `${colors.primary[600]}`,
+      color: `${colors.primary[100]}`,
+      borderRadius: "10px",
+    },
+  });
+
+  // PDF component to render the judge decision
+  const PDFComponent = ({ judgeDecision }) => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.section}>
+        <Text>
+            <div dangerouslySetInnerHTML={{ __html: judgeDecision }} />
+          </Text>
+        </View>
+      </Page>
+    </Document>
+  );
+  const handleMakeDecisionClick = (caseId) => {
+    setShowDecisionForm(true);
+    setSelectedCaseId(caseId); // Assuming setSelectedCaseId is a state setter function
   };
 
+  const handleCancelClick = () => {
+    setShowDecisionForm(false);
+    // Reset the decision text when cancel is clicked
+    setDecisionText("");
+  };
+  const handleSubmited = async (event) => {
+    event.preventDefault();
+    // Handle form submission logic here
+    console.log("Decision submitted:", decisionText);
+    console.log("case id ", selectedCaseId);
+    // Make sure there's a case ID available
+    if (!selectedCaseId) {
+      console.error("Case ID is missing.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:8081/api/editcasedecition",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            caseId: selectedCaseId,
+            decisionText: decisionText,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        console.log("Decision submitted successfully.");
+        // Reset the decision text after submission
+        setDecisionText("");
+        setShowDecisionForm(false);
+        fetchCaseCount();
+      } else {
+        console.error("Failed to submit decision:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error submitting decision:", error);
+    }
+  };
+
+  const handleEditorChange = (event, editor) => {
+    const data = editor.getData();
+    setDecisionText(data);
+  };
   useEffect(() => {
     fetchCaseCount();
   }, []);
-
-  const handleSnackbarOpen = () => {
-    setSnackbarOpen(true);
-  };
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -106,43 +195,6 @@ const AddCaseJudge = () => {
     }));
   };
 
-  const handleEditCase = (caseId) => {
-    console.log("Editing case with ID:", caseId);
-  };
-
-  const deleteCase = (caseId) => {
-    setCaseToDelete(caseId);
-    setOpenDeleteDialog(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (caseToDelete) {
-      await deleteCaseFromServer(caseToDelete);
-      setOpenDeleteDialog(false);
-    }
-  };
-
-  const deleteCaseFromServer = async (caseId) => {
-    try {
-      const response = await fetch(`http://localhost:8081/api/deletecase`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: caseId }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to delete case");
-      }
-      setFetchedCases((prevCases) =>
-        prevCases.filter((caseData) => caseData.case_id !== caseId)
-      );
-      handleSnackbarOpen();
-    } catch (error) {
-      console.error("Error deleting case:", error);
-    }
-  };
-
   const handleFormSubmit = (values) => {
     setErrorMessage("");
 
@@ -166,17 +218,6 @@ const AddCaseJudge = () => {
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Case Management" subtitle="" />
-      <Box display="flex" justifyContent="end" mt="10px">
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleClick}
-          startIcon={<AddIcon fontSize="small" />}
-          mb="10px"
-        >
-          Add Case
-        </Button>
-      </Box>
 
       <Formik
         onSubmit={handleFormSubmit}
@@ -254,7 +295,12 @@ const AddCaseJudge = () => {
                       mt={2}
                       bgcolor={`${colors.primary[400]}80`}
                     >
-                      <Box display="flex" alignItems="center" p={2}>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent={"space-between"}
+                        p={2}
+                      >
                         <Typography
                           marginBottom={2}
                           style={{
@@ -267,23 +313,21 @@ const AddCaseJudge = () => {
                         >
                           Case Number {caseData.case_id}
                         </Typography>
-                        <Box>
-                          <Button
-                            style={{ margin: "10px" }}
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleEditCase(caseData.case_id)}
-                          >
-                            Edit Case
-                          </Button>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            onClick={() => deleteCase(caseData.case_id)}
-                          >
-                            Delete Case
-                          </Button>
-                        </Box>
+                        <Typography
+                          marginBottom={2}
+                          style={{
+                            fontWeight: "bold",
+                            color: colors.greenAccent[300],
+                          }}
+                          variant="h3"
+                          color="#5bc0de"
+                          flexGrow={1} // Grow to fill available space
+                        >
+                          Case Status{" "}
+                          <span style={{ color: colors.blueAccent[500] }}>
+                            {caseData.case_status}
+                          </span>
+                        </Typography>
                       </Box>
                       <Grid container spacing={0}>
                         <Grid
@@ -495,7 +539,7 @@ const AddCaseJudge = () => {
                                     <DescriptionOutlinedIcon
                                       style={{ fontSize: "30px" }}
                                     />
-                                    viaw case Document
+                                    Initiate Case Document
                                   </Button>
                                 </a>
                               </>
@@ -700,6 +744,8 @@ const AddCaseJudge = () => {
                           )}
                         </Grid>
                       </Grid>
+                      <Box></Box>
+
                       {expandedCases[caseData.case_id] && (
                         <Grid container m={0.1} boxShadow={10} padding={1}>
                           <Grid item xs={10}>
@@ -708,7 +754,7 @@ const AddCaseJudge = () => {
                               color="#5bc0de"
                               style={{ fontWeight: "bold" }}
                             >
-                              Case Related Documents
+                              Case Documents
                             </Typography>
                           </Grid>
                           {caseData.other_documents_info &&
@@ -815,20 +861,135 @@ const AddCaseJudge = () => {
                           )}
                         </Grid>
                       )}
+                      {caseData.case_status === "running" && (
+                        <Box mt={2} display="flex" justifyContent="flex-end">
+                          <Button
+                            variant="contained"
+                            onClick={() =>
+                              handleMakeDecisionClick(caseData.case_id)
+                            }
+                          >
+                            Make Decision
+                          </Button>
+                        </Box>
+                      )}
+                      {showDecisionForm &&
+                        selectedCaseId === caseData.case_id && (
+                          <form onSubmit={handleSubmited}>
+                            <Box
+                              sx={{
+                                "& .ck-editor__main .ck-content": {
+                                  background: `${colors.blueAccent[900]}70`,
+                                  marginTop: "2px",
+                                  boxShadow: "10px",
+                                  borderRadius: "5px",
+                                  height: "190px",
+                                },
+                              }}
+                            >
+                              <CKEditor
+                                editor={ClassicEditor}
+                                data={decisionText}
+                                onChange={handleEditorChange}
+                                config={{
+                                  toolbar: [
+                                    "heading",
+                                    "|",
+                                    "bold",
+                                    "italic",
+                                    "underline",
+                                    "|",
+                                    "bulletedList",
+                                    "numberedList",
+                                    "|",
+                                    "link",
+                                    "|",
+                                    "undo",
+                                    "redo",
+                                  ],
+                                }}
+                              />
+                            </Box>
 
+                            <Box
+                              mt={2}
+                              display="flex"
+                              justifyContent="flex-end"
+                            >
+                              <Button
+                                variant="contained"
+                                onClick={handleSubmited}
+                                type="submit"
+                              >
+                                Submit
+                              </Button>
+                              <Button
+                                variant="contained"
+                                onClick={handleCancelClick}
+                              >
+                                Cancel
+                              </Button>
+                            </Box>
+                          </form>
+                        )}
                       {expandedCases[caseData.case_id] && (
                         <>
                           <TextField
-                            style={{ margin: "10px" }}
+                            style={{
+                              margin: "10px",
+                              fontSize: "40px",
+                              backgroundColor: `${colors.primary[600]}`,
+                              color: `${colors.primary[100]}`,
+                            }}
                             multiline
-                            label="discrioption"
+                            label="intiate case discription"
                             fullWidth
                             disabled
-                            variant="outlined"
+                            variant="filled"
                             value={caseData.description}
                           />
                         </>
                       )}
+                      <div>
+                        {/* Your existing code */}
+                        {expandedCases[caseData.case_id] && (
+                          <div>
+                            {/* Other content */}
+                            {caseData.judge_decision && ( // Check if judge_decision is not null
+                              <div
+                                style={{
+                                  padding: "10px",
+                                  backgroundColor: `${colors.primary[600]}`,
+                                  color: `${colors.primary[100]}`,
+                                  borderRadius: "10px",
+                                }}
+                                dangerouslySetInnerHTML={{
+                                  __html: caseData.judge_decision,
+                                }}
+                              />
+                            )}
+                            <button onClick={() => setShowPDF(true)}>
+                              Download PDF
+                            </button>
+                            {showPDF && (
+                              <PDFDownloadLink
+                                document={
+                                  <PDFComponent
+                                    judgeDecision={caseData.judge_decision}
+                                  />
+                                }
+                                fileName="judge_decision.pdf"
+                              >
+                                {({ blob, url, loading, error }) =>
+                                  loading
+                                    ? "Loading document..."
+                                    : "Download now!"
+                                }
+                              </PDFDownloadLink>
+                            )}
+                          </div>
+                        )}
+                      </div>
 
                       <Button
                         variant="contained"
@@ -846,30 +1007,6 @@ const AddCaseJudge = () => {
           </Form>
         )}
       </Formik>
-      <Dialog
-        open={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        sx={{
-          "& .MuiDialog-paper": {
-            backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
-          },
-        }}
-      >
-        <DialogTitle id="alert-dialog-title" color={"red"}>
-          {"Are you sure you want to delete this Case"}
-        </DialogTitle>
-
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

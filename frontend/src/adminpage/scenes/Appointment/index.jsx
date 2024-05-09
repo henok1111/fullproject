@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, TextField, Typography, InputLabel, DialogActions, DialogTitle, DialogContent, Dialog } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  InputLabel,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  Dialog,
+} from "@mui/material";
 import { Form, Formik } from "formik";
 import * as yup from "yup";
 import AddIcon from "@mui/icons-material/Add";
@@ -36,17 +46,17 @@ const Appointment = () => {
   useEffect(() => {
     fetchAppointment();
   }, []); // Fetch appointments when the component mounts
-  
+
   const initialValues = {
     note: "",
     date: "",
-    time: ""
+    time: "",
   };
-  
+
   const appointmentSchema = yup.object().shape({
     note: yup.string().required("Note is required"),
     date: yup.date().required("Date is required"),
-    time: yup.string().required("Time is required")
+    time: yup.string().required("Time is required"),
   });
 
   const handleEditClick = (row) => {
@@ -61,24 +71,27 @@ const Appointment = () => {
   const handleSubmitAppointment = async (values) => {
     // Extract only the fields that need to be updated
     const { "Appointment ID": appointmentId, time, date, note } = values;
-  
+
     // Prepare the updated appointment data
     const updatedAppointment = {
       "Appointment ID": appointmentId, // Use the existing appointment ID
       time,
       date,
-      note
+      note,
     };
-  console.log(updatedAppointment);
+    console.log(updatedAppointment);
     try {
-      const response = await fetch("http://localhost:8081/api/updateappointment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedAppointment),
-      });
-  
+      const response = await fetch(
+        "http://localhost:8081/api/updateappointment",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedAppointment),
+        }
+      );
+
       if (response.ok) {
         console.log("Appointment updated successfully");
         // Close the dialog after successful update
@@ -92,8 +105,7 @@ const Appointment = () => {
       console.error("Error updating appointment:", error);
     }
   };
-  
-    
+
   const fetchAppointment = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken");
@@ -111,7 +123,6 @@ const Appointment = () => {
       const data = await response.json();
       console.log("data", data);
       setCases(data);
-     
     } catch (error) {
       console.error("Error fetching cases:", error);
     }
@@ -121,13 +132,16 @@ const Appointment = () => {
     try {
       console.log("Deleting appointment with ID:", row["Appointment ID"]);
 
-      const response = await fetch("http://localhost:8081/api/deleteappointment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ appointmentId: row["Appointment ID"] }),
-      });
+      const response = await fetch(
+        "http://localhost:8081/api/deleteappointment",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ appointmentId: row["Appointment ID"] }),
+        }
+      );
 
       if (response.ok) {
         // Appointment deleted successfully
@@ -169,10 +183,10 @@ const Appointment = () => {
       headerName: "Note",
       flex: 3,
     },
-    { 
-      field: "Action", 
-      headerName: "Action", 
-      flex: 0.8, 
+    {
+      field: "Action",
+      headerName: "Action",
+      flex: 0.8,
       renderCell: (params) => (
         <div style={{ display: "flex", justifyContent: "space-around" }}>
           <Button
@@ -282,73 +296,83 @@ const Appointment = () => {
               padding="5px"
               backgroundColor={colors.blueAccent[900]}
             >
-           <Box
-  m="40px 0 0 0"
-  height="115vh"
-  paddingBottom="25vh"
-  sx={{
-    "& .MuiDataGrid-root": {
-      border: "none",
-    },
-    "& .MuiDataGrid-cell": {
-      borderBottom: "none",
-    },
-    "& .name-column--cell": {
-      color: colors.greenAccent[300],
-    },
-    "& .MuiDataGrid-columnHeaders": {
-      backgroundColor: colors.blueAccent[700],
-      borderBottom: "none",
-    },
-    "& .MuiDataGrid-virtualScroller": {
-      backgroundColor: colors.primary[400],
-    },
-    "& .MuiDataGrid-footerContainer": {
-      borderTop: "none",
-      backgroundColor: colors.blueAccent[700],
-    },
-    "& .MuiCheckbox-root": {
-      color: `${colors.greenAccent[200]} !important`,
-    },
-    "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-      color: `${colors.grey[100]} !important`,
-    },
-    "& .date-time-cell": {
-      color: "blue", // Change the color to blue
-      fontWeight: "bold", // Add additional styles as needed
-    },
-  }}
->
-  <DataGrid
-    rows={cases.map((appointment, index) => ({
-      id: index + 1,
-      "Appointment ID": appointment.appointment_id,
-      "Case ID": appointment.case_id,
-      Date: new Date(appointment.date).toLocaleDateString(),
-      Time: appointment.time,
-      Note: appointment.note,
-      Action: "Action Button"
-    }))}
-    columns={columns}
-    components={{ Toolbar: GridToolbar }}
-  />
-</Box>
-
+              <Box
+                m="40px 0 0 0"
+                height="115vh"
+                paddingBottom="25vh"
+                sx={{
+                  "& .MuiDataGrid-root": {
+                    border: "none",
+                  },
+                  "& .MuiDataGrid-cell": {
+                    borderBottom: "none",
+                  },
+                  "& .name-column--cell": {
+                    color: colors.greenAccent[300],
+                  },
+                  "& .MuiDataGrid-columnHeaders": {
+                    backgroundColor: colors.blueAccent[700],
+                    borderBottom: "none",
+                  },
+                  "& .MuiDataGrid-virtualScroller": {
+                    backgroundColor: colors.primary[400],
+                  },
+                  "& .MuiDataGrid-footerContainer": {
+                    borderTop: "none",
+                    backgroundColor: colors.blueAccent[700],
+                  },
+                  "& .MuiCheckbox-root": {
+                    color: `${colors.greenAccent[200]} !important`,
+                  },
+                  "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+                    color: `${colors.grey[100]} !important`,
+                  },
+                  "& .date-time-cell": {
+                    color: "blue", // Change the color to blue
+                    fontWeight: "bold", // Add additional styles as needed
+                  },
+                }}
+              >
+                <DataGrid
+                  rows={cases.map((appointment, index) => ({
+                    id: index + 1,
+                    "Appointment ID": appointment.appointment_id,
+                    "Case ID": appointment.case_id,
+                    Date: new Date(appointment.date).toLocaleDateString(),
+                    Time: appointment.time,
+                    Note: appointment.note,
+                    Action: "Action Button",
+                  }))}
+                  columns={columns}
+                  components={{ Toolbar: GridToolbar }}
+                />
+              </Box>
             </Box>
           </Form>
         )}
       </Formik>
       {/* Edit Appointment Dialog */}
-      <Dialog  open={openDialog} onClose={handleCloseDialog}>
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
         <Formik
           initialValues={selectedAppointment || initialValues}
           validationSchema={appointmentSchema}
           onSubmit={handleSubmitAppointment}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+          }) => (
             <Form onSubmit={handleSubmit}>
-              <DialogTitle style={{ backgroundColor: colors.blueAccent[900]}} >Edit Appointment</DialogTitle>
-              <DialogContent style={{ backgroundColor: colors.blueAccent[900]}} >
+              <DialogTitle style={{ backgroundColor: colors.blueAccent[900] }}>
+                Edit Appointment
+              </DialogTitle>
+              <DialogContent
+                style={{ backgroundColor: colors.blueAccent[900] }}
+              >
                 <TextField
                   fullWidth
                   id="note"
@@ -359,46 +383,50 @@ const Appointment = () => {
                   onBlur={handleBlur}
                   error={touched.note && Boolean(errors.note)}
                   helperText={touched.note && errors.note}
-                  style={{margin:"10px 0px 10px 0px"
+                  style={{ margin: "10px 0px 10px 0px" }}
+                />
+                <TextField
+                  fullWidth
+                  id="date"
+                  name="date"
+                  label="Date"
+                  type="date"
+                  value={values.date}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.date && Boolean(errors.date)}
+                  helperText={touched.date && errors.date}
+                  style={{ margin: "10px 0px 10px 0px" }}
+                  InputProps={{
+                    inputProps: {
+                      min: new Date().toISOString().split("T")[0], // Set min date to today
+                    },
                   }}
                 />
-              <TextField
-  fullWidth
-  id="date"
-  name="date"
-  label="Date"
-  type="date"
-  value={values.date}
-  onChange={handleChange}
-  onBlur={handleBlur}
-  error={touched.date && Boolean(errors.date)}
-  helperText={touched.date && errors.date}
-  style={{ margin: "10px 0px 10px 0px" }}
-  InputProps={{
-    inputProps: {
-      min: new Date().toISOString().split("T")[0], // Set min date to today
-    },
-  }}
-/>
 
-<TextField
-  fullWidth
-  id="time"
-  name="time"
-  label="Time"
-  type="time"
-  value={values.time}
-  onChange={handleChange}
-  onBlur={handleBlur}
-  error={touched.time && Boolean(errors.time)}
-  helperText={touched.time && errors.time}
-  style={{ margin: "10px 0px 10px 0px" }}
-/>
-
+                <TextField
+                  fullWidth
+                  id="time"
+                  name="time"
+                  label="Time"
+                  type="time"
+                  value={values.time}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.time && Boolean(errors.time)}
+                  helperText={touched.time && errors.time}
+                  style={{ margin: "10px 0px 10px 0px" }}
+                />
               </DialogContent>
-              <DialogActions style={{ backgroundColor: colors.blueAccent[900]}} >
-                <Button color="error" onClick={handleCloseDialog}>Cancel</Button>
-                <Button type="submit" color="secondary">Save</Button>
+              <DialogActions
+                style={{ backgroundColor: colors.blueAccent[900] }}
+              >
+                <Button color="error" onClick={handleCloseDialog}>
+                  Cancel
+                </Button>
+                <Button type="submit" color="secondary">
+                  Save
+                </Button>
               </DialogActions>
             </Form>
           )}

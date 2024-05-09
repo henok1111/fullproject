@@ -196,18 +196,13 @@ const Sidebar = ({ role, name, userId }) => {
       {
         title: "Case Management",
         icon: <GavelIcon />,
-        subItems: [
-          {
-            title: "View Cases",
-            to: "/proscuter/addcase",
-            icon: <PersonOutlinedIcon />,
-          },
-          {
-            title: "Add Case",
-            to: "/proscuter/caseform",
-            icon: <PersonOutlinedIcon />,
-          },
-        ],
+        to: "proscutercase",
+      },
+
+      {
+        title: "Intiate Cases",
+        to: "proscutordocument",
+        icon: <ReceiptOutlinedIcon />,
       },
     ],
     Invoice_Clerk: [
@@ -243,6 +238,13 @@ const Sidebar = ({ role, name, userId }) => {
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
       { title: "Manage Team", to: "team", icon: <PeopleOutlinedIcon /> },
       { title: "Prom", to: "form", icon: <PersonOutlinedIcon /> },
+
+      {
+        title: "proscutor inteated case",
+        to: "casethatcomefromproscutor",
+        icon: <PersonOutlinedIcon />,
+      },
+
       {
         title: "Profile Form",
         to: "casecourtmanager",

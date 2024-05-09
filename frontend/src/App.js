@@ -41,6 +41,7 @@ import ProfilePage from "./adminpage/scenes/profile";
 import ViewProfilePage from "./adminpage/scenes/profile";
 import NotFound from "./adminpage/scenes/global/pagenotfound";
 import Casetype from "./adminpage/scenes/case/casetype";
+import FetchProscuterCases from "./adminpage/scenes/proscutor/fetchcase";
 import {
   GavelRounded,
   HailRounded,
@@ -52,6 +53,9 @@ import AddServices from "./adminpage/scenes/services/addservices";
 import ConfirmedPage from "./forgot_password/confirmedPage";
 import ResetPassword from "./forgot_password/receive_new_password";
 import ViewProfilePages from "./adminpage/scenes/profile/profile";
+import UploadProscutorDocumentPage from "./adminpage/scenes/proscutor/index";
+import ProscutoreDocuments from "./adminpage/scenes/proscutor/fetchproscuterdocument";
+import ProscutorCases from "./adminpage/scenes/registrar";
 import InvoiceDetail from "./adminpage/scenes/invoices/invoiceDetailspage";
 
 const App = () => {
@@ -160,6 +164,9 @@ const RegistrarRoutes = () => {
     <Routes>
       <Route path="/" element={<Adminss />}>
         <Route path="/caseform" element={<Caseform />} />
+
+        <Route path="/casethatcomefromproscutor" element={<ProscutorCases />} />
+
         <Route path="/addinvoices" element={<AddInvoices />} />
         <Route path="/team" element={<Team />} />
         <Route path="/contacts" element={<Contacts />} />
@@ -267,6 +274,13 @@ const ProscutorRoutes = () => {
         <Route path="/profilepage" element={<ProfilePage />} />
         <Route path="/viewprofilepagefasdfa" element={<ViewProfilePages />} />
         <Route path="/caseform" element={<Caseform />} />
+        <Route path="/proscutercase" element={<FetchProscuterCases />} />
+        <Route
+          path="/proscuter_intiate_case"
+          element={<UploadProscutorDocumentPage />}
+        />
+
+        <Route path="proscutordocument" element={<ProscutoreDocuments />} />
         <Route path="/addcase" element={<AddCase />} />
       </Route>
     </Routes>

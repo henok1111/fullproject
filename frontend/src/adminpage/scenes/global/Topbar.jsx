@@ -122,11 +122,12 @@ const Topbar = () => {
       p={2}
       backgroundColor={colors.blueAccent[900]}
     >
+      {" "}
+      <div id="google_translate_element"></div>
       {/* SEARCH BAR */}
-      <Box display="flex" borderRadius="3px">
+      <Box display="flex" alignItems={"flex-start"} borderRadius="3px">
         {/* Search bar content */}
       </Box>
-
       {/* ICONS */}
       <Box display="flex">
         {/* Dark/Light mode toggle */}
