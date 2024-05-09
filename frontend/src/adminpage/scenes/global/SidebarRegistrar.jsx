@@ -15,7 +15,6 @@ import GavelIcon from "@mui/icons-material/Gavel";
 import { jwtDecode } from "jwt-decode";
 import henok from "./image.png";
 
-
 const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -62,7 +61,9 @@ const Item = ({ title, to, icon, selected, setSelected, subItems }) => {
               }}
               onClick={() => setSelected(subItem.title)}
             >
-              <Typography sx={{ fontSize: "inherit" }}>{subItem.title}</Typography>
+              <Typography sx={{ fontSize: "inherit" }}>
+                {subItem.title}
+              </Typography>
               <Link to={subItem.to} />
             </MenuItem>
           ))}
@@ -88,7 +89,9 @@ const Sidebar = ({ role, name, userId }) => {
       const userId = decodedToken.userId;
 
       // Make an API request to fetch the user image path
-      const response = await fetch(`http://localhost:8081/api/getUserImage/${userId}`);
+      const response = await fetch(
+        `http://localhost:8081/api/getUserImage/${userId}`
+      );
       const data = await response.json();
       const { imagePath } = data;
 
@@ -162,7 +165,7 @@ const Sidebar = ({ role, name, userId }) => {
           // Extract the first_name from the decoded token
           const c = decodedToken.first_name;
           const userLastName = decodedToken.last_name;
-          const  userFirstName  = c + ' ' + userLastName ;
+          const userFirstName = c + " " + userLastName;
           // Set the first_name state with the extracted value
           setFirstName(userFirstName);
         } else {
@@ -189,22 +192,29 @@ const Sidebar = ({ role, name, userId }) => {
         icon: <ContactsOutlinedIcon />,
       },
     ],
-    proscutor:[
+    proscutor: [
       {
         title: "Case Management",
         icon: <GavelIcon />,
         subItems: [
-          { title: "View Cases", to: "/proscuter/addcase", icon: <PersonOutlinedIcon /> },
-          { title: "Add Case", to: "/proscuter/caseform", icon: <PersonOutlinedIcon /> },
-        ]
-      }
+          {
+            title: "View Cases",
+            to: "/proscuter/addcase",
+            icon: <PersonOutlinedIcon />,
+          },
+          {
+            title: "Add Case",
+            to: "/proscuter/caseform",
+            icon: <PersonOutlinedIcon />,
+          },
+        ],
+      },
     ],
-    Invoice_Clerk:[
+    Invoice_Clerk: [
       { title: "Invoices", to: "invoices", icon: <ReceiptOutlinedIcon /> },
       { title: "Services", to: "services", icon: <ReceiptOutlinedIcon /> },
     ],
     judge: [
-     
       {
         title: "Contact Information",
         to: "contacts",
@@ -214,52 +224,76 @@ const Sidebar = ({ role, name, userId }) => {
         title: "Calendar",
         to: "calendar",
         icon: <CalendarTodayOutlinedIcon />,
-      }, { title: "Profile Form", to: "casejudge", icon: <PersonOutlinedIcon /> },
+      },
+      { title: "Profile Form", to: "casejudge", icon: <PersonOutlinedIcon /> },
       {
         title: "Appointment",
         to: "appointment",
         icon: <ReceiptOutlinedIcon />,
       },
     ],
-    court_manager:[
-
-{ title: "View Cases", to: "/court_manager/casecourtmanager", icon: <PersonOutlinedIcon /> },
+    court_manager: [
+      {
+        title: "View Cases",
+        to: "/court_manager/casecourtmanager",
+        icon: <PersonOutlinedIcon />,
+      },
     ],
-    registrar : [
+    registrar: [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
       { title: "Manage Team", to: "team", icon: <PeopleOutlinedIcon /> },
-      { title: "Prom", to: "form", icon: <PersonOutlinedIcon /> }, 
-      { title: "Profile Form", to: "casecourtmanager", icon: <PersonOutlinedIcon /> },
+      { title: "Prom", to: "form", icon: <PersonOutlinedIcon /> },
+      {
+        title: "Profile Form",
+        to: "casecourtmanager",
+        icon: <PersonOutlinedIcon />,
+      },
       {
         title: "Case Management",
         icon: <GavelIcon />,
         subItems: [
-          { title: "View Cases", to: "/registrar/addcase", icon: <PersonOutlinedIcon /> },
-          { title: "Add Case", to: "/registrar/caseform", icon: <PersonOutlinedIcon /> },
-        ]
+          {
+            title: "View Cases",
+            to: "/registrar/addcase",
+            icon: <PersonOutlinedIcon />,
+          },
+          {
+            title: "Add Case",
+            to: "/registrar/caseform",
+            icon: <PersonOutlinedIcon />,
+          },
+        ],
       },
       {
         title: "Client Management",
         icon: <PersonOutlinedIcon />,
         subItems: [
-          { title: "View Client", to: "/registrar/viewclient", icon: <PersonOutlinedIcon /> },
-          { title: "View Advocator", to: "/registrar/viewadvocator", icon: <PersonOutlinedIcon /> },
-          { title: "Add Client", to: "/registrar/addclient", icon: <PersonOutlinedIcon /> },
-          { title: "Add Advocator", to: "/registrar/addadvocator", icon: <PersonOutlinedIcon /> },
-        ]
+          {
+            title: "View Client",
+            to: "/registrar/viewclient",
+            icon: <PersonOutlinedIcon />,
+          },
+          {
+            title: "View Advocator",
+            to: "/registrar/viewadvocator",
+            icon: <PersonOutlinedIcon />,
+          },
+          {
+            title: "Add Client",
+            to: "/registrar/addclient",
+            icon: <PersonOutlinedIcon />,
+          },
+          {
+            title: "Add Advocator",
+            to: "/registrar/addadvocator",
+            icon: <PersonOutlinedIcon />,
+          },
+        ],
       },
       {
         title: "Appointment",
         to: "appointment",
         icon: <ReceiptOutlinedIcon />,
-      },
-      {
-        title: "Income",
-        icon: <PersonOutlinedIcon />,
-        subItems: [
-          { title: "Invoices", to: "invoices", icon: <ReceiptOutlinedIcon /> },
-          { title: "Services", to: "services", icon: <ReceiptOutlinedIcon /> },
-        ],
       },
       {
         title: "Contact Information",
@@ -275,10 +309,10 @@ const Sidebar = ({ role, name, userId }) => {
         title: "Settings",
         icon: <PersonOutlinedIcon />,
         subItems: [
-          { title: "Case Type", to: "casetype", icon: <PersonOutlinedIcon/> },
+          { title: "Case Type", to: "casetype", icon: <PersonOutlinedIcon /> },
         ],
       },
-    ]
+    ],
   };
 
   return (
@@ -287,7 +321,7 @@ const Sidebar = ({ role, name, userId }) => {
         "& .pro-sidebar-inner": {
           background: `${colors.primary[400]} !important`,
           color: `${colors.primary[900]}!important`,
-          borderRight: "none"
+          borderRight: "none",
         },
         "& .pro-icon-wrapper": {
           backgroundColor: "transparent !important",
