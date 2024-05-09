@@ -298,14 +298,6 @@ const Sidebar = ({ role, name, userId }) => {
         icon: <ReceiptOutlinedIcon />,
       },
       {
-        title: "Income",
-        icon: <PersonOutlinedIcon />,
-        subItems: [
-          { title: "Invoices", to: "invoices", icon: <ReceiptOutlinedIcon /> },
-          { title: "Services", to: "services", icon: <ReceiptOutlinedIcon /> },
-        ],
-      },
-      {
         title: "Contact Information",
         to: "contacts",
         icon: <ContactsOutlinedIcon />,
