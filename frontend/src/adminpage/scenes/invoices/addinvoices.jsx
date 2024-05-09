@@ -7,7 +7,10 @@ import {
   TextField,
   Typography,
   Autocomplete,
+  Snackbar,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
+
 import {
   Table,
   TableBody,
@@ -64,6 +67,7 @@ const AddInvoices = () => {
   const [descriptions, setDescriptions] = useState([""]);
   const [fetchedCases, setFetchedCases] = useState([]);
   const [selectedCase, setSelectedCase] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleActionClick = (event, index) => {
     if (anchorEl && index === selectedRow) {
@@ -79,6 +83,13 @@ const AddInvoices = () => {
   const handleEdit = () => {
     // Add your edit logic here
     setAnchorEl(null);
+  };
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
   };
 
   const handleRemove = () => {
@@ -171,8 +182,21 @@ const AddInvoices = () => {
 
       if (response.ok) {
         const result = await response.json();
-        console.log(result); // Log the response from the backend
-        // You can navigate or show a success message here
+        console.log(result);
+        setOpenSnackbar(true);
+        setInvoiceRows([
+          {
+            service: "",
+            description: "",
+            amount: 0,
+            paidStatus: "Unpaid",
+          },
+        ]);
+        setSelectedCase(null);
+        setNote("");
+        setDueDate(currentDate);
+        setDescriptions([""]);
+        fetchHighestInvoiceNumber();
       } else {
         console.error("Failed to save invoice:", response.statusText);
         // Handle the error or show an error message
@@ -230,7 +254,9 @@ const AddInvoices = () => {
       console.error("Error fetching case count:", error);
     }
   };
-
+  const handleCancelButtonClick = () => {
+    navigate("/invoice_clerk/invoices");
+  };
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Box display="flex" justifyContent="flex-end">
@@ -529,6 +555,7 @@ const AddInvoices = () => {
             color="error"
             sx={{ mt: "10px" }}
             size="large"
+            onClick={handleCancelButtonClick}
           >
             Cancel
           </Button>
@@ -544,6 +571,20 @@ const AddInvoices = () => {
             Save
           </Button>
         </Box>
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <MuiAlert
+            onClose={handleCloseSnackbar}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Invoice Added Successfully
+          </MuiAlert>
+        </Snackbar>
       </Box>
     </Box>
   );

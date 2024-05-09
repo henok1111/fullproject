@@ -421,7 +421,7 @@ const AddCase = () => {
               <Box m="40px 0 0 0">
                 <Snackbar
                   open={snackbarOpen}
-                  autoHideDuration={6000} // Adjust as needed
+                  autoHideDuration={6000}
                   onClose={handleSnackbarClose}
                   message="Case deleted successfully"
                 />

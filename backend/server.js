@@ -381,11 +381,8 @@ const io = new Server(server, {
 
 // Socket.IO event listeners
 io.on("connection", (socket) => {
-  console.log(`Socket ${socket.id} connected`);
-
   socket.on("join_room", (room) => {
     socket.join(room);
-    console.log(`Socket ${socket.id} joined room ${room}`);
   });
 
   socket.on("send_notification", (data) => {

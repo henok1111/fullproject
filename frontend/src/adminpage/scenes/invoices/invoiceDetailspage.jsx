@@ -12,7 +12,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Snackbar,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
+
 import {
   Table,
   TableBody,
@@ -40,6 +43,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 const InvoiceDetail = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
   const [invoiceRows, setInvoiceRows] = useState([
     {
       service: "",
@@ -74,6 +79,7 @@ const InvoiceDetail = () => {
       if (response.ok) {
         fetchInvoiceDetail();
         console.log("Items added successfully!");
+        setOpenModal(false);
       } else {
         console.error("Failed to add items:", response.statusText);
       }
@@ -323,14 +329,6 @@ const InvoiceDetail = () => {
       // Get overall status
       const overallStatus = calculateOverallStatus();
 
-      // Log data to be sent to the backend
-      console.log("Data to be sent to the backend:");
-      console.log("Invoice ID:", invoiceId);
-      console.log("Total Amount:", totalAmount);
-      console.log("Overall Status:", overallStatus);
-      console.log("Case ID:", invoiceDetail?.case_id);
-      console.log("note:", note);
-
       // Send data to the backend
       const response = await fetch(
         `http://localhost:8081/api/editea`, // Adjust the endpoint URL
@@ -353,12 +351,29 @@ const InvoiceDetail = () => {
       if (response.ok) {
         fetchInvoiceDetail();
         console.log("Invoice data saved successfully!");
+        setOpenSnackbar(true);
       } else {
         console.error("Failed to save invoice data:", response.statusText);
       }
     } catch (error) {
       console.error("Error saving invoice data:", error);
     }
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+
+    setTimeout(() => {
+      navigate("/invoice_clerk/invoices");
+    });
+  };
+
+  const handleCancelButtonClick = () => {
+    navigate("/invoice_clerk/invoices");
   };
 
   return (
@@ -656,7 +671,7 @@ const InvoiceDetail = () => {
                           if (selectedService) {
                             const updatedRows = [...invoiceRows];
                             updatedRows[index].service = selectedService.name;
-                            updatedRows[index].amount = selectedService.amount; // Update the amount
+                            updatedRows[index].amount = selectedService.amount;
                             setInvoiceRows(updatedRows);
                           }
                         }}
@@ -665,10 +680,10 @@ const InvoiceDetail = () => {
                         {services
                           .filter(
                             (service) =>
-                              !invoiceRows
-                                .slice(0, index)
-                                .map((row) => row.service)
-                                .includes(service.name)
+                              !invoiceDetail ||
+                              !invoiceDetail.items.some(
+                                (item) => item.service === service.name
+                              )
                           )
                           .map((service) => (
                             <MenuItem key={service.id} value={service.name}>
@@ -805,6 +820,7 @@ const InvoiceDetail = () => {
             color="error"
             sx={{ mt: "10px" }}
             size="large"
+            onClick={handleCancelButtonClick}
           >
             Cancel
           </Button>
@@ -820,6 +836,20 @@ const InvoiceDetail = () => {
             Save
           </Button>
         </Box>
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <MuiAlert
+            onClose={handleCloseSnackbar}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Invoice Edited Successfully
+          </MuiAlert>
+        </Snackbar>
       </Box>
     </Box>
   );

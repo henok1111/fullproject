@@ -51,16 +51,19 @@ const Invoices = () => {
       headerName: "Services",
       flex: 1.2,
       renderCell: (params) => (
-        <ul>
-          {params.row.items &&
-            params.row.items.map((item, index) => (
-              <li key={index}>
-                {item.service}: {item.amount}
-              </li>
-            ))}
-        </ul>
+        <div style={{ maxWidth: "100%", overflowX: "auto" }}>
+          <ul style={{ margin: 0, padding: 0 }}>
+            {params.row.items &&
+              params.row.items.map((item, index) => (
+                <li key={index}>
+                  {item.service}: {item.amount}
+                </li>
+              ))}
+          </ul>
+        </div>
       ),
     },
+
     {
       field: "total_amount",
       headerName: "Total Amount",
