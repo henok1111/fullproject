@@ -24,6 +24,14 @@ import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import EditCase from "../form/editcaseform";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  PDFDownloadLink,
+} from "@react-pdf/renderer"; // Import necessary modules
 const initialValues = {};
 
 const checkoutSchema = yup.object().shape({});
@@ -48,37 +56,33 @@ const AddCase = () => {
   const [isEditFormClosed, setIsEditFormClosed] = useState(false);
   const [documentRows, setDocumentRows] = useState([]); // State variable to store document rows
   const [showSubmitButton, setShowSubmitButton] = useState(false);
-
-<<<<<<< HEAD
-    const [selectedCaseId, setSelectedCaseId] = useState(null);
-    const handleClick = () => {
-        navigate(`/registrar/caseform`);
-    };
-    const handleSnackbarOpen = () => {
-        setSnackbarOpen(true);
-    };
-    const [documentDescriptions, setDocumentDescriptions] = useState({}); // State variable to store document descriptions
-    const [documentFiles, setDocumentFiles] = useState({}); // State variable to store document files
-    const addDocumentRow = (caseId) => {
-      // Find the case by its ID
-      const foundCase = fetchedCases.find((caseData) => caseData.case_id === caseId);
-      if (foundCase) {
-        // Add a new document row to the case
-        const updatedCases = fetchedCases.map((caseData) =>
-          caseData.case_id === caseId
-            ? { ...caseData, documentRows: [...(caseData.documentRows || []), { description: "", file: null }] }
-            : caseData
-        );
-        setFetchedCases(updatedCases);
-        setShowSubmitButton(true);
-      }
-    };
-  
-  
-  
-    const removeDocumentRow = (caseId, rowIndex) => {
-      // Remove the document row from the case
-=======
+  const [showPDF, setShowPDF] = React.useState(false);
+  // Function to toggle showing the PDF
+  const styles = StyleSheet.create({
+    page: {
+      flexDirection: "row",
+      backgroundColor: "#E4E4E4",
+    },
+    section: {
+      margin: 10,
+      padding: 10,
+      flexGrow: 1,
+      backgroundColor: `${colors.primary[600]}`,
+      color: `${colors.primary[100]}`,
+      borderRadius: "10px",
+    },
+  });
+  const PDFComponent = ({ judgeDecision }) => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.section}>
+          <Text>
+            <div dangerouslySetInnerHTML={{ __html: judgeDecision }} />
+          </Text>
+        </View>
+      </Page>
+    </Document>
+  );
   const [selectedCaseId, setSelectedCaseId] = useState(null);
   const handleClick = () => {
     navigate(`/registrar/caseform`);
@@ -88,9 +92,6 @@ const AddCase = () => {
   };
   const [documentDescriptions, setDocumentDescriptions] = useState({}); // State variable to store document descriptions
   const [documentFiles, setDocumentFiles] = useState({}); // State variable to store document files
-
-  // Function to add a document row
-
   const addDocumentRow = (caseId) => {
     // Find the case by its ID
     const foundCase = fetchedCases.find(
@@ -98,7 +99,6 @@ const AddCase = () => {
     );
     if (foundCase) {
       // Add a new document row to the case
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
       const updatedCases = fetchedCases.map((caseData) =>
         caseData.case_id === caseId
           ? {
@@ -483,6 +483,21 @@ const AddCase = () => {
                         >
                           Case Number {caseData.case_id}
                         </Typography>
+                        <Typography
+                          marginBottom={2}
+                          style={{
+                            fontWeight: "bold",
+                            color: colors.greenAccent[300],
+                          }}
+                          variant="h3"
+                          color="#5bc0de"
+                          flexGrow={1} // Grow to fill available space
+                        >
+                          Case Status{" "}
+                          <span style={{ color: colors.blueAccent[500] }}>
+                            {caseData.case_status}
+                          </span>
+                        </Typography>
                         <Box>
                           <Button
                             style={{ margin: "10px" }}
@@ -564,6 +579,7 @@ const AddCase = () => {
                               <span
                                 style={{
                                   color: colors.greenAccent[300],
+
                                   fontWeight: "bold",
                                   fontSize: "1.1em",
                                 }}
@@ -695,60 +711,41 @@ const AddCase = () => {
                                 "N/A"
                               )}
                             </Typography>
+                            {caseData.id && caseData.first_name ? (
+                              <Typography
+                                variant="h4"
+                                margin={1}
+                                color={colors.grey[100]}
+                                style={{
+                                  fontWeight: "bold",
+                                  fontSize: "1.1em",
+                                }}
+                              >
+                                Assigned Judge:{" "}
+                                <span
+                                  style={{
+                                    color: colors.greenAccent[300],
+                                    fontWeight: "bold",
+                                    fontSize: "1.1em",
+                                  }}
+                                >
+                                  {`${caseData.id} / ${caseData.first_name} / ${caseData.last_name}`}
+                                </span>
+                              </Typography>
+                            ) : (
+                              <Typography
+                                variant="h4"
+                                margin={1}
+                                color={colors.grey[100]}
+                                style={{
+                                  fontWeight: "bold",
+                                  fontSize: "1.1em",
+                                }}
+                              >
+                                Case is not assigned yet
+                              </Typography>
+                            )}
 
-<<<<<<< HEAD
-  {caseData.file_path && ( // Check if file_path exists
-        <>
-         
-    
-          {/* Display the document icon with a link to download the file */}
-          <a href={`http://localhost:8081/${caseData.file_path}`} download>
-             <Button component="span" variant="contained"  size="large" >
-                       <DescriptionOutlinedIcon style={{ fontSize: "30px" }} />
- viaw case Document
-                      </Button>
-          </a>
-        </>
-      )} 
-</Box>
-
-
-  
-
-
-                     </Grid>
-  
-                   <Grid item xs={12} boxShadow={10} borderRadius={3} margin={1} bgcolor={`${colors.primary[400]}40`} md={3.6}>
-                        {caseData.petitioners_info && (
-                          <Box padding={2} >
-                            <Typography variant="h3" color="#5bc0de" style={{ fontWeight: 'bold'}} textAlign={"center"}>Petitioners</Typography>
-                            {caseData.petitioners_info.map((petitioner, index) => (
-                              <Box key={index} borderBottom={3}  mt={1} padding={1} borderRadius={2}  borderColor={colors.blueAccent[800]} marginLeft={2} marginRight={2}>
-                                <Typography style={{ fontWeight: 'bold', fontSize: '1.1.1em' }} variant="body1"  color={colors.grey[100]}>
-  Full Name   <span style={{ fontWeight: 'bold', fontSize: '1.1em', color: colors.greenAccent[300] }}>{`${petitioner.first_name} ${petitioner.middle_name} ${petitioner.last_name}`}</span>
-</Typography>
-
-                                {expandedCases[caseData.case_id] && (
-              <>
-                <Typography variant="body1"  color={colors.grey[100]}>{`Email:  ${petitioner.email}`}</Typography>
-                <Typography variant="body1"  color={colors.grey[100]}>{`Phone Number:  ${petitioner.mobile_number}`}</Typography>
-              </>
-            )}
-                                {/* Render other petitioner info */}
-                                {expandedCases[caseData.case_id] && (
-                          <>
-                            <Typography variant="h5"  color={colors.blueAccent[300]}>Reference Information</Typography>
-                            {petitioner.references && petitioner.references.map((reference, index) => (
-                              <Box key={index}  color={colors.greenAccent[300] }mt={1} >
-                                <Typography variant="body1"  color={colors.grey[100]}>{`Reference Name: ${reference.reference_name}`}</Typography>
-                                <Typography variant="body1"  color={colors.grey[100]}>{`Reference Mobile: ${reference.reference_mobile}`}</Typography>
-                              </Box>
-                            ))}
-                          </>
-                        )}
-                              </Box>
-                            ))}
-=======
                             {caseData.file_path && ( // Check if file_path exists
                               <>
                                 {/* Display the document icon with a link to download the file */}
@@ -769,68 +766,7 @@ const AddCase = () => {
                                 </a>
                               </>
                             )}
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
                           </Box>
-
-                          {caseData.other_documents_info &&
-                            caseData.other_documents_info.map(
-                              (doc, index) =>
-                                // Check if id is not null before displaying the document
-                                doc.id !== null && (
-                                  <div key={index}>
-                                    <Grid
-                                      container
-                                      borderRadius={3}
-                                      bgcolor={`${colors.primary[400]}40`}
-                                      boxShadow={10}
-                                    >
-                                      <Grid item xs={4} padding={1}>
-                                        <a
-                                          href={`http://localhost:8081/${doc.file_path}`}
-                                          download
-                                        >
-                                          <Button
-                                            component="span"
-                                            variant="contained"
-                                            size="large"
-                                          >
-                                            <DescriptionOutlinedIcon
-                                              style={{ fontSize: "30px" }}
-                                            />
-                                            V {index + 1}
-                                          </Button>
-                                        </a>
-                                      </Grid>
-
-                                      <Grid
-                                        item
-                                        xs={18}
-                                        justifyContent="flex-end"
-                                        padding={1}
-                                      >
-                                        <Typography
-                                          variant="body1"
-                                          color={colors.grey[100]}
-                                          style={{
-                                            fontWeight: "bold",
-                                            fontSize: "1.1em",
-                                            justifyContent: "end",
-                                          }}
-                                        >
-                                          Document Description:{" "}
-                                          <span
-                                            style={{
-                                              color: colors.greenAccent[300],
-                                            }}
-                                          >
-                                            {doc.description}
-                                          </span>
-                                        </Typography>
-                                      </Grid>
-                                    </Grid>
-                                  </div>
-                                )
-                            )}
                         </Grid>
 
                         <Grid
@@ -1030,6 +966,122 @@ const AddCase = () => {
                           )}
                         </Grid>
                       </Grid>
+                      {expandedCases[caseData.case_id] && (
+                        <Grid container m={0.1} boxShadow={10} padding={1}>
+                          <Grid item xs={10}>
+                            <Typography
+                              variant="h3"
+                              color="#5bc0de"
+                              style={{ fontWeight: "bold" }}
+                            >
+                              Case Information
+                            </Typography>
+                          </Grid>
+                          {caseData.other_documents_info &&
+                          caseData.other_documents_info.length > 0 ? (
+                            caseData.other_documents_info.map((doc, index) =>
+                              // Check if id is not null before displaying the document
+                              doc.id !== null ? (
+                                <Grid
+                                  item
+                                  key={index}
+                                  xs={12}
+                                  sm={8}
+                                  md={6}
+                                  lg={7}
+                                  padding={2}
+                                  xl={6}
+                                >
+                                  <Grid
+                                    container
+                                    borderRadius={3}
+                                    spacing={0.1}
+                                    padding={2}
+                                    margin={1}
+                                    bgcolor={`${colors.primary[400]}40`}
+                                    boxShadow={10}
+                                  >
+                                    <Grid item xs={7.9}>
+                                      <Typography
+                                        variant="body1"
+                                        color={colors.grey[100]}
+                                        style={{
+                                          fontWeight: "bold",
+                                          fontSize: "1.1em",
+                                          marginBottom: "0.5em",
+                                        }}
+                                      >
+                                        Document Description{" "}
+                                        <span
+                                          style={{
+                                            color: colors.greenAccent[300],
+                                          }}
+                                        >
+                                          {doc.description}
+                                        </span>
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={3}>
+                                      <a
+                                        style={{ fontSize: "30px" }}
+                                        href={`http://localhost:8081/${doc.file_path}`}
+                                        download
+                                      >
+                                        <Button
+                                          component="span"
+                                          variant="contained"
+                                          size="large"
+                                          style={{ width: "180px" }} // Adjust the width as needed
+                                        >
+                                          <DescriptionOutlinedIcon
+                                            style={{ fontSize: "25px" }}
+                                          />
+                                          <h5 style={{ fontSize: "12px" }}>
+                                            {doc.file_path}
+                                          </h5>
+                                        </Button>
+                                      </a>
+                                    </Grid>
+                                  </Grid>
+                                </Grid>
+                              ) : (
+                                // Handle the case when id is null
+                                <Grid
+                                  item
+                                  key={index}
+                                  xs={12}
+                                  sm={8}
+                                  md={6}
+                                  lg={7}
+                                  padding={2}
+                                  xl={6}
+                                >
+                                  <Typography
+                                    variant="body1"
+                                    color={colors.grey[100]}
+                                    style={{
+                                      fontWeight: "bold",
+                                      fontSize: "1.1em",
+                                    }}
+                                  >
+                                    No data
+                                  </Typography>
+                                </Grid>
+                              )
+                            )
+                          ) : (
+                            // Handle the case when other_documents_info is empty or undefined
+                            <Typography
+                              variant="body1"
+                              color={colors.grey[100]}
+                              style={{ fontWeight: "bold", fontSize: "1.1em" }}
+                            >
+                              No data
+                            </Typography>
+                          )}
+                        </Grid>
+                      )}
+
                       <Grid container justifyContent="flex-end" mt={2} pr={2}>
                         <Grid item boxShadow={10}>
                           <Box mt={2}>
@@ -1096,7 +1148,6 @@ const AddCase = () => {
                         ))}
 
                       {/* Button to add a new document row */}
-
                       {documentRows.map((rowId) => (
                         <Grid
                           container
@@ -1164,192 +1215,45 @@ const AddCase = () => {
                           </Grid>
                         )}
 
-<<<<<<< HEAD
-            {expandedCases[caseData.case_id] && (
-              <>
-                <Typography variant="body1"  color={colors.grey[100]}>{`Email: ${respondent.email}`}</Typography>
-                <Typography variant="body1"  color={colors.grey[100]}>{`Phone Number: ${respondent.mobile_number}`}</Typography>
-              </>
-            )}
-            {/* Render other respondent info */}
-            {expandedCases[caseData.case_id] && (
-              <>
-                <Typography variant="h5" color={colors.blueAccent[300]}>References Information</Typography>
-                {respondent.references && respondent.references.map((reference, index) => (
-                  <Box key={index} mt={1}>
-                    <Typography variant="body1"  color={colors.grey[100]}>{`Reference Name: ${reference.reference_name}`}</Typography>
-                    <Typography variant="body1"  color={colors.grey[100]}>{`Reference Mobile: ${reference.reference_mobile}`}</Typography>
-                  </Box>
-                ))}
-              </>
-            )}
-          </Box>
-        ))}
-      </Box>
-    )}
-  </Grid>
-</Grid>
-{expandedCases[caseData.case_id] && ( 
-  <Grid container m={0.1} boxShadow={10} padding={1}>
-  <Grid item xs={10 }  ><Typography variant="h3" color="#5bc0de" style={{ fontWeight: 'bold'}} >Case Information</Typography></Grid>
-  {caseData.other_documents_info && caseData.other_documents_info.length > 0 ? (
-    caseData.other_documents_info.map((doc, index) => (
-      // Check if id is not null before displaying the document
-      doc.id !== null ? (
-        <Grid item key={index} xs={12} sm={8} md={6} lg={7} padding={2} xl={6}> 
-          <Grid container borderRadius={3} spacing={0.1} padding={2} margin={1} bgcolor={`${colors.primary[400]}40`} boxShadow={10}>
-            <Grid item xs={7.9}>
-              <Typography variant="body1" color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em', marginBottom: '0.5em' }}>
-                Document Description <span style={{ color: colors.greenAccent[300] }}>{doc.description}</span>
-              </Typography>
-            </Grid>
-            <Grid item xs={3}>
-              <a style={{ fontSize: "30px" }} href={`http://localhost:8081/${doc.file_path}`} download>
-                <Button
-                  component="span"
-                  variant="contained"
-                  size="large"
-                  style={{ width: '180px' }} // Adjust the width as needed
-                >
-                  <DescriptionOutlinedIcon style={{ fontSize: "25px" }} />
-                  <h5 style={{ fontSize: "12px" }}>{doc.file_path}</h5>
-                </Button>
-              </a>
-            </Grid>
-          </Grid>
-        </Grid>
-      ) : (
-        // Handle the case when id is null
-        <Grid item key={index} xs={12} sm={8} md={6} lg={7} padding={2} xl={6}>
-          <Typography variant="body1" color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-            No data
-          </Typography>
-        </Grid>
-      )
-    ))
-  ) : (
-    // Handle the case when other_documents_info is empty or undefined
-    <Typography variant="body1" color={colors.grey[100]} style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-      No data
-    </Typography>
-  )}
-</Grid>
-)}
-
-
-
-<Grid container  justifyContent="flex-end" mt={2} pr={2}>
-  <Grid  item boxShadow={10}>
-    <Box mt={2}>
-      <Button variant="contained" color="primary" onClick={() => addDocumentRow(caseData.case_id)}>
-        Add Document
-      </Button>
-    </Box>
-  </Grid>
-</Grid>
-{caseData.documentRows &&
-  caseData.documentRows.map((row, index) => (
-    <Grid key={index} container spacing={2} alignItems="center">
-      <Grid item marginBottom={2} xs={7}>
-        {/* Text field for document description */}
-        <TextField
-          label="Document Description"
-          variant="outlined"
-          fullWidth
-          value={row.description}
-          onChange={(e) => handleDescriptionChange(caseData.case_id, index, e.target.value)}
-        />
-      </Grid>
-      <Grid item xs={3.5}>
-        {/* File input for document upload */}
-        <input type="file" onChange={(e) => handleFileUpload(caseData.case_id, index, e.target.files[0])} />
-      </Grid>
-      <Grid item xs={1}>
-        {/* Button to remove the document row */}
-        <Button variant="contained" color="error" onClick={() => removeDocumentRow(caseData.case_id, index)}>
-          Remove
-        </Button>
-      </Grid>
-    </Grid>
-  ))}
-
-{/* Button to add a new document row */}
-{documentRows.map((rowId) => (
-    <Grid container spacing={2} alignItems="center" key={rowId}>
-        <Grid item xs={8}>
-            {/* Text field for document description */}
-            <TextField
-                label="Document Description"
-                required
-                variant="outlined"
-                fullWidth
-                value={documentDescriptions[rowId]}
-                onChange={(e) => handleDescriptionChange(rowId, e.target.value)}
-            />
-        </Grid>
-        <Grid item xs={2}>
-            {/* File input for document upload */}
-            <input
-            required
-                type="file"
-                onChange={(e) => handleFileUpload(rowId, e.target.files[0])}
-            />
-        </Grid>
-        <Grid item  justifyContent="flex-end" xs={1}>
-            {/* Button to remove the document row */}
-            <Button variant="contained" color="error" onClick={() => removeDocumentRow(rowId)}>
-                Remove
-            </Button>
-        </Grid>
-    </Grid>
-))}
-{showSubmitButton && fetchedCases.some((caseData) => caseData.documentRows && caseData.documentRows.length > 0) && (
-  <Grid container mt={2} spacing={2}>
-    <Grid item xs={12} marginRight={3} container justifyContent="flex-end">
-      <Button variant="contained" color="primary" onClick={handleSubmits}>
-        Submit
-      </Button>
-    </Grid>
-  </Grid>
-)}
-
-
-
-
-{expandedCases[caseData.case_id] && (
-        <>
-     
-        
-     <TextField style={{margin:"10px"}} multiline label="discrioption" fullWidth disabled variant="outlined" value={caseData.description}/>
-        
-        </>
-      )
-       }
-
- 
-             
-             
-  <Button
-      variant="contained"
-      onClick={() => toggleCaseDetails(caseData.case_id)}
-    >
-      {expandedCases[caseData.case_id] ? "Hide Details" : "Case Details"}
-    </Button>
-=======
                       {expandedCases[caseData.case_id] && (
                         <>
                           <TextField
-                            style={{ margin: "10px" }}
+                            style={{
+                              margin: "10px",
+                              fontSize: "40px",
+                              backgroundColor: `${colors.blueAccent[900]}50`,
+                              color: `${colors.primary[100]}`,
+                            }}
                             multiline
-                            label="discrioption"
+                            label="intiate case discription"
                             fullWidth
                             disabled
-                            variant="outlined"
+                            variant="filled"
                             value={caseData.description}
                           />
                         </>
                       )}
-
+                      <div>
+                        {/* Your existing code */}
+                        {expandedCases[caseData.case_id] && (
+                          <div>
+                            {/* Other content */}
+                            {caseData.judge_decision && ( // Check if judge_decision is not null
+                              <div
+                                style={{
+                                  padding: "10px",
+                                  backgroundColor: `${colors.primary[600]}`,
+                                  color: `${colors.primary[100]}`,
+                                  borderRadius: "10px",
+                                }}
+                                dangerouslySetInnerHTML={{
+                                  __html: caseData.judge_decision,
+                                }}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </div>
                       <Button
                         variant="contained"
                         onClick={() => toggleCaseDetails(caseData.case_id)}
@@ -1358,7 +1262,6 @@ const AddCase = () => {
                           ? "Hide Details"
                           : "Case Details"}
                       </Button>
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
                     </Box>
                   ))}
                 </>
@@ -1368,32 +1271,6 @@ const AddCase = () => {
         )}
       </Formik>
       <Dialog
-<<<<<<< HEAD
-    open={openDeleteDialog}
-    onClose={() => setOpenDeleteDialog(false)}
-    aria-labelledby="alert-dialog-title"
-    aria-describedby="alert-dialog-description"
-    sx={{
-      "& .MuiDialog-paper": {
-        backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
-      },
-    }}
->
-
-<DialogTitle id="alert-dialog-title" color={"red"}>
-            {"Are you sure you want to delete this Case"}
-          </DialogTitle>
-    
-    <DialogActions>
-        <Button onClick={() => setOpenDeleteDialog(false)} color="primary">
-            Cancel
-        </Button>
-        <Button onClick={handleConfirmDelete} color="primary" autoFocus>
-            Delete
-        </Button>
-    </DialogActions>
-</Dialog>
-=======
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
         aria-labelledby="alert-dialog-title"
@@ -1407,7 +1284,6 @@ const AddCase = () => {
         <DialogTitle id="alert-dialog-title" color={"red"}>
           {"Are you sure you want to delete this Case"}
         </DialogTitle>
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
 
         <DialogActions>
           <Button onClick={() => setOpenDeleteDialog(false)} color="primary">

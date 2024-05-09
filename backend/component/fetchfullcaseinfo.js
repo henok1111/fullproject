@@ -58,7 +58,6 @@ const FetchAllCasesInformation = async (req, res) => {
          WHERE ra.advocator_id IN (SELECT advocator_id FROM respondent_case_map WHERE case_id = c.case_id) LIMIT 1) 
         AS respondent_advocate_info,
         JSON_OBJECT('id', prosecutor.id, 'first_name', prosecutor.first_name, 'last_name', prosecutor.last_name, 'role', prosecutor.role) AS prosecutor_info,
-<<<<<<< HEAD
         cs.case_type AS sub_type_case_type,
         JSON_ARRAYAGG(
             JSON_OBJECT(
@@ -77,18 +76,6 @@ const FetchAllCasesInformation = async (req, res) => {
       LEFT JOIN users prosecutor ON pc.prosecutor_id = prosecutor.id
       LEFT JOIN otherdocumentcases odc ON c.case_id = odc.case_id
       GROUP BY
-=======
-        cs.case_type AS sub_type_case_type
-    FROM cases c
-    LEFT JOIN petitioner_case_map pc ON c.case_id = pc.case_id
-    LEFT JOIN respondent_case_map rc ON c.case_id = rc.case_id
-    LEFT JOIN case_sub_type cs ON c.case_id = cs.case_id
-    LEFT JOIN clients pc_client ON pc.client_id = pc_client.id
-    LEFT JOIN clients rc_client ON rc.client_id = rc_client.id
-    LEFT JOIN users u ON c.assigned_judge = u.id 
-    LEFT JOIN users prosecutor ON pc.prosecutor_id = prosecutor.id
-    GROUP BY
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
         c.case_id,
         c.case_type,
         c.file_path,
@@ -102,11 +89,7 @@ const FetchAllCasesInformation = async (req, res) => {
         c.judge_decision,
         c.is_paid,
         cs.sub_type_name,
-<<<<<<< HEAD
         cs.case_type,
-=======
-        cs.case_type, -- Include cs.case_type in GROUP BY
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
         prosecutor.id; 
     `;
 
@@ -129,22 +112,20 @@ const FetchAllCasesInformation = async (req, res) => {
         );
       });
 
-<<<<<<< HEAD
       // Remove duplicates based on id in other_documents_info
-      const uniqueOtherDocuments = Array.from(new Set(result.other_documents_info.map(document => document.id))).map(id => {
-        return result.other_documents_info.find(document => document.id === id);
+      const uniqueOtherDocuments = Array.from(
+        new Set(result.other_documents_info.map((document) => document.id))
+      ).map((id) => {
+        return result.other_documents_info.find(
+          (document) => document.id === id
+        );
       });
 
-=======
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
       return {
         ...result,
         respondents_info: uniqueRespondents,
         petitioners_info: uniquePetitioners,
-<<<<<<< HEAD
-        other_documents_info: uniqueOtherDocuments
-=======
->>>>>>> de7553ec1e4991077a53e91930c6f96a8a4e8e95
+        other_documents_info: uniqueOtherDocuments,
       };
     });
 
