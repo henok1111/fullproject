@@ -56,6 +56,8 @@ import ViewProfilePages from "./adminpage/scenes/profile/profile";
 import UploadProscutorDocumentPage from "./adminpage/scenes/proscutor/index";
 import ProscutoreDocuments from "./adminpage/scenes/proscutor/fetchproscuterdocument";
 import ProscutorCases from "./adminpage/scenes/registrar";
+import InvoiceDetail from "./adminpage/scenes/invoices/invoiceDetailspage";
+
 const App = () => {
   const [theme, colorMode] = useMode();
   const [authenticated, setAuthenticated] = useState(false);
@@ -252,6 +254,7 @@ const InvoiceClerkRoutes = () => {
         <Route path="/viewprofilepage" element={<ViewProfilePages />} />
         <Route path="/services" element={<AddServices />} />
         <Route path="/addinvoices" element={<AddInvoices />} />
+        <Route path="/invoicedetail/:invoiceId" element={<InvoiceDetail />} />
       </Route>
     </Routes>
   );
@@ -278,6 +281,7 @@ const ProscutorRoutes = () => {
         />
 
         <Route path="proscutordocument" element={<ProscutoreDocuments />} />
+        <Route path="/addcase" element={<AddCase />} />
       </Route>
     </Routes>
   );

@@ -38,36 +38,39 @@ const Appointmentform = () => {
   const [respondents, setRespondents] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  
+
   // Function to fetch cases from the backend
- // Function to fetch cases from the backend
-const fetchCases = async () => {
-  try {
-    const accessToken = localStorage.getItem("accessToken");
-    const decodedToken = jwtDecode(accessToken);
-    const userId = decodedToken.userId;
+  // Function to fetch cases from the backend
+  const fetchCases = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      const decodedToken = jwtDecode(accessToken);
+      const userId = decodedToken.userId;
 
-    const response = await fetch("http://localhost:8081/api/appointmentcases", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ judgeId: userId }), // Include the userId as judgeId in the request body
-    });
+      const response = await fetch(
+        "http://localhost:8081/api/appointmentcases",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ judgeId: userId }), // Include the userId as judgeId in the request body
+        }
+      );
 
-    const data = await response.json();
-    console.log("data", data);
-    setCases(data);
-  } catch (error) {
-    console.error("Error fetching cases:", error);
-  }
-};
+      const data = await response.json();
+      console.log("Data received from backend:", data); // Add this line to check the structure of the data
+      setCases(data);
+    } catch (error) {
+      console.error("Error fetching cases:", error);
+    }
+  };
 
   const openSnackbarWithMessage = (message) => {
     setSnackbarMessage(message);
     setOpenSnackbar(true);
   };
-  
+
   // Function to fetch petitioners and respondents for the selected case
   const fetchPetitionersAndRespondents = async (caseId) => {
     try {
@@ -110,13 +113,13 @@ const fetchCases = async () => {
       const decodedToken = jwtDecode(accessToken);
       const userId = decodedToken.userId;
       console.log("user id ", userId);
-  
+
       // Check if any required fields are empty
       if (!selectedCase || !date || !time || !note) {
         openSnackbarWithMessage("One or more required fields are empty");
         return;
       }
-  
+
       // Extract phone numbers from the fetched petitioner and respondent data
       const petitionerPhoneNumbers = petitioners
         .map((petitioner) => petitioner.mobile_number)
@@ -124,7 +127,7 @@ const fetchCases = async () => {
       const respondentPhoneNumbers = respondents
         .map((respondent) => respondent.mobile_number)
         .join(", ");
-  
+
       const appointmentData = {
         user_id: userId, // Include userId
         case_id: selectedCase.case_id,
@@ -145,7 +148,6 @@ const fetchCases = async () => {
       console.error("Error saving appointment:", error);
     }
   };
-  
 
   return (
     <Box padding="20px" mb="10px" backgroundColor={colors.blueAccent[900]}>
@@ -162,19 +164,19 @@ const fetchCases = async () => {
       </Box>
       <Header title="Add Appointment" subtitle="Appointment Form" />
       <Snackbar
-  open={openSnackbar}
-  autoHideDuration={6000}
-  onClose={() => setOpenSnackbar(false)}
->
-  <MuiAlert
-    elevation={6}
-    variant="filled"
-    onClose={() => setOpenSnackbar(false)}
-    severity="error" // or "warning", "info", "success"
-  >
-    {snackbarMessage}
-  </MuiAlert>
-</Snackbar>
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={() => setOpenSnackbar(false)}
+          severity="error" // or "warning", "info", "success"
+        >
+          {snackbarMessage}
+        </MuiAlert>
+      </Snackbar>
 
       <Box
         margin="20px"

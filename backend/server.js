@@ -64,6 +64,16 @@ import uploadDocuments from "./component/othercase.js";
 import http from "http";
 import { Server } from "socket.io";
 import uploadProscutorCaseDocument from "./component/uploadeproscutoercasedocument.js";
+import InsertInvoiceAndItems from "./component/addinvoice.js";
+import HighestInvoice from "./component/gethighestinvoice.js";
+import GetInvoices from "./component/getinvoices.js";
+import DeleteInvoice from "./component/deleteinvoice.js";
+import AddInvoiceItem from "./component/editinvoice.js";
+import GetInvoiceById from "./component/getinvoicebyid.js";
+import DeleteInvoiceItem from "./component/deleteinvoiceitem.js";
+import EditItem from "./component/edititem.js";
+import EditSA from "./component/editinvoicestatusandamount.js";
+
 const PORT = 8081;
 import GetAppointmnetCases from "./component/getapppointmentcases.js";
 import GetAppointment from "./component/getappointment.js";
@@ -175,6 +185,10 @@ app.get("/api/proscutorcasedocuments", async (req, res) => {
 app.post("/api/getUserbyid", async (req, res) => {
   await GetUserById(req, res);
 });
+
+app.get("/api/getinvoicebyid/:invoiceId", async (req, res) => {
+  await GetInvoiceById(db, req, res);
+});
 app.get("/api/getServices", async (req, res) => {
   await ViewServices(req, res);
 });
@@ -217,6 +231,10 @@ app.post("/api/editcasedecition", async (req, res) => {
 app.post("/api/updateDocumentStatus", async (req, res) => {
   await updateDocumentStatus(db, req, res);
 });
+app.post("/api/edititem", async (req, res) => {
+  await EditItem(db, req, res);
+});
+
 app.post("/api/updateappointment", async (req, res) => {
   await UpdateAppointment(db, req, res);
 });
@@ -226,6 +244,10 @@ app.post("/user/resetPassword", async (req, res) => {
 
 app.post("/user/updatePassword", async (req, res) => {
   await UpdatePassword(db, req, res);
+});
+
+app.post("/api/editea", async (req, res) => {
+  await EditSA(db, req, res);
 });
 app.post("/api/editUser", async (req, res) => {
   await EditUser(db, req, res);
@@ -238,12 +260,24 @@ app.get("/api/getUserImage/:userId", (req, res) => {
   getUserImage(db, req, res); // Call getUserImage function with db, req, and res parameters
 });
 
+app.get("/api/getinvoices", async (req, res) => {
+  await GetInvoices(db, req, res);
+});
+
 app.post("/api/addservice", async (req, res) => {
   await AddService(db, req, res);
 });
 
 app.post("/api/addcasetype", async (req, res) => {
   await AddCaseType(db, req, res);
+});
+
+app.post("/api/addinvoice", async (req, res) => {
+  await InsertInvoiceAndItems(db, req, res);
+});
+
+app.post("/api/deleteinvoiceitem", async (req, res) => {
+  await DeleteInvoiceItem(db, req, res);
 });
 
 app.post("/api/addcase", async (req, res) => {
@@ -294,6 +328,10 @@ app.post("/api/deleteClient", async (req, res) => {
 app.post("/api/deleteproscutordocument", async (req, res) => {
   await DeleteProscutorDocument(db, req, res);
 });
+app.post("/api/deleteinvoice", async (req, res) => {
+  await DeleteInvoice(db, req, res);
+});
+
 app.post("/api/judgeassign", async (req, res) => {
   await assignJudgeToCase(db, req, res);
 });
@@ -316,6 +354,11 @@ app.post("/api/deleteService", async (req, res) => {
 app.post("/api/editClient", async (req, res) => {
   await editClient(db, req, res);
 });
+
+app.post("/api/addinvoiceitemforinvoice/:invoiceId", async (req, res) => {
+  await AddInvoiceItem(db, req, res);
+});
+
 app.post("/api/editAdvocator", async (req, res) => {
   await editAdvocator(db, req, res);
 });
@@ -324,6 +367,10 @@ app.post("/api/adduser", async (req, res) => {
 });
 app.get("/api/cases", async (req, res) => {
   await GetCases(req, res); // Call GetCases function with req and res parameters
+});
+
+app.get("/api/gethighestinvoice", async (req, res) => {
+  await HighestInvoice(db, req, res);
 });
 
 app.post("/api/appointmentcases", async (req, res) => {

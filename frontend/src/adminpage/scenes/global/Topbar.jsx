@@ -255,7 +255,11 @@ const Topbar = () => {
           {/* Your profile editing form component */}
           <ViewProfilePages />
           <Box display="flex" justifyContent="flex-end" mt={2}>
-            <Button variant="text" color="error" onClick={handleCloseDialog}>
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={handleCloseDialog}
+            >
               Cancel
             </Button>
           </Box>

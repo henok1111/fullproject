@@ -460,6 +460,23 @@ const AddCourtRegistrarCase = () => {
                                 {caseData.registrationDate}
                               </span>
                             </Typography>
+                            <Typography
+                              variant="h4"
+                              margin={1}
+                              color={colors.grey[100]}
+                              style={{ fontWeight: "bold", fontSize: "1.1em" }}
+                            >
+                              Payment Status:{" "}
+                              <span
+                                style={{
+                                  color: colors.greenAccent[300],
+                                  fontWeight: "bold",
+                                  fontSize: "1.1em",
+                                }}
+                              >
+                                {caseData.is_paid}
+                              </span>
+                            </Typography>
                             {expandedCases[caseData.case_id] && (
                               <>
                                 {caseData.case_type === "criminal" && (
@@ -486,74 +503,74 @@ const AddCourtRegistrarCase = () => {
                                 )}
                               </>
                             )}
-                            {caseData.first_name === null ? (
-                              // Render select dropdown to choose a judge
+                            {caseData.is_paid === "Paid" && (
                               <>
-                                <TextField
-                                  select
-                                  label="Judge Type"
-                                  value={selectedJudge}
-                                  onChange={(e) =>
-                                    setSelectedJudge(e.target.value)
-                                  } // Change this line
-                                  variant="outlined"
-                                  fullWidth
-                                  style={{ marginTop: "10px" }}
-                                >
-                                  {caseData.case_type === "criminal"
-                                    ? criminalJudges.map((judge) => (
-                                        <MenuItem
-                                          key={judge.id}
-                                          value={judge.id}
-                                        >
-                                          {" "}
-                                          {/* Change value to judge.id */}
-                                          {` ${judge.id}  ${judge.first_name} ${judge.last_name}`}
-                                        </MenuItem>
-                                      ))
-                                    : civilJudges.map((judge) => (
-                                        <MenuItem
-                                          key={judge.id}
-                                          value={judge.id}
-                                        >
-                                          {" "}
-                                          {/* Change value to judge.id */}
-                                          {`${judge.id}  ${judge.first_name} ${judge.last_name}`}
-                                        </MenuItem>
-                                      ))}
-                                </TextField>
+                                {caseData.first_name === null ? (
+                                  // Render select dropdown to choose a judge
+                                  <>
+                                    <TextField
+                                      select
+                                      label="Judge Type"
+                                      value={selectedJudge}
+                                      onChange={(e) =>
+                                        setSelectedJudge(e.target.value)
+                                      }
+                                      variant="outlined"
+                                      fullWidth
+                                      style={{ marginTop: "10px" }}
+                                    >
+                                      {caseData.case_type === "criminal"
+                                        ? criminalJudges.map((judge) => (
+                                            <MenuItem
+                                              key={judge.id}
+                                              value={judge.id}
+                                            >
+                                              {`${judge.id}  ${judge.first_name} ${judge.last_name}`}
+                                            </MenuItem>
+                                          ))
+                                        : civilJudges.map((judge) => (
+                                            <MenuItem
+                                              key={judge.id}
+                                              value={judge.id}
+                                            >
+                                              {`${judge.id}  ${judge.first_name} ${judge.last_name}`}
+                                            </MenuItem>
+                                          ))}
+                                    </TextField>
 
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  onClick={() =>
-                                    handleSubmitc(caseData.case_id)
-                                  }
-                                  style={{ marginTop: "10px" }}
-                                >
-                                  Submit
-                                </Button>
+                                    <Button
+                                      variant="contained"
+                                      color="primary"
+                                      onClick={() =>
+                                        handleSubmitc(caseData.case_id)
+                                      }
+                                      style={{ marginTop: "10px" }}
+                                    >
+                                      Submit
+                                    </Button>
+                                  </>
+                                ) : (
+                                  // Render assigned judge's name
+                                  <Typography
+                                    variant="h4"
+                                    margin={1}
+                                    color={colors.grey[100]}
+                                    style={{
+                                      fontWeight: "bold",
+                                      fontSize: "1.1em",
+                                    }}
+                                  >
+                                    Assigned Judge:{" "}
+                                    <span
+                                      style={{
+                                        color: colors.greenAccent[300],
+                                        fontWeight: "bold",
+                                        fontSize: "1.1em",
+                                      }}
+                                    >{` ${caseData.id} / ${caseData.first_name}/ ${caseData.last_name}`}</span>
+                                  </Typography>
+                                )}
                               </>
-                            ) : (
-                              // Render assigned judge's name
-                              <Typography
-                                variant="h4"
-                                margin={1}
-                                color={colors.grey[100]}
-                                style={{
-                                  fontWeight: "bold",
-                                  fontSize: "1.1em",
-                                }}
-                              >
-                                Assigned Judge:{" "}
-                                <span
-                                  style={{
-                                    color: colors.greenAccent[300],
-                                    fontWeight: "bold",
-                                    fontSize: "1.1em",
-                                  }}
-                                >{` ${caseData.id} / ${caseData.first_name}/ ${caseData.last_name}`}</span>
-                              </Typography>
                             )}
                             {caseData.petitioner_advocate_info &&
                               caseData.petitioner_advocate_info.first_name &&

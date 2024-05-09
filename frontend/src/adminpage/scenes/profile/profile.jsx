@@ -183,7 +183,7 @@ const ViewProfilePages = () => {
         </Grid>
         <Box display="flex" justifyContent="flex-end" mt={2}>
           <Button
-            variant="contained"
+            variant="outlined"
             color="secondary"
             startIcon={<EditIcon />}
             onClick={handleEditClick}

@@ -974,7 +974,7 @@ const AddCase = () => {
                               color="#5bc0de"
                               style={{ fontWeight: "bold" }}
                             >
-                              Case Information
+                              Case Related Documents
                             </Typography>
                           </Grid>
                           {caseData.other_documents_info &&
@@ -1286,7 +1286,7 @@ const AddCase = () => {
         </DialogTitle>
 
         <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)} color="primary">
+          <Button onClick={() => setOpenDeleteDialog(false)} color="cancle">
             Cancel
           </Button>
           <Button onClick={handleConfirmDelete} color="primary" autoFocus>
