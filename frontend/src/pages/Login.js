@@ -178,23 +178,18 @@ const LoginForm = () => {
 
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userStatus = decodedToken.status.toLowerCase();
-      const userID = getUSerID(token);
 
       // Log the user role and status for debugging
       console.log("User Role:", role);
       console.log("User Status:", userStatus);
 
-      // Perform additional checks based on the user's status
-      if (userStatus === "activated") {
-        navigate(`/${role}`);
-        setTimeout(() => {
-          window.location.reload(); // Refresh the page after navigating
-        }, 1000); // Adjust the delay as needed
-      } else {
-        navigate("/deactive");
-      }
+      // Store role in localStorage
+      localStorage.setItem("userRole", role);
 
       setLoadingButton(false);
+
+      // Reload the page
+      window.location.href = window.location.href; // reload the page
     } catch (error) {
       setLoadingButton(false);
 
@@ -208,6 +203,22 @@ const LoginForm = () => {
         }
       } else {
         toast.error(`Login failed: ${error.message}`);
+      }
+    }
+  };
+  window.onload = () => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      const userStatus = decodedToken.status.toLowerCase();
+
+      if (userStatus === "activated") {
+        const role_name = getUserRoleFromToken(token);
+        const role = role_name.toLowerCase();
+
+        navigate(`/${role}`);
+      } else {
+        navigate("/deactive");
       }
     }
   };
