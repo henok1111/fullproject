@@ -27,6 +27,7 @@ const ProscutorCases = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [docIdToUpdate, setDocIdToUpdate] = useState(null);
   const [newStatusToUpdate, setNewStatusToUpdate] = useState(null);
+  const [prosecutorId, setProsecutorID] = useState(null);
 
   // useEffect to fetch documents
   useEffect(() => {
@@ -41,6 +42,7 @@ const ProscutorCases = () => {
       );
       const data = await response.json();
       setDocuments(data);
+      setProsecutorID(data[0].prosecutor_id);
       console.log(data);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -76,7 +78,7 @@ const ProscutorCases = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ docId, status: newStatus }),
+          body: JSON.stringify({ docId, prosecutorId, status: newStatus }),
         }
       );
 
@@ -112,7 +114,7 @@ const ProscutorCases = () => {
 
       {/* Display documents as cards */}
       <Grid container spacing={3}>
-        {documents.map((doc) => (
+        {documents.map((doc, result) => (
           <Grid item xs={12} sm={12} lg={6} xl={6} key={doc.id}>
             <Card
               sx={{
@@ -159,7 +161,9 @@ const ProscutorCases = () => {
                       }}
                     >
                       Prosecutor :
-                      {`${doc.first_name} ${" "} ${doc.last_name} / ${doc.id}`}
+                      {`${doc.first_name} ${" "} ${doc.last_name} / ${
+                        doc.id
+                      } / ${prosecutorId}`}
                     </Typography>
                   </Grid>
                   <Grid item xs={6}>

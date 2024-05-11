@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import {
   Box,
@@ -11,12 +11,14 @@ import {
   FormControl,
   FormLabel,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import * as yup from "yup";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { useNavigate } from "react-router-dom";
 
 const validationSchema = yup.object().shape({
   firstName: yup.string().required("First Name is required"),
@@ -37,7 +39,9 @@ const validationSchema = yup.object().shape({
 
 const isEmailUnique = async (email) => {
   try {
-    const response = await fetch(`http://localhost:8081/api/checkemail?email=${email}`);
+    const response = await fetch(
+      `http://localhost:8081/api/checkemail?email=${email}`
+    );
     const data = await response.json();
     return data.isUnique;
   } catch (error) {
@@ -65,6 +69,7 @@ const createUserObject = (values) => {
 const AddClient = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
 
   const formik = useFormik({
     validationSchema,
@@ -81,6 +86,15 @@ const AddClient = () => {
     },
     onSubmit: (values) => handleSubmit(values, formik),
   });
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const handleAddReference = () => {
     formik.setFieldValue("references", [
@@ -99,22 +113,22 @@ const AddClient = () => {
     try {
       // Check if the email is unique
       const isEmailValid = await isEmailUnique(values.email);
-  
+
       if (!isEmailValid) {
         formik.setErrors({
           email: "This email is already in use. Please use a different one.",
         });
         return;
       }
-  
+
       // Continue with the rest of your form submission logic
       console.log("Form submitted");
       console.log("Formik Values:", values);
-  
+
       const userObject = createUserObject(values);
-  
+
       console.log("User Object:", userObject);
-  
+
       try {
         JSON.parse(JSON.stringify(userObject));
         console.log("User Object is a valid JSON");
@@ -122,11 +136,11 @@ const AddClient = () => {
         console.error("User Object is not a valid JSON:", error);
         return;
       }
-  
+
       console.log("Sending request to:", "http://localhost:8081/api/addclient");
-  
+
       let response;
-  
+
       try {
         response = await fetch("http://localhost:8081/api/addclient", {
           method: "POST",
@@ -135,14 +149,15 @@ const AddClient = () => {
           },
           body: JSON.stringify(userObject),
         });
-  
+
         console.log("Response Status:", response.status);
         console.log("Response OK:", response.ok);
+        setOpenSnackbar(true);
       } catch (error) {
         console.error("Error during fetch:", error);
         return;
       }
-  
+
       if (response.ok) {
         const responseData = await response.json();
         console.log("API Response:", responseData);
@@ -154,7 +169,6 @@ const AddClient = () => {
       console.error("Error submitting form data:", error);
     }
   };
-  
 
   useEffect(() => {
     console.log("Initial Formik Values:", formik.values);
@@ -162,10 +176,11 @@ const AddClient = () => {
 
   const handleCancel = () => {
     formik.resetForm();
+    navigate("/registrar/viewclient");
   };
 
   return (
-    <Box padding="30px"  backgroundColor={colors.blueAccent[900]}>
+    <Box padding="30px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Client Management" subtitle="Add Client" />
       <form onSubmit={formik.handleSubmit}>
         <Box
@@ -191,9 +206,7 @@ const AddClient = () => {
                 onChange={formik.handleChange}
                 value={formik.values.firstName}
                 error={formik.touched.firstName && !!formik.errors.firstName}
-                helperText={
-                  formik.touched.firstName && formik.errors.firstName
-                }
+                helperText={formik.touched.firstName && formik.errors.firstName}
               />
               <TextField
                 name="middleName"
@@ -203,9 +216,7 @@ const AddClient = () => {
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 value={formik.values.middleName}
-                error={
-                  formik.touched.middleName && !!formik.errors.middleName
-                }
+                error={formik.touched.middleName && !!formik.errors.middleName}
                 helperText={
                   formik.touched.middleName && formik.errors.middleName
                 }
@@ -265,8 +276,7 @@ const AddClient = () => {
                 onChange={formik.handleChange}
                 value={formik.values.mobileNumber}
                 error={
-                  formik.touched.mobileNumber &&
-                  !!formik.errors.mobileNumber
+                  formik.touched.mobileNumber && !!formik.errors.mobileNumber
                 }
                 helperText={
                   formik.touched.mobileNumber && formik.errors.mobileNumber
@@ -376,11 +386,19 @@ const AddClient = () => {
         </Box>
       </form>
       <Snackbar
-        open={false}
-        autoHideDuration={6000}
-        onClose={() => {}}
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      />
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Client Added Successfully
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };

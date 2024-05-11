@@ -74,7 +74,7 @@ const App = () => {
 
   const getUserRoleFromToken = (token) => {
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
-    console.log(decodedToken.role_name);
+    console.log(decodedToken);
     return decodedToken.role_name;
   };
 

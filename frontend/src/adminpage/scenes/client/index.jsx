@@ -13,21 +13,25 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import { DataGrid, GridCloseIcon, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../../theme";
 import Header from "../../components/Header";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 const validationSchema = yup.object().shape({
-  first_name: yup.string().required('First Name is required'),
+  first_name: yup.string().required("First Name is required"),
   middle_name: yup.string(),
-  last_name: yup.string().required('Last Name is required'),
+  last_name: yup.string().required("Last Name is required"),
   gender: yup.string(),
-  email: yup.string().email('Invalid email address').required('Email is required'),
+  email: yup
+    .string()
+    .email("Invalid email address")
+    .required("Email is required"),
   mobile_number: yup.string(),
   address: yup.string(),
   // Add validation for other fields as needed
@@ -39,8 +43,13 @@ const Client = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  const { control, handleSubmit, formState: { errors }, setValue } = useForm({
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm({
     resolver: yupResolver(validationSchema),
   });
 
@@ -48,16 +57,17 @@ const Client = () => {
 
   const isEmailUnique = async (email) => {
     try {
-      const response = await fetch(`http://localhost:8081/api/checkemail?email=${email}`);
+      const response = await fetch(
+        `http://localhost:8081/api/checkemail?email=${email}`
+      );
       const data = await response.json();
       return data.isUnique;
     } catch (error) {
       console.error("Error checking email uniqueness:", error);
       return false;
     }
-  }
+  };
 
-  
   // Define fetchData as an arrow function to access it in the component
   const fetchData = async () => {
     try {
@@ -101,6 +111,8 @@ const Client = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openSnackbar1, setOpenSnackbar1] = useState(false);
+
   const [openDialog, setOpenDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [editedValues, setEditedValues] = useState({});
@@ -114,10 +126,10 @@ const Client = () => {
       phone_number: params.phone_number,
       address: params.address,
       middle_name: params.middle_name,
-      gender:params.gender,
+      gender: params.gender,
       mobile_number: params.mobile_number,
-      
-      references: params.references
+
+      references: params.references,
     });
     setIsEditing(true);
     setAnchorEl(null);
@@ -135,16 +147,13 @@ const Client = () => {
       );
       console.log("Request Body:", JSON.stringify({ id: selectedClient.id }));
 
-      const response = await fetch(
-        "http://localhost:8081/api/deleteClient",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: selectedClient.id }),
-        }
-      );
+      const response = await fetch("http://localhost:8081/api/deleteClient", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: selectedClient.id }),
+      });
 
       if (response.ok) {
         console.log(
@@ -168,48 +177,47 @@ const Client = () => {
     }
   };
 
-const handleEditFormChange = (e, fieldName, index) => {
-  const { value } = e.target;
+  const handleEditFormChange = (e, fieldName, index) => {
+    const { value } = e.target;
 
-  let updatedValues = {};
+    let updatedValues = {};
 
-  if (fieldName.startsWith('references')) {
-    const referenceIndex = parseInt(fieldName.match(/\[(\d+)\]/)[1]);
-    const referenceFieldName = fieldName.split('.')[1];
+    if (fieldName.startsWith("references")) {
+      const referenceIndex = parseInt(fieldName.match(/\[(\d+)\]/)[1]);
+      const referenceFieldName = fieldName.split(".")[1];
 
-    // Update the form state for the nested field within the references array
-    setValue(`references[${referenceIndex}].${referenceFieldName}`, value);
+      // Update the form state for the nested field within the references array
+      setValue(`references[${referenceIndex}].${referenceFieldName}`, value);
 
-    updatedValues = {
-      ...editedValues,
-      references: editedValues.references ? [...editedValues.references] : [], // Create a shallow copy of references or initialize it as an empty array
-    };
-
-    // Update the specific reference if it exists, otherwise, initialize it
-    if (updatedValues.references[referenceIndex]) {
-      updatedValues.references[referenceIndex] = {
-        ...updatedValues.references[referenceIndex],
-        [referenceFieldName]: value,
+      updatedValues = {
+        ...editedValues,
+        references: editedValues.references ? [...editedValues.references] : [], // Create a shallow copy of references or initialize it as an empty array
       };
+
+      // Update the specific reference if it exists, otherwise, initialize it
+      if (updatedValues.references[referenceIndex]) {
+        updatedValues.references[referenceIndex] = {
+          ...updatedValues.references[referenceIndex],
+          [referenceFieldName]: value,
+        };
+      } else {
+        updatedValues.references[referenceIndex] = {
+          [referenceFieldName]: value,
+        };
+      }
     } else {
-      updatedValues.references[referenceIndex] = { [referenceFieldName]: value };
+      // Update the form state for non-nested fields
+      setValue(fieldName, value);
+
+      updatedValues = {
+        ...editedValues,
+        [fieldName]: value, // Update the latest edited value
+      };
     }
-  } else {
-    // Update the form state for non-nested fields
-    setValue(fieldName, value);
 
-    updatedValues = {
-      ...editedValues,
-      [fieldName]: value, // Update the latest edited value
-    };
-  }
-
-  setEditedValues(updatedValues);
-  console.log("Edited Values:", updatedValues);
-};
-
-
-
+    setEditedValues(updatedValues);
+    console.log("Edited Values:", updatedValues);
+  };
 
   const handleAddClientClick = () => {
     // Navigate to /addclient route
@@ -234,11 +242,11 @@ const handleEditFormChange = (e, fieldName, index) => {
         reference_mobile: editedValues.references[index].reference_mobile, // Update reference_mobile
       })),
     };
-  
+
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("accessToken");
       const isEmailValid = await isEmailUnique(editedValues.email); // Use editedValues.email here
-    
+
       if (!isEmailValid) {
         // Use errors object from react-hook-form to set errors
         // Assuming you're using 'errors' object from react-hook-form
@@ -249,14 +257,14 @@ const handleEditFormChange = (e, fieldName, index) => {
         });
         return;
       }
-  
+
       if (!token) {
         console.error("No token found");
         return;
       }
-  
+
       console.log("Client data to be sent:", editedClientData);
-  
+
       const response = await fetch("http://localhost:8081/api/editClient", {
         method: "POST",
         headers: {
@@ -265,11 +273,11 @@ const handleEditFormChange = (e, fieldName, index) => {
         },
         body: JSON.stringify(editedClientData),
       });
-  
+
       if (response.ok) {
         console.log("Client edited successfully!");
         fetchData();
-        setOpenSnackbar(true);
+        setOpenSnackbar1(true);
       } else {
         console.error("Error editing client:", response.statusText);
       }
@@ -289,6 +297,7 @@ const handleEditFormChange = (e, fieldName, index) => {
       });
     }
   };
+
   const handleCancelEdit = () => {
     setIsEditing(false);
     setSelectedClient({
@@ -307,6 +316,11 @@ const handleEditFormChange = (e, fieldName, index) => {
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
+
+  const handleCloseSnackbar1 = () => {
+    setOpenSnackbar1(false);
+  };
+
   const columns = [
     { field: "first_name", headerName: "First Name", flex: 2.5 },
     { field: "middle_name", headerName: "Middle Name", flex: 2.5 },
@@ -394,200 +408,239 @@ const handleEditFormChange = (e, fieldName, index) => {
         flexDirection="column"
       >
         {isEditing && (
-          <Box
-            marginLeft={10}
-            marginRight={10}
-            bgcolor={`${colors.primary[400]}80`}
-            borderRadius={5}
-            padding={5}
-            marginBottom={5}
+          <Dialog
+            open={isEditing}
+            onClose={handleCancelEdit}
+            aria-labelledby="edit-client-dialog-title"
           >
-            <Typography variant="h2" gutterBottom>
-              Edit Client
-            </Typography>
-            <form onSubmit={handleSubmit(handleEditFormSubmit)}>
-              <Box
-                sx={{ display: "flex", gap: "20px", alignItems: "center" }}
-              >
-                <Controller
-  name="first_name"
-  control={control}
-  
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="First Name"
-      fullWidth
-      margin="normal"
-      error={!!errors.first_name}
-      helperText={errors.first_name?.message}
-      onChange={(e) => handleEditFormChange(e, "first_name")}
-    />
-  )}
-/>
-<Controller
-  name="middle_name"
-  control={control}
-  
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Middle Name"
-      fullWidth
-      margin="normal"
-      onChange={(e) => handleEditFormChange(e, "middle_name")}
-    />
-  )}
-/>
-<Controller
-  name="last_name"
-  control={control}
-
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Last Name"
-      fullWidth
-      margin="normal"
-      error={!!errors.last_name}
-      helperText={errors.last_name?.message}
-      onChange={(e) => handleEditFormChange(e, "last_name")}
-    />
-  )}
-/>
-<Controller
-  name="gender"
-  control={control}
- 
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Gender"
-      fullWidth
-      margin="normal"
-      onChange={(e) => handleEditFormChange(e, "gender")}
-    />
-  )}
-/>
-
-  <Controller
-    name="email"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        label="Email"
-        fullWidth
-        margin="normal"
-        error={!!errors.email}
-        helperText={errors.email?.message}
-        onChange={(e) => handleEditFormChange(e, "email")}
-      />
-    )}
-  />
-  
-  <Controller
-    name="mobile_number"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        label="Mobile Number"
-        fullWidth
-        margin="normal"
-        onChange={(e) => handleEditFormChange(e, "mobile_number")}
-      />
-    )}
-  />
-  
-  <Controller
-    name="address"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        label="Address"
-        fullWidth
-        margin="normal"
-        onChange={(e) => handleEditFormChange(e, "address")}
-      />
-    )}
-  />
-
-
-                 
-              </Box>
-
-             
-{selectedClient.references.map((ref, index) => (
-  <Box
-    key={index}
-    sx={{ display: "flex", gap: "20px", alignItems: "center" }}
-  >
-    <Controller
-      name={`references[${index}].referenceName`}
-      control={control}
-      render={({ field }) => (
-        <TextField
-          {...field}
-          label="Reference Name"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          onChange={(e) => handleEditFormChange(e, `references[${index}].reference_name`)}
-        />
-      )}
-    />
-    <Controller
-      name={`references[${index}].referenceMobile`}
-      control={control}
-      
-      render={({ field }) => (
-        <TextField
-          {...field}
-          label="Reference Mobile"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          onChange={(e) => handleEditFormChange(e, `references[${index}].reference_mobile`)}
-        />
-      )}
-    />
-                </Box>
-              ))}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  marginTop: "20px",
-                }}
-              >
-                <Button type="submit" variant="contained" color="primary">
-                  Save
-                </Button>
-                <Button
-                  onClick={handleCancelEdit}
-                  variant="contained"
-                  color="secondary"
-                  sx={{ marginLeft: "10px" }}
+            <DialogTitle id="edit-client-dialog-title">Edit Client</DialogTitle>
+            <DialogContent>
+              <form onSubmit={handleSubmit(handleEditFormSubmit)}>
+                <Box
+                  sx={{ display: "flex", gap: "20px", alignItems: "center" }}
                 >
-                  Cancel
-                </Button>
-              </Box>
-            </form>
-          </Box>
+                  <Controller
+                    name="first_name"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="First Name"
+                        fullWidth
+                        margin="normal"
+                        error={!!errors.first_name}
+                        helperText={errors.first_name?.message}
+                        onChange={(e) => handleEditFormChange(e, "first_name")}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="middle_name"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Middle Name"
+                        fullWidth
+                        required
+                        margin="normal"
+                        onChange={(e) => handleEditFormChange(e, "middle_name")}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="last_name"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Last Name"
+                        fullWidth
+                        required
+                        margin="normal"
+                        error={!!errors.last_name}
+                        helperText={errors.last_name?.message}
+                        onChange={(e) => handleEditFormChange(e, "last_name")}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="gender"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Gender"
+                        fullWidth
+                        required
+                        margin="normal"
+                        onChange={(e) => handleEditFormChange(e, "gender")}
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    name="email"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Email"
+                        fullWidth
+                        required
+                        margin="normal"
+                        error={!!errors.email}
+                        helperText={errors.email?.message}
+                        onChange={(e) => handleEditFormChange(e, "email")}
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    name="mobile_number"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Mobile Number"
+                        fullWidth
+                        required
+                        margin="normal"
+                        onChange={(e) =>
+                          handleEditFormChange(e, "mobile_number")
+                        }
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    name="address"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Address"
+                        fullWidth
+                        required
+                        margin="normal"
+                        onChange={(e) => handleEditFormChange(e, "address")}
+                      />
+                    )}
+                  />
+                </Box>
+                <Box sx={{ display: "flex", gap: "20px", marginTop: "20px" }}>
+                  <Button type="submit" variant="outlined" color="success">
+                    Save
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </form>
+            </DialogContent>
+          </Dialog>
         )}
+
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <MuiAlert
+            onClose={handleCloseSnackbar}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Client Deleted Successfuly
+          </MuiAlert>
+        </Snackbar>
+        <Snackbar
+          open={openSnackbar1}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar1}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <MuiAlert
+            onClose={handleCloseSnackbar1}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Client Edited Successfuly
+          </MuiAlert>
+        </Snackbar>
+
+        <Dialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          aria-labelledby="delete-client-dialog-title"
+          aria-describedby="delete-client-dialog-description"
+        >
+          <DialogTitle id="delete-client-dialog-title">
+            Delete Client
+          </DialogTitle>
+          <DialogContent>
+            <Typography>Are you sure you want to delete the client?</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              color="success"
+              onClick={() => setOpenDialog(false)}
+              autoFocus
+              variant="outlined"
+            >
+              Cancle
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleConfirmDelete}
+              color="error"
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <DataGrid
           rows={data}
           columns={columns}
           pageSize={10}
-          rowsPerPageOptions={[10]}
-          checkboxSelection={false}
-          disableSelectionOnClick
           components={{
             Toolbar: GridToolbar,
+            NoRowsOverlay: () => (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                height="100%"
+              >
+                <Typography>No clients found</Typography>
+              </Box>
+            ),
+            ErrorOverlay: () => (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                height="100%"
+              >
+                <Typography>An error occurred while fetching data</Typography>
+              </Box>
+            ),
           }}
+          loading={loading}
+          checkboxSelection={false}
+          disableSelectionOnClick
+          disableColumnMenu
+          disableColumnFilter
+          disableColumnSelector
+          disableDensitySelector
+          disableExport
+          autoHeight
           sx={{
             flexGrow: 1,
             "& .MuiDataGrid-root": {
@@ -616,52 +669,8 @@ const handleEditFormChange = (e, fieldName, index) => {
           }}
         />
       </Box>
-
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        message="Operation successful!"
-        action={
-          <IconButton
-            size="small"
-            aria-label="close"
-            color="inherit"
-            onClick={handleCloseSnackbar}
-          >
-            <GridCloseIcon fontSize="small" />
-          </IconButton>
-        }
-      />
-
-      <Dialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        sx={{
-          "& .MuiDialog-paper": {
-            backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
-          },
-        }}
-      >
-        <DialogTitle id="alert-dialog-title" color={"red"}>
-          {"Are you sure you want to delete this client?"}
-        </DialogTitle>
-        <DialogContent>
-          {/* You can add additional content here if needed */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="primary">
-            No
-          </Button>
-          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
-            Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
 
-export default Client; 
+export default Client;

@@ -95,7 +95,7 @@ const Invoices = () => {
           </Button>
           <IconButton aria-label="delete">
             <DeleteIcon
-              onClick={() => handleDeleteClick(params.row.invoice_id)} // Pass invoice_id
+              onClick={() => handleDeleteClick(params.row.invoice_id)}
               style={{ color: "#FD4653" }}
             />
           </IconButton>
@@ -310,6 +310,8 @@ const Invoices = () => {
           rows={invoices}
           columns={columns}
           getRowId={(row) => row.invoice_id}
+          autoHeight
+          pageSize={10}
         />
       </Box>
     </Box>

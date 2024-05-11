@@ -6,6 +6,11 @@ import {
   Button,
   TextField,
   Typography,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Snackbar,
 } from "@mui/material";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
@@ -17,6 +22,8 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import axios from "axios";
 import * as Yup from "yup";
+import DeleteIcon from "@mui/icons-material/Delete";
+import MuiAlert from "@mui/material/Alert";
 
 const Casetype = () => {
   const theme = useTheme();
@@ -31,12 +38,29 @@ const Casetype = () => {
   const [casesubtype, setCasesubtype] = useState("");
   const [casesubtypeerror, setcasesubtypeerror] = useState(false);
   const [CaseTypes, setCaseTypes] = useState([]);
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [caseSubTypeToDelete, setCaseSubTypeToDelete] = useState(null);
 
   const columns = [
     { field: "id", headerName: "Number", flex: 0.5 },
-    { field: "caseType", headerName: "Case Type", flex: 2.3 },
     { field: "caseSubType", headerName: "Case Sub Types", flex: 2 },
-    { field: "Action", headerName: "Action", flex: 0.4 },
+    { field: "caseType", headerName: "Case Type", flex: 2.3 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 0.5,
+      renderCell: (params) => (
+        <>
+          <IconButton aria-label="delete">
+            <DeleteIcon
+              onClick={() => handleDeleteClick(params.row.id)}
+              style={{ color: "#FD4653" }}
+            />
+          </IconButton>
+        </>
+      ),
+    },
   ];
 
   const style = {
@@ -79,66 +103,16 @@ const Casetype = () => {
     setOpencasesubtype(false);
   };
 
-  const validationSchema = Yup.object().shape({
-    casetype: Yup.string().required("Case type Name is required"),
-  });
-
   const subtypeValidationSchema = Yup.object().shape({
     casesubtype: Yup.string().required("Case subtype Name is required"),
   });
-
-  const handleSave = () => {
-    console.log("Saving case type");
-    // Validate form fields
-    validationSchema
-      .validate({ casetype }, { abortEarly: false })
-      .then(() => {
-        // If validation succeeds, proceed with saving
-        console.log("Validation successful. Sending request...");
-        axios
-          .post("http://localhost:8081/api/addcasetype", {
-            case_type_name: casetype,
-          })
-          .then((response) => {
-            console.log("Case type saved successfully");
-            handleclosecasetype();
-            window.location.reload();
-          })
-          .catch((error) => {
-            console.error("Error saving case type:", error);
-          });
-      })
-      .catch((error) => {
-        // If validation fails, set error states for invalid fields
-        console.log("Validation failed:", error);
-        const validationErrors = {};
-        error.inner.forEach((fieldError) => {
-          validationErrors[fieldError.path] = fieldError.message;
-        });
-        setcasetypeerror(validationErrors.casetype || false);
-      });
-  };
-
-  useEffect(() => {
-    // Fetch case types from backend when component mounts
-    console.log("Fetching case types...");
-    axios
-      .get("http://localhost:8081/api/getCaseType")
-      .then((response) => {
-        console.log("Case types fetched successfully:", response.data);
-        setCaseType(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching case types:", error);
-      });
-  }, []);
 
   const handSubTypeSave = () => {
     console.log("Saving case subtype");
     // Validate form fields
     subtypeValidationSchema
       .validate({ casesubtype }, { abortEarly: false })
-      .then(() => {  
+      .then(() => {
         // If validation succeeds, proceed with saving
         console.log("Validation successful. Sending request...");
         axios
@@ -146,11 +120,10 @@ const Casetype = () => {
             case_type: value.case_type,
             sub_type_name: casesubtype,
           })
-          
+
           .then((response) => {
-            console.log("Case subtype saved successfully",);
+            console.log("Case subtype saved successfully");
             handleclosecasesubtype();
-            window.location.reload();
           })
           .catch((error) => {
             console.error("Error saving case subtype:", error);
@@ -178,62 +151,53 @@ const Casetype = () => {
       });
   }, []);
 
+  const handleCancelDelete = () => {
+    setDeleteConfirmationOpen(false);
+  };
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
+
+  const handleDeleteConfirmation = async () => {
+    try {
+      if (!caseSubTypeToDelete) {
+        console.error("Invoice ID is missing.");
+        return;
+      }
+
+      const response = await fetch(
+        "http://localhost:8081/api/deletecasesubtype",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: caseSubTypeToDelete }),
+        }
+      );
+
+      if (response.ok) {
+        setDeleteConfirmationOpen(false);
+      } else {
+        console.error("Failed to delete invoice:", response.statusText);
+      }
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+    }
+  };
+  const handleDeleteClick = (id) => {
+    setCaseSubTypeToDelete(id);
+    setDeleteConfirmationOpen(true);
+  };
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Case Type" subtitle="" />
       <Box gap={2} display="flex" justifyContent="flex-end" mt="20px">
-        <Button
-          type="button"
-          variant="contained"
-          color="secondary"
-          onClick={handleaddcasetypebuttonClick}
-          startIcon={<AddIcon fontSize="small" />}
-        >
-          Add Case type
-        </Button>
-        <Modal
-          open={opencasetype}
-          onClose={handleclosecasetype}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box mt="10px" sx={style}>
-            <Typography id="modal-modal-title" variant="h6" component="h2">
-              Add Case Type
-            </Typography>
-            <TextField
-              mt="10px"
-              required
-              label="Enter Case Type"
-              value={casetype}
-              onChange={(e) => {
-                setCasetype(e.target.value);
-                setcasetypeerror(false);
-              }}
-              error={casetypeerror}
-              helperText={casetypeerror ? "Case Type is required" : ""}
-              fullWidth
-            />
-            <Box gap="5px" display="flex" justifyContent="end" mt="20px">
-              <Button
-                color="error"
-                variant="outlined"
-                onClick={handleclosecasetype}
-                startIcon={<ClearIcon fontSize="small" />}
-              >
-                Cancel
-              </Button>
-              <Button
-                color="success"
-                variant="outlined"
-                startIcon={<SaveIcon />}
-                onClick={handleSave}
-              >
-                Save
-              </Button>
-            </Box>
-          </Box>
-        </Modal>
         <Button
           type="button"
           variant="contained"
@@ -312,6 +276,50 @@ const Casetype = () => {
           </Box>
         </Modal>
       </Box>
+      <Dialog
+        open={deleteConfirmationOpen}
+        onClose={handleCancelDelete}
+        sx={{
+          "& .MuiDialog-paper": {
+            backgroundColor: `${colors.blueAccent[900]}`, // Set your preferred background color
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title" color="secondary">
+          {"Are you sure you want to delete this Case Sub Type?"}
+        </DialogTitle>
+        <DialogActions>
+          <Button
+            onClick={handleCancelDelete}
+            variant="outlined"
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleDeleteConfirmation}
+            autoFocus
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Case Sub Type Deleted Successfully
+        </MuiAlert>
+      </Snackbar>
       <Box
         sx={{ mt: "10px" }}
         padding="5px"
@@ -350,20 +358,9 @@ const Casetype = () => {
           }}
         >
           <DataGrid
-            rows={CaseTypes.flatMap((caseType, index) => {
-              const subtypes = caseType.subtypes
-                .map((subtype) => subtype.name)
-                .join(", ");
-              return [
-                {
-                  id: index + 1,
-                  caseType: caseType.name,
-                  caseSubType: subtypes,
-                  Action: "", // Add an empty string for the Action column
-                },
-              ];
-            })}
+            rows={CaseTypes}
             columns={columns}
+            getRowId={(row) => row.id}
             components={{ Toolbar: GridToolbar }}
           />
         </Box>

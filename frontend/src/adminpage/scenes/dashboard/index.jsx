@@ -96,7 +96,7 @@ const RegistrarDashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title={`name is ${ 1+1 }`}
+            title={`name is ${1 + 1}`}
             subtitle="New Clients"
             progress="0.30"
             increase="+5%"
@@ -208,23 +208,6 @@ const RegistrarDashboard = () => {
           </Box>
         </Box>
 
-        {/* <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          padding="30px"
-        >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ marginBottom: "15px" }}
-          >
-            Geography Based Traffic
-          </Typography>
-          <Box height="200px">
-            <GeographyChart isDashboard={true} />
-          </Box>
-        </Box> */}
         <Box
           gridColumn="span 12"
           gridRow="span 4"
