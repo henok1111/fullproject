@@ -241,6 +241,7 @@ const Sidebar = ({ role, name, userId }) => {
         to: "/court_manager/casecourtmanager",
         icon: <ReviewsIcon />,
       },
+      { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
     ],
     registrar: [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
@@ -340,7 +341,11 @@ const Sidebar = ({ role, name, userId }) => {
                 alignItems="center"
                 ml="15px"
               >
-                <Typography variant="h3" color={colors.grey[100]}>
+                <Typography
+                  variant="h3"
+                  fontWeight={700}
+                  color={colors.grey[100]}
+                >
                   {role.toUpperCase()}
                 </Typography>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>

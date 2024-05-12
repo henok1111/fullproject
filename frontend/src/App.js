@@ -164,9 +164,7 @@ const RegistrarRoutes = () => {
     <Routes>
       <Route path="/" element={<Adminss />}>
         <Route path="/caseform" element={<Caseform />} />
-
         <Route path="/casethatcomefromproscutor" element={<ProscutorCases />} />
-
         <Route path="/addinvoices" element={<AddInvoices />} />
         <Route path="/team" element={<Team />} />
         <Route path="/contacts" element={<Contacts />} />
