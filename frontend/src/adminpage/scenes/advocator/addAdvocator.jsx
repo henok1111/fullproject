@@ -31,7 +31,9 @@ const validationSchema = yup.object().shape({
 
 const isEmailUnique = async (email) => {
   try {
-    const response = await fetch(`http://localhost:8081/api/checkemail?email=${email}`);
+    const response = await fetch(
+      `http://localhost:8081/api/checkemail?email=${email}`
+    );
     const data = await response.json();
     return data.isUnique;
   } catch (error) {
@@ -75,22 +77,22 @@ const AddAdvocator = () => {
     try {
       // Check if the email is unique
       const isEmailValid = await isEmailUnique(values.email);
-  
+
       if (!isEmailValid) {
         formik.setErrors({
           email: "This email is already in use. Please use a different one.",
         });
         return;
       }
-  
+
       // Continue with the rest of your form submission logic
       console.log("Form submitted");
       console.log("Formik Values:", values);
-  
+
       const advocatorObject = createUserObject(values);
-  
+
       console.log("Advocator Object:", advocatorObject);
-  
+
       try {
         JSON.parse(JSON.stringify(advocatorObject));
         console.log("Advocator Object is a valid JSON");
@@ -98,11 +100,14 @@ const AddAdvocator = () => {
         console.error("Advocator Object is not a valid JSON:", error);
         return;
       }
-  
-      console.log("Sending request to:", "http://localhost:8081/api/addadvocator");
-  
+
+      console.log(
+        "Sending request to:",
+        "http://localhost:8081/api/addadvocator"
+      );
+
       let response;
-  
+
       try {
         response = await fetch("http://localhost:8081/api/addadvocator", {
           method: "POST",
@@ -111,14 +116,14 @@ const AddAdvocator = () => {
           },
           body: JSON.stringify(advocatorObject),
         });
-  
+
         console.log("Response Status:", response.status);
         console.log("Response OK:", response.ok);
       } catch (error) {
         console.error("Error during fetch:", error);
         return;
       }
-  
+
       if (response.ok) {
         const responseData = await response.json();
         console.log("API Response:", responseData);
@@ -130,7 +135,6 @@ const AddAdvocator = () => {
       console.error("Error submitting form data:", error);
     }
   };
-  
 
   useEffect(() => {
     console.log("Initial Formik Values:", formik.values);
@@ -167,9 +171,7 @@ const AddAdvocator = () => {
                 onChange={formik.handleChange}
                 value={formik.values.firstName}
                 error={formik.touched.firstName && !!formik.errors.firstName}
-                helperText={
-                  formik.touched.firstName && formik.errors.firstName
-                }
+                helperText={formik.touched.firstName && formik.errors.firstName}
               />
               <TextField
                 name="middleName"
@@ -179,9 +181,7 @@ const AddAdvocator = () => {
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 value={formik.values.middleName}
-                error={
-                  formik.touched.middleName && !!formik.errors.middleName
-                }
+                error={formik.touched.middleName && !!formik.errors.middleName}
                 helperText={
                   formik.touched.middleName && formik.errors.middleName
                 }
@@ -234,15 +234,14 @@ const AddAdvocator = () => {
               />
               <TextField
                 name="mobileNumber"
-                label="Mobile Number"
+                label="Mobile Number (+2519XXXXXXXX)"
                 variant="outlined"
                 fullWidth
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 value={formik.values.mobileNumber}
                 error={
-                  formik.touched.mobileNumber &&
-                  !!formik.errors.mobileNumber
+                  formik.touched.mobileNumber && !!formik.errors.mobileNumber
                 }
                 helperText={
                   formik.touched.mobileNumber && formik.errors.mobileNumber

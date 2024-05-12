@@ -416,9 +416,7 @@ const Client = () => {
             <DialogTitle id="edit-client-dialog-title">Edit Client</DialogTitle>
             <DialogContent>
               <form onSubmit={handleSubmit(handleEditFormSubmit)}>
-                <Box
-                  sx={{ display: "flex", gap: "20px", alignItems: "center" }}
-                >
+                <Box sx={{ gap: "20px", alignItems: "center" }}>
                   <Controller
                     name="first_name"
                     control={control}
@@ -502,7 +500,7 @@ const Client = () => {
                     render={({ field }) => (
                       <TextField
                         {...field}
-                        label="Mobile Number"
+                        label="Mobile Number (+2519XXXXXXXX)"
                         fullWidth
                         required
                         margin="normal"

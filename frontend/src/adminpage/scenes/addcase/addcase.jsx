@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import { Form, Formik } from "formik";
 import * as yup from "yup";
 import SearchIcon from "@mui/icons-material/Search";
@@ -439,8 +440,11 @@ const AddCase = () => {
                   style={{ backgroundColor: `${colors.blueAccent[900]}` }}
                 >
                   <Button
+                    type="button"
+                    variant="contained"
+                    color="error"
+                    sx={{ mt: "10px" }}
                     onClick={() => setOpenCaseFormDialog(false)}
-                    color="info"
                   >
                     Cancel
                   </Button>
@@ -458,8 +462,16 @@ const AddCase = () => {
                   open={snackbarOpen}
                   autoHideDuration={6000}
                   onClose={handleSnackbarClose}
-                  message="Case deleted successfully"
-                />
+                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  <MuiAlert
+                    onClose={handleSnackbarClose}
+                    severity="success"
+                    sx={{ width: "100%" }}
+                  >
+                    Case Deleted Successfully
+                  </MuiAlert>
+                </Snackbar>
                 {/* Render CaseBoxes for each fetched case */}
                 <>
                   {fetchedCases.map((caseData) => (
@@ -503,7 +515,7 @@ const AddCase = () => {
                           <Button
                             style={{ margin: "10px" }}
                             variant="contained"
-                            color="primary"
+                            color="secondary"
                             onClick={() => handleEditCase(caseData.case_id)}
                           >
                             Edit Case

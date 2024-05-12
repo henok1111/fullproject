@@ -269,7 +269,7 @@ const AddClient = () => {
               />
               <TextField
                 name="mobileNumber"
-                label="Mobile Number"
+                label="Mobile Number (+2519XXXXXXXX)"
                 variant="outlined"
                 fullWidth
                 onBlur={formik.handleBlur}
@@ -286,7 +286,7 @@ const AddClient = () => {
             <Box sx={{ display: "flex", mt: "20px", gap: "20px" }}>
               <TextField
                 name="alternateNumber"
-                label="Alternate Number"
+                label="Alternate Number (+2519XXXXXXXX)"
                 variant="outlined"
                 fullWidth
                 onBlur={formik.handleBlur}
