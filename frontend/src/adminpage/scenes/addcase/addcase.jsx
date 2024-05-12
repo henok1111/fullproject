@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Button,
@@ -10,7 +10,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
 } from "@mui/material";
 import { Form, Formik } from "formik";
@@ -22,16 +21,9 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import EditCase from "../form/editcaseform";
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  PDFDownloadLink,
-} from "@react-pdf/renderer"; // Import necessary modules
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer"; // Import necessary modules
 const initialValues = {};
 
 const checkoutSchema = yup.object().shape({});
@@ -40,10 +32,30 @@ const AddCase = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const colors = tokens(theme.palette.mode);
-  const { userId } = useParams();
-  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchCaseCount = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8081/api/fetchcaseinformation"
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch case count");
+      }
+      const data = await response.json();
+      console.log("Fetched case count:", data);
+      setFetchedCases(data);
+    } catch (error) {
+      console.error("Error fetching case count:", error);
+    }
+  };
+
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const memoizedFetchCases = useMemo(() => fetchCaseCount, []);
+
   const [fetchedCases, setFetchedCases] = useState([]);
-  const [filePath, setFilePath] = useState("");
   const [expandedCases, setExpandedCases] = useState({});
   const [referencesVisible, setReferencesVisible] = useState({});
   const [enteredCaseId, setEnteredCaseId] = useState("");
@@ -197,28 +209,28 @@ const AddCase = () => {
   };
 
   useEffect(() => {
-    // Define a function to fetch case count
-    const fetchCaseCount = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(
-          "http://localhost:8081/api/fetchcaseinformation"
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch case count");
-        }
-        const data = await response.json();
-        console.log("Fetched case count:", data);
-        setFetchedCases(data);
+        const casesData = await memoizedFetchCases();
+        setCases(casesData);
       } catch (error) {
-        console.error("Error fetching case count:", error);
+        setError(error.message);
       }
+      setLoading(false);
     };
+
+    fetchData(); // Fetch data on component mount
+  }, [memoizedFetchCases]);
+
+  useEffect(() => {
     fetchCaseCount();
-    // Call fetchCaseCount when the dialog is closed or when the edit form is submitted
     if (!openCaseFormDialog && isEditFormClosed) {
       fetchCaseCount();
     }
-  }, [openCaseFormDialog, isEditFormClosed]); // Dependencies: openCaseFormDialog and isEditFormClosed
+    const intervalId = setInterval(fetchCaseCount, 3000);
+    return () => clearInterval(intervalId);
+  }, [openCaseFormDialog, isEditFormClosed]);
 
   const toggleCaseDetails = (caseId) => {
     setExpandedCases((prev) => ({
@@ -293,26 +305,20 @@ const AddCase = () => {
     }
   };
   const handleSubmits = async () => {
-    // Initialize an array to store submitted data
     const submittedData = [];
 
-    // Iterate over cases and submit document rows for each case
     fetchedCases.forEach((caseData) => {
       if (caseData.documentRows && caseData.documentRows.length > 0) {
         caseData.documentRows.forEach(async (row) => {
-          // Use async keyword here
-          // Construct an object containing the submitted data
           const submittedRow = {
             caseId: caseData.case_id,
             description: row.description,
-            fileName: row.file ? row.file.name : null, // Extract file name or null if file is not present
+            fileName: row.file ? row.file.name : null,
           };
 
-          // Push the submitted data to the array
           submittedData.push(submittedRow);
 
           try {
-            // Make the API call to post the submitted data
             const response = await fetch(
               "http://localhost:8081/api/uploadothercase",
               {
@@ -341,7 +347,6 @@ const AddCase = () => {
       }
     });
 
-    // Display the submitted data in the console
     console.log("Submitted Data:", submittedData);
   };
 
@@ -382,7 +387,6 @@ const AddCase = () => {
                 className="text"
                 value={enteredCaseId}
                 onChange={(e) => {
-                  // Ensure only numbers are entered
                   const regex = /^[0-9]*$/;
                   if (regex.test(e.target.value) || e.target.value === "") {
                     setEnteredCaseId(e.target.value);
@@ -412,9 +416,7 @@ const AddCase = () => {
                 {errorMessage}
               </Typography>
             )}
-            {/* DataGrid */}
             <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
-              {/* Other code remains the same */}
               <Dialog
                 open={openCaseFormDialog}
                 onClose={() => setOpenCaseFormDialog(false)}
@@ -431,7 +433,6 @@ const AddCase = () => {
                 <DialogContent
                   style={{ backgroundColor: `${colors.blueAccent[900]}` }}
                 >
-                  {/* Render the CaseForm component */}
                   {isEditFormOpen && <EditCase caseId={selectedCaseId} />}
                 </DialogContent>
                 <DialogActions
@@ -1277,19 +1278,23 @@ const AddCase = () => {
         aria-describedby="alert-dialog-description"
         sx={{
           "& .MuiDialog-paper": {
-            backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
+            backgroundColor: `${colors.blueAccent[900]}`, // Set your preferred background color
           },
         }}
       >
-        <DialogTitle id="alert-dialog-title" color={"red"}>
+        <DialogTitle id="alert-dialog-title">
           {"Are you sure you want to delete this Case"}
         </DialogTitle>
 
         <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)} color="cancle">
+          <Button
+            onClick={() => setOpenDeleteDialog(false)}
+            color="success"
+            variant="outlined"
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+          <Button onClick={handleConfirmDelete} color="error" autoFocus>
             Delete
           </Button>
         </DialogActions>

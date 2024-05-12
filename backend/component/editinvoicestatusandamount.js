@@ -23,9 +23,26 @@ const EditSA = async (db, req, res) => {
       `;
 
     const caseValues = [overallStatus, caseId];
-    // Execute the query to update the cases table
     const [caseResult] = await db.query(updateCasesQuery, caseValues);
     console.log(caseResult);
+
+    const getCourtManagersQuery = `SELECT id FROM users WHERE role = "Court_Manager"`;
+    const courtManagers = await db.query(getCourtManagersQuery);
+
+    const notificationMessage = `The paid status for case ${caseId} has been unpdated to ${overallStatus}`;
+    for (const courtmanager of courtManagers[0]) {
+      const sqlInsert =
+        "INSERT INTO notifications (user_id, message) VALUES (?, ?)";
+      db.query(
+        sqlInsert,
+        [courtmanager.id, notificationMessage],
+        function (err, result) {
+          if (err) {
+            console.error("Error inserting notification:", err);
+          }
+        }
+      );
+    }
 
     if (invoiceResult.changedRows > 0 && caseResult.changedRows > 0) {
       res.status(200).json({

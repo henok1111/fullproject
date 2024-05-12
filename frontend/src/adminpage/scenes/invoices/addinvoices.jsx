@@ -170,8 +170,6 @@ const AddInvoices = () => {
         })),
       };
 
-      console.log("Data to be sent to the backend:", data); // Log the data before sending
-
       const response = await fetch("http://localhost:8081/api/addInvoice", {
         method: "POST",
         headers: {
@@ -230,8 +228,6 @@ const AddInvoices = () => {
         "http://localhost:8081/api/gethighestinvoice"
       );
       const data = await response.json();
-      console.log("Fetched highest invoice number data:", data); // Log the fetched data
-      // Increment the highest invoice number by 1
       const nextInvoiceNumber = data.highestNumber + 1;
       setInvoiceNumber(`INV-${nextInvoiceNumber}`);
     } catch (error) {
@@ -248,7 +244,6 @@ const AddInvoices = () => {
         throw new Error("Failed to fetch case count");
       }
       const data = await response.json();
-      console.log("Fetched case count:", data);
       setFetchedCases(data);
     } catch (error) {
       console.error("Error fetching case count:", error);

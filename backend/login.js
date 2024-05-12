@@ -7,15 +7,12 @@ export default async function Login(db, req, res) {
   try {
     const { email, password } = req.body;
 
-    console.log("Received login request with email:", email);
-
     // Check if the user exists with the provided email
     const userQuery = "SELECT * FROM users WHERE email = ?";
 
     const [userResults] = await db.query(userQuery, [email]);
 
     if (userResults.length === 0) {
-      console.log("User not found for email:", email);
       return res
         .status(401)
         .json({ success: false, message: "Invalid email or password" });
@@ -28,13 +25,10 @@ export default async function Login(db, req, res) {
     );
 
     if (!isValidPassword) {
-      console.log("Invalid password for email:", email);
       return res
         .status(401)
         .json({ success: false, message: "Invalid password" });
     }
-
-    console.log("User authenticated:", email);
 
     // Extract user information
     const { id, first_name, role, last_name, status } = userResults[0];
@@ -55,8 +49,6 @@ export default async function Login(db, req, res) {
       SECRET_KEY,
       { expiresIn: "30m" }
     );
-
-    console.log("Token generated for user:", email);
 
     // Send the token as a response to the client along with user information
     res.status(200).json({

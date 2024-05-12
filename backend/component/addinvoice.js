@@ -60,11 +60,27 @@ const AddInvoice = async (db, req, res) => {
       await db.query(insertItemQuery, itemValues);
     }
 
-    // If the case_id is available and the status is 'Paid', update the is_paid status in the cases table
     if (case_id && paid_status) {
       const updateCaseQuery = "UPDATE cases SET is_paid = ? WHERE case_id = ?";
       const updateCaseValues = [paid_status, case_id];
       await db.query(updateCaseQuery, updateCaseValues);
+    }
+    const getCourtManagersQuery = `SELECT id FROM users WHERE role = "Court_Manager"`;
+    const courtManagers = await db.query(getCourtManagersQuery);
+
+    const notificationMessage = `The paid status for case ${case_id} has been unpdated to ${paid_status}`;
+    for (const courtmanager of courtManagers[0]) {
+      const sqlInsert =
+        "INSERT INTO notifications (user_id, message) VALUES (?, ?)";
+      db.query(
+        sqlInsert,
+        [courtmanager.id, notificationMessage],
+        function (err, result) {
+          if (err) {
+            console.error("Error inserting notification:", err);
+          }
+        }
+      );
     }
 
     res.status(201).json({ message: "Invoice created successfully" });

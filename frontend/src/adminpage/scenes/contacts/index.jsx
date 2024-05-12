@@ -322,6 +322,7 @@ const Contacts = () => {
           rows={userData}
           columns={columns}
           components={{ Toolbar: GridToolbar }}
+          pageSize={10}
         />
       </Box>
 

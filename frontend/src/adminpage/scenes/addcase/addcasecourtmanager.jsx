@@ -17,11 +17,6 @@ import {
   Typography,
   IconButton,
   InputAdornment,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   MenuItem,
 } from "@mui/material";
 import { io } from "socket.io-client";
@@ -34,20 +29,13 @@ const AddCourtRegistrarCase = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const colors = tokens(theme.palette.mode);
-  const { userId } = useParams();
-  const [searchQuery, setSearchQuery] = useState("");
   const [fetchedCases, setFetchedCases] = useState([]);
-  const [filePath, setFilePath] = useState("");
   const [expandedCases, setExpandedCases] = useState({});
   const [referencesVisible, setReferencesVisible] = useState({});
   const [enteredCaseId, setEnteredCaseId] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [caseToDelete, setCaseToDelete] = useState(null);
   const [criminalJudges, setCriminalJudges] = useState([]);
   const [civilJudges, setCivilJudges] = useState([]);
-  const [selectedJudgeType, setSelectedJudgeType] = useState("");
   const [selectedJudge, setSelectedJudge] = useState("");
   const [selectedCaseId, setSelectedCaseId] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -60,17 +48,9 @@ const AddCourtRegistrarCase = () => {
   useEffect(() => {
     fetchCaseCount();
     fetchJudge();
+    const intervalId = setInterval(fetchCaseCount, 3000);
+    return () => clearInterval(intervalId);
   }, [submitSuccess]);
-
-  const handleSnackbarOpen = () => {
-    setSnackbarOpen(true);
-  };
-  const handleSelectCase = (caseId) => {
-    setSelectedCaseId(caseId); // Step 2
-  };
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
 
   const fetchJudge = async () => {
     try {
@@ -125,43 +105,6 @@ const AddCourtRegistrarCase = () => {
       ...prev,
       [caseId]: !prev[caseId],
     }));
-  };
-
-  const handleEditCase = (caseId) => {
-    console.log("Editing case with ID:", caseId);
-  };
-
-  const deleteCase = (caseId) => {
-    setCaseToDelete(caseId);
-    setOpenDeleteDialog(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (caseToDelete) {
-      await deleteCaseFromServer(caseToDelete);
-      setOpenDeleteDialog(false);
-    }
-  };
-
-  const deleteCaseFromServer = async (caseId) => {
-    try {
-      const response = await fetch(`http://localhost:8081/api/deletecase`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: caseId }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to delete case");
-      }
-      setFetchedCases((prevCases) =>
-        prevCases.filter((caseData) => caseData.case_id !== caseId)
-      );
-      handleSnackbarOpen();
-    } catch (error) {
-      console.error("Error deleting case:", error);
-    }
   };
 
   const handleFormSubmit = (values) => {
@@ -307,14 +250,6 @@ const AddCourtRegistrarCase = () => {
               backgroundColor={colors.blueAccent[900]}
             >
               <Box m="40px 0 0 0">
-                <Snackbar
-                  open={snackbarOpen}
-                  autoHideDuration={6000} // Adjust as needed
-                  onClose={handleSnackbarClose}
-                  message="Case deleted successfully"
-                />
-
-                {/* Render CaseBoxes for each fetched case */}
                 <>
                   {fetchedCases.map((caseData) => (
                     <Box
@@ -338,23 +273,6 @@ const AddCourtRegistrarCase = () => {
                         >
                           Case Number {caseData.case_id}
                         </Typography>
-                        <Box>
-                          <Button
-                            style={{ margin: "10px" }}
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleEditCase(caseData.case_id)}
-                          >
-                            Edit Case
-                          </Button>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            onClick={() => deleteCase(caseData.case_id)}
-                          >
-                            Delete Case
-                          </Button>
-                        </Box>
                       </Box>
                       <Grid container spacing={0}>
                         <Grid
@@ -865,30 +783,6 @@ const AddCourtRegistrarCase = () => {
           </Form>
         )}
       </Formik>
-      <Dialog
-        open={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        sx={{
-          "& .MuiDialog-paper": {
-            backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
-          },
-        }}
-      >
-        <DialogTitle id="alert-dialog-title" color={"red"}>
-          {"Are you sure you want to delete this Case"}
-        </DialogTitle>
-
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

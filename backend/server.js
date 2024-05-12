@@ -61,8 +61,6 @@ import GetUserById from "./component/getuserbyid.js";
 const app = express();
 import uploadOtherCases from "./component/uploadothercasedocument.js";
 import uploadDocuments from "./component/othercase.js";
-import http from "http";
-import { Server } from "socket.io";
 import uploadProscutorCaseDocument from "./component/uploadeproscutoercasedocument.js";
 import InsertInvoiceAndItems from "./component/addinvoice.js";
 import HighestInvoice from "./component/gethighestinvoice.js";
@@ -73,6 +71,8 @@ import GetInvoiceById from "./component/getinvoicebyid.js";
 import DeleteInvoiceItem from "./component/deleteinvoiceitem.js";
 import EditItem from "./component/edititem.js";
 import EditSA from "./component/editinvoicestatusandamount.js";
+import Notifications from "./component/notifications.js";
+import DeleteCaseSubType from "./component/deleteCaseSubType.js";
 
 const PORT = 8081;
 import GetAppointmnetCases from "./component/getapppointmentcases.js";
@@ -85,6 +85,8 @@ import DeleteProscutorDocument from "./component/deleteproscutordocument.js";
 import fetchAllProsecutorDocuments from "./component/fetchallcasedocuemtofproscutor.js";
 import updateDocumentStatus from "./component/updatestatusofproscutordocument.js";
 import CaseDecision from "./component/updatecasedecision.js";
+import markAsRead from "./component/markasread.js";
+import EditAdvocate from "./component/editadvocator.js";
 const router = express.Router();
 
 app.use(express.json());
@@ -332,6 +334,10 @@ app.post("/api/deleteinvoice", async (req, res) => {
   await DeleteInvoice(db, req, res);
 });
 
+app.post("/api/deletecasesubtype", async (req, res) => {
+  await DeleteCaseSubType(db, req, res);
+});
+
 app.post("/api/judgeassign", async (req, res) => {
   await assignJudgeToCase(db, req, res);
 });
@@ -360,7 +366,7 @@ app.post("/api/addinvoiceitemforinvoice/:invoiceId", async (req, res) => {
 });
 
 app.post("/api/editAdvocator", async (req, res) => {
-  await editAdvocator(db, req, res);
+  await EditAdvocate(db, req, res);
 });
 app.post("/api/adduser", async (req, res) => {
   await AddUser(db, req, res);
@@ -386,9 +392,16 @@ app.post("/api/updateUser/:userId", async (req, res) => {
 app.get("/api/petitioners/:caseId", async (req, res) => {
   await GetPetitioners(db, req, res);
 });
+app.get("/api/notifications", (req, res) => {
+  Notifications(db, req, res);
+});
 
 app.get("/api/respondents/:caseId", async (req, res) => {
   await GetRespondents(db, req, res);
+});
+
+app.post("/api/notifications/markallasread", async (req, res) => {
+  await markAsRead(db, req, res);
 });
 
 // New endpoint to fetch case sub types based on case type
@@ -398,38 +411,6 @@ app.get("/api/getCaseSubType", async (req, res) => {
 app.get("/api/getcasecout", async (req, res) => {
   await GetCaseCount(req, res);
 });
-
-const server = http.createServer(app);
-
-// Create Socket.IO server
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3000",
-    method: ["GET", "POST"],
-  },
-});
-
-// Socket.IO event listeners
-io.on("connection", (socket) => {
-  socket.on("join_room", (room) => {
-    socket.join(room);
-  });
-
-  socket.on("send_notification", (data) => {
-    console.log("Received notification data:", data);
-    io.to(data.room).emit("receive_notification", data.Notification);
-  });
-
-  socket.on("disconnect", () => {
-    console.log(`Socket ${socket.id} disconnected`);
-  });
-});
-
-io.on("connect_error", (error) => {
-  console.error("Socket.IO connection error:", error);
-});
-
-server.listen(3001, () => console.log("socket io is running on port 3001"));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
