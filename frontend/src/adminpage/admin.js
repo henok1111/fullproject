@@ -5,7 +5,8 @@ import { ColorModeContext, useMode } from "../theme";
 import Topbar from "./scenes/global/Topbar";
 import { Outlet, useParams, Route, Routes } from "react-router-dom"; // Import Outlet and useParams
 import Sidebar from "./scenes/global/SidebarRegistrar";
-import RegistrarDashboard from "./scenes/dashboard";
+import RegistrarDashboard from "./scenes/dashboard/admin";
+import AdminDashboard from "./scenes/dashboard/admin";
 
 export default function Admin() {
   const { userId } = useParams(); // Use useParams to get userId from the route
@@ -26,7 +27,7 @@ export default function Admin() {
           <div style={{ flexGrow: 1, overflow: "hidden" }}>
             <Topbar setIsSidebar={setIsSidebar} />
             <Routes>
-              <Route index element={<RegistrarDashboard />} />
+              <Route index element={<AdminDashboard />} />
             </Routes>
             <Outlet />
           </div>

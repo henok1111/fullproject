@@ -5,9 +5,10 @@ import { ColorModeContext, useMode } from "../theme";
 import Sidebar from "./scenes/global/SidebarRegistrar";
 import Topbar from "./scenes/global/Topbar";
 import { Outlet, Route, Routes } from "react-router-dom"; // Import Outlet from react-router-dom
-import RegistrarDashboard from "./scenes/dashboard";
+import RegistrarDashboard from "./scenes/dashboard/admin";
+import ProscutorDashboard from "./scenes/dashboard/proscutor";
 // ... (other imports)
-export default function Proscutor( ) {
+export default function Proscutor() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
   return (
@@ -18,10 +19,17 @@ export default function Proscutor( ) {
           <Sidebar isSidebar={isSidebar} role="proscutor" privateImage="" />
           <div style={{ flexGrow: 1, overflowY: "auto" }}>
             <Topbar setIsSidebar={setIsSidebar} />
-            <div style={{ overflowY: "auto", height: "calc(100vh - 64px)", scrollbarWidth: "none", msOverflowStyle: "none" }}>
+            <div
+              style={{
+                overflowY: "auto",
+                height: "calc(100vh - 64px)",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
               {/* 64px is the height of the Topbar */}
               <Routes>
-                <Route index element={<RegistrarDashboard />} />
+                <Route index element={<ProscutorDashboard />} />
               </Routes>
               <Outlet />
             </div>
