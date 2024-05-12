@@ -1,20 +1,31 @@
 import React from "react";
 import { useState } from "react";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider, useTheme } from "@mui/material";
 import { ColorModeContext, useMode } from "../theme";
 import Sidebar from "./scenes/global/SidebarRegistrar";
 import Topbar from "./scenes/global/Topbar";
 import { Outlet, Route, Routes } from "react-router-dom"; // Import Outlet from react-router-dom
 import RegistrarDashboard from "./scenes/dashboard/admin";
+import JudgeDashboard from "./scenes/dashboard/judge";
+import { tokens } from "../theme";
 // ... (other imports)
 export default function Invoiclerk() {
-  const [theme, colorMode] = useMode();
+  const [colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+        <div
+          style={{
+            display: "flex",
+            backgroundColor: `${colors.blueAccent[900]}`,
+            height: "100vh",
+            overflow: "hidden",
+          }}
+        >
           <Sidebar isSidebar={isSidebar} role="Invoice_Clerk" privateImage="" />
           <div style={{ flexGrow: 1, overflowY: "auto" }}>
             <Topbar setIsSidebar={setIsSidebar} />
@@ -28,7 +39,7 @@ export default function Invoiclerk() {
             >
               {/* 64px is the height of the Topbar */}
               <Routes>
-                <Route index element={<RegistrarDashboard />} />
+                <Route index element={<JudgeDashboard />} />
               </Routes>
               <Outlet />
             </div>

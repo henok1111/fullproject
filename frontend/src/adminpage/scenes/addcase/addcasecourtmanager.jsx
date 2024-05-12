@@ -19,7 +19,7 @@ import {
   InputAdornment,
   MenuItem,
 } from "@mui/material";
-import { io } from "socket.io-client";
+import MuiAlert from "@mui/material/Alert";
 
 const initialValues = {};
 
@@ -37,12 +37,19 @@ const AddCourtRegistrarCase = () => {
   const [criminalJudges, setCriminalJudges] = useState([]);
   const [civilJudges, setCivilJudges] = useState([]);
   const [selectedJudge, setSelectedJudge] = useState("");
-  const [selectedCaseId, setSelectedCaseId] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const socket = io.connect("http://localhost:3001");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleClick = () => {
     navigate(`/registrar/caseform`);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
   };
 
   useEffect(() => {
@@ -164,9 +171,7 @@ const AddCourtRegistrarCase = () => {
 
         // Optionally, reset the selectedJudge state after submission
         setSelectedJudge("");
-        socket.emit("send_notification", {
-          Notification: "new case has been assigned",
-        });
+        setOpenSnackbar(true);
       } catch (error) {
         console.error("Error submitting data:", error);
         // Handle error state if needed
@@ -783,6 +788,20 @@ const AddCourtRegistrarCase = () => {
           </Form>
         )}
       </Formik>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Judge Assigned Successfully
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };

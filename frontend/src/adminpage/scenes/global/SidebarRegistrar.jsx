@@ -241,7 +241,6 @@ const Sidebar = ({ role, name, userId }) => {
         to: "/court_manager/casecourtmanager",
         icon: <ReviewsIcon />,
       },
-      { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
     ],
     registrar: [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },

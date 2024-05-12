@@ -15,6 +15,7 @@ import {
   colors,
   useTheme,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +24,6 @@ import axios from "axios"; // Import Axios for making HTTP requests
 import { tokens } from "../../../theme";
 import { jwtDecode } from "jwt-decode";
 import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
 
 const Appointmentform = () => {
   const theme = useTheme();
@@ -39,8 +39,6 @@ const Appointmentform = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  // Function to fetch cases from the backend
-  // Function to fetch cases from the backend
   const fetchCases = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken");
@@ -144,6 +142,16 @@ const Appointmentform = () => {
       );
       console.log("Appointment saved successfully:", response.data);
       // Optionally, you can navigate to another page or show a success message here
+      setOpenSnackbar(true);
+      setSnackbarMessage("Appointment Saved Successfully");
+
+      // Reset all the values after successful save
+      setSelectedCase(null);
+      setDate("");
+      setTime("");
+      setNote("");
+      setPetitioners([]);
+      setRespondents([]);
     } catch (error) {
       console.error("Error saving appointment:", error);
     }
@@ -167,12 +175,13 @@ const Appointmentform = () => {
         open={openSnackbar}
         autoHideDuration={6000}
         onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <MuiAlert
           elevation={6}
-          variant="filled"
+          severity="success"
           onClose={() => setOpenSnackbar(false)}
-          severity="error" // or "warning", "info", "success"
+          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </MuiAlert>

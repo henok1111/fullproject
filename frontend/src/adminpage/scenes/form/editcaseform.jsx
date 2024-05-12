@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  TextField,
+  Typography,
+  Snackbar,
+} from "@mui/material";
 import { Form, Formik } from "formik";
-import * as yup from "yup";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme"; // Ensure this import is correct
 import { useTheme } from "@mui/material";
-import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
 import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/material/Radio";
+
 import SaveIcon from "@mui/icons-material/Save";
 import { useNavigate } from "react-router-dom";
+import MuiAlert from "@mui/material/Alert";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 // Define your initialValues and validation schema
 const initialValues = {
@@ -34,16 +37,14 @@ const initialValues = {
   },
 };
 
-const EditCase = ({ caseId }) => {
+const EditCase = ({ caseId, onCloseDialog, setOpenSnackbar1 }) => {
+  console.log("Props:", { caseId, onCloseDialog });
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
   const [prosecutors, setProsecutors] = useState([]);
-  const [advocates, setAdvocates] = useState([]);
   const [clients, setClients] = useState([]);
   const [caseTypes, setCaseTypes] = useState([]);
   const [caseSubTypes, setCaseSubTypes] = useState([]);
-  const [judges, setJudges] = useState([]);
   const [caseCount, setCaseCount] = useState(0);
   const [selectedPetitioners, setSelectedPetitioners] = useState([]);
   const [selectedRespondents, setSelectedRespondents] = useState([]);
@@ -61,6 +62,7 @@ const EditCase = ({ caseId }) => {
   const [policeStation, setPoliceStation] = useState(""); // State for police station
   const [FIRNumber, setFIRNumber] = useState(""); // State for FIR number
   const [FIRDate, setFIRDate] = useState(""); // State for FIR date
+
   const handleRegistrationDateChange = (event) => {
     setRegistrationDate(event.target.value); // Update registration date state
   };
@@ -266,24 +268,16 @@ const EditCase = ({ caseId }) => {
       if (!response.ok) {
         throw new Error("Failed to save case");
       }
-
-      // If the form submission is successful, you can show a success message or navigate to another page
       console.log("Case saved successfully!");
       fetchCaseCount();
-      // Example: Navigate to another page after successful form submission
-      // navigate("/success-page");
-
-      // Handle document upload
-      // You can include logic for uploading documents here
-      // Ensure that you have implemented the handleDocumentChange function to handle file upload
+      setOpenSnackbar1(true);
+      onCloseDialog();
     } catch (error) {
       console.error("Error saving case:", error);
       // Handle error, show error message, or perform any necessary actions
     }
   };
-  const handleBackButtonClick = () => {
-    navigate("/registrar/addcase");
-  };
+
   const [dynamicInitialValues, setDynamicInitialValues] =
     useState(initialValues);
 
@@ -333,17 +327,6 @@ const EditCase = ({ caseId }) => {
 
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
-      <Box display="flex" justifyContent="flex-end" mt="20px">
-        <Button
-          type="button"
-          variant="contained"
-          color="secondary"
-          onClick={handleBackButtonClick}
-          startIcon={<ArrowBackIosNewOutlinedIcon fontSize="small" />}
-        >
-          Back
-        </Button>
-      </Box>
       <Header title="Edit Case" subtitle="" />
       <Formik onSubmit={handleFormSubmit} initialValues={dynamicInitialValues}>
         {({
@@ -356,9 +339,115 @@ const EditCase = ({ caseId }) => {
           setFieldValue,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <Box display="grid" gridRow="span 10" gap="2px" padding="20px">
+            <Box display="grid" gridRow="span 10" gap="2px">
               <Box
-                sx={{ backgroundColor: `${colors.primary[400]}75` }}
+                sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
+                borderRadius="15px"
+                padding="30px"
+              >
+                <Typography color={colors.greenAccent[500]} variant="h3">
+                  Case Detail
+                </Typography>
+                <Box sx={{ display: "flex", gap: "20px" }}>
+                  <TextField
+                    name="caseNumber"
+                    label={`Case Number`} // Concatenate the text and case count
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    value={`Case Number: ${caseCount + 1}`} // Set the value
+                    disabled // Make the field disabled
+                  />
+
+                  <TextField
+                    id="caseType"
+                    select
+                    label="Case Type"
+                    value={values.caseDetails.caseType}
+                    onChange={(event) => {
+                      const selectedCaseType = event.target.value;
+                      setSelectedCaseType(selectedCaseType);
+                      setFieldValue("caseDetails.caseType", selectedCaseType);
+                      fetchCaseSubTypes(selectedCaseType);
+                    }}
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                  >
+                    {caseTypes.map((caseType) => (
+                      <MenuItem
+                        key={caseType.case_type}
+                        value={caseType.case_type}
+                      >
+                        {caseType.case_type}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+
+                  <TextField
+                    id="caseSubType"
+                    select
+                    label="Case Sub Type"
+                    value={values.caseDetails.caseSubType}
+                    onChange={(event) => {
+                      const selectedCaseSubType = event.target.value;
+                      setSelectedCaseSubType(selectedCaseSubType);
+                      // Update selected case sub
+                      console.log("case sub type ", selectedCaseSubType);
+                      setFieldValue(
+                        "caseDetails.caseSubType",
+                        event.target.value
+                      );
+                    }}
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    required
+                  >
+                    {caseSubTypes.map((subType) => (
+                      <MenuItem
+                        key={subType.sub_type_name}
+                        value={subType.sub_type_name}
+                      >
+                        {subType.sub_type_name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Box>
+                <Box sx={{ display: "flex" }}>
+                  <Typography variant="body1" sx={{ mt: "20px", ml: "10px" }}>
+                    Registration Date:
+                  </Typography>
+                  <TextField
+                    name="registrationDate"
+                    type="date"
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    required
+                    value={registrationDate}
+                    onChange={handleRegistrationDateChange}
+                  />
+                </Box>
+                <Box sx={{ display: "flex" }}>
+                  <TextField
+                    required
+                    multiline
+                    rows={4}
+                    fullWidth
+                    id="description"
+                    name="description"
+                    label="Description"
+                    variant="outlined"
+                    value={description}
+                    onChange={handleDescriptionChange}
+                    onBlur={handleBlur} // Add onBlur event handler
+                    sx={{ mt: 2, ml: "20px" }}
+                  />
+                </Box>
+              </Box>
+              <Box
+                sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
                 borderRadius="20px"
                 padding="30px"
               >
@@ -598,112 +687,7 @@ const EditCase = ({ caseId }) => {
                   </Grid>
                 </Grid>
               </Box>
-              <Box
-                sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
-                borderRadius="15px"
-                padding="30px"
-              >
-                <Typography color={colors.greenAccent[500]} variant="h3">
-                  Case Detail
-                </Typography>
-                <Box sx={{ display: "flex", gap: "20px" }}>
-                  <TextField
-                    name="caseNumber"
-                    label={`Case Number`} // Concatenate the text and case count
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    value={`Case Number: ${caseCount + 1}`} // Set the value
-                    disabled // Make the field disabled
-                  />
 
-                  <TextField
-                    id="caseType"
-                    select
-                    label="Case Type"
-                    value={values.caseDetails.caseType}
-                    onChange={(event) => {
-                      const selectedCaseType = event.target.value;
-                      setSelectedCaseType(selectedCaseType);
-                      setFieldValue("caseDetails.caseType", selectedCaseType);
-                      fetchCaseSubTypes(selectedCaseType);
-                    }}
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                  >
-                    {caseTypes.map((caseType) => (
-                      <MenuItem
-                        key={caseType.case_type}
-                        value={caseType.case_type}
-                      >
-                        {caseType.case_type}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-
-                  <TextField
-                    id="caseSubType"
-                    select
-                    label="Case Sub Type"
-                    value={values.caseDetails.caseSubType}
-                    onChange={(event) => {
-                      const selectedCaseSubType = event.target.value;
-                      setSelectedCaseSubType(selectedCaseSubType);
-                      // Update selected case sub
-                      console.log("case sub type ", selectedCaseSubType);
-                      setFieldValue(
-                        "caseDetails.caseSubType",
-                        event.target.value
-                      );
-                    }}
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    required
-                  >
-                    {caseSubTypes.map((subType) => (
-                      <MenuItem
-                        key={subType.sub_type_name}
-                        value={subType.sub_type_name}
-                      >
-                        {subType.sub_type_name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Box>
-                <Box sx={{ display: "flex" }}>
-                  <Typography variant="body1" sx={{ mt: "20px", ml: "10px" }}>
-                    Registration Date:
-                  </Typography>
-                  <TextField
-                    name="registrationDate"
-                    type="date"
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    required
-                    value={registrationDate}
-                    onChange={handleRegistrationDateChange}
-                  />
-                </Box>
-                <Box sx={{ display: "flex" }}>
-                  <TextField
-                    required
-                    multiline
-                    rows={4}
-                    fullWidth
-                    id="description"
-                    name="description"
-                    label="Description"
-                    variant="outlined"
-                    value={description}
-                    onChange={handleDescriptionChange}
-                    onBlur={handleBlur} // Add onBlur event handler
-                    sx={{ mt: 2, ml: "20px" }}
-                  />
-                </Box>
-              </Box>
               <Box
                 sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
                 borderRadius="15px"

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import axios from "axios";
-import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 
-const UploadProscutorDocumentPage = () => {
+const UploadProscutorDocumentPage = ({
+  setOpenSnackbar,
+  handleCloseSnackbar,
+  onClose,
+}) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [description, setDescription] = useState("");
@@ -20,33 +23,7 @@ const UploadProscutorDocumentPage = () => {
   const handleDescriptionChange = (event) => {
     setDescription(event.target.value);
   };
-  useEffect(() => {
-    fetchDocuments();
-  }, []); // Fetch documents when the component mounts
 
-  const fetchDocuments = async () => {
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-      const decodedToken = jwtDecode(accessToken);
-      const prosecutorId = decodedToken.userId; // Get the userId from the decoded JWT token
-
-      const response = await fetch(
-        "http://localhost:8081/api/fetchproscutorcases",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ prosecutorId }), // Send the prosecutorId to the backend server
-        }
-      );
-
-      const data = await response.json();
-      console.log("data", data);
-    } catch (error) {
-      console.error("Error fetching documents:", error);
-    }
-  };
   const handleUpload = async () => {
     try {
       const formData = new FormData();
@@ -76,7 +53,8 @@ const UploadProscutorDocumentPage = () => {
         // Reset the form fields
         setDescription("");
         setFile(null);
-        fetchDocuments();
+        setOpenSnackbar(true); // Open the Snackbar
+        onClose();
       } else {
         console.error("Failed to upload document.");
       }

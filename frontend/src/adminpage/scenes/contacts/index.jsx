@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../../theme";
 import Header from "../../components/Header";
@@ -46,7 +47,16 @@ const Contacts = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [selectedUserToDelete, setSelectedUserToDelete] = useState(null);
+  const [openSnackbar1, setOpenSnackbar1] = useState(false);
   const [showJudgeTypeDropdown, setShowJudgeTypeDropdown] = useState(false);
+
+  const handleCloseSnackbar1 = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar1(false);
+  };
   const fetchUsers = async () => {
     try {
       const response = await fetch("http://localhost:8081/api/getUsers");
@@ -124,6 +134,7 @@ const Contacts = () => {
       } else {
         console.error(`Error deleting user with ID ${selectedUserToDelete.id}`);
       }
+      setOpenSnackbar1(true);
     } catch (error) {
       console.error("Error deleting user:", error);
     }
@@ -331,18 +342,23 @@ const Contacts = () => {
         onClose={handleCancelDelete}
         sx={{
           "& .MuiDialog-paper": {
-            backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
+            backgroundColor: `${colors.blueAccent[900]}`, // Set your preferred background color
           },
         }}
       >
-        <DialogTitle id="alert-dialog-title" color={"red"}>
+        <DialogTitle id="alert-dialog-title">
           {"Are you sure you want to delete this client?"}
         </DialogTitle>
         <DialogActions>
-          <Button onClick={handleCancelDelete} color="primary">
+          <Button variant="outlined" onClick={handleCancelDelete} color="error">
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+          <Button
+            variant="outlined"
+            onClick={handleConfirmDelete}
+            color="secondary"
+            autoFocus
+          >
             Delete
           </Button>
         </DialogActions>
@@ -471,6 +487,20 @@ const Contacts = () => {
         >
           User edited successfully!
         </Alert>
+      </Snackbar>
+      <Snackbar
+        open={openSnackbar1}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar1}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar1}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          User Deleted Successfully
+        </MuiAlert>
       </Snackbar>
     </Box>
   );

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Typography, Dialog, DialogContent } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  Dialog,
+  DialogContent,
+  Snackbar,
+} from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import UploadProscutorDocumentPage from "./index";
 import { useTheme } from "@mui/material";
@@ -7,13 +14,15 @@ import { jwtDecode } from "jwt-decode";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme";
 import { useNavigate } from "react-router-dom";
+import MuiAlert from "@mui/material/Alert";
 
 const ProscutoreDocuments = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [documents, setDocuments] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false); // State to control dialog visibility
-  const navigate = useNavigate();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openSnackbar1, setOpenSnackbar1] = useState(false);
 
   useEffect(() => {
     fetchDocuments();
@@ -64,6 +73,7 @@ const ProscutoreDocuments = () => {
         console.log("Document deleted successfully");
         // Refresh documents after deletion
         fetchDocuments();
+        setOpenSnackbar1(true);
       } else {
         // Error deleting document
         console.error("Failed to delete document");
@@ -74,12 +84,20 @@ const ProscutoreDocuments = () => {
   };
 
   const handleNavigateClick = () => {
-    setOpenDialog(true); // Open the dialog when the button is clicked
+    setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false); // Close the dialog
     fetchDocuments();
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false); // Close the Snackbar
+  };
+
+  const handleCloseSnackbar1 = () => {
+    setOpenSnackbar1(false); // Close the Snackbar
   };
 
   const columns = [
@@ -180,10 +198,13 @@ const ProscutoreDocuments = () => {
             Add Case Document
           </Button>
         </Box>
-        <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <Dialog open={openDialog}>
           <DialogContent style={{ backgroundColor: colors.blueAccent[900] }}>
-            {/* Your profile editing form component */}
-            <UploadProscutorDocumentPage />
+            <UploadProscutorDocumentPage
+              setOpenSnackbar={setOpenSnackbar}
+              handleCloseSnackbar={handleCloseSnackbar}
+              onClose={handleCloseDialog}
+            />
             <Box display="flex" justifyContent="flex-end" mt={2}>
               <Button variant="text" color="error" onClick={handleCloseDialog}>
                 Cancel
@@ -196,6 +217,36 @@ const ProscutoreDocuments = () => {
           columns={columns}
           components={{ Toolbar: GridToolbar }}
         />
+        {/* Snackbar Component */}
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <MuiAlert
+            onClose={handleCloseSnackbar}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            File Uploaded Successfully
+          </MuiAlert>
+        </Snackbar>
+        <Snackbar
+          open={openSnackbar1}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar1}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <MuiAlert
+            onClose={handleCloseSnackbar1}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            File Deleted Successfully
+          </MuiAlert>
+        </Snackbar>
+        {/* Snackbar Component */}
       </Box>
     </Box>
   );

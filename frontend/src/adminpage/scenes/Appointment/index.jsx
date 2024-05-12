@@ -9,7 +9,9 @@ import {
   DialogTitle,
   DialogContent,
   Dialog,
+  Snackbar,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import { Form, Formik } from "formik";
 import * as yup from "yup";
 import AddIcon from "@mui/icons-material/Add";
@@ -22,8 +24,6 @@ import { jwtDecode } from "jwt-decode";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const initialValues = {};
-
 const checkoutSchema = yup.object().shape({});
 
 const Appointment = () => {
@@ -34,6 +34,8 @@ const Appointment = () => {
   const [cases, setCases] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openSnackbar1, setOpenSnackbar1] = useState(false);
 
   const handleFormSubmit = (values) => {
     console.log(values);
@@ -64,17 +66,33 @@ const Appointment = () => {
     setOpenDialog(true);
   };
 
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
+  const handleCloseSnackbar1 = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar1(false);
+  };
+
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedAppointment(null);
   };
+
   const handleSubmitAppointment = async (values) => {
     // Extract only the fields that need to be updated
     const { "Appointment ID": appointmentId, time, date, note } = values;
 
     // Prepare the updated appointment data
     const updatedAppointment = {
-      "Appointment ID": appointmentId, // Use the existing appointment ID
+      appointmentId,
       time,
       date,
       note,
@@ -98,6 +116,7 @@ const Appointment = () => {
         handleCloseDialog();
         // Refresh appointments after update
         fetchAppointment();
+        setOpenSnackbar1(true);
       } else {
         console.error("Failed to update appointment");
       }
@@ -148,12 +167,43 @@ const Appointment = () => {
         console.log("Appointment deleted successfully");
         // Refresh appointments after deletion
         fetchAppointment();
+        setOpenSnackbar(true);
       } else {
         // Error deleting appointment
         console.error("Failed to delete appointment");
       }
     } catch (error) {
       console.error("Error deleting appointment:", error);
+    }
+  };
+
+  const handleRemindClick = async (values) => {
+    const { "Appointment ID": appointmentId, Time: time, Date: date } = values;
+
+    try {
+      const response = await fetch("http://localhost:8081/api/sendreminder", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId,
+          time,
+          date,
+        }),
+      });
+      console.log(appointmentId, date, time);
+
+      if (response.ok) {
+        console.log("Reminder sent successfully");
+        // Optionally, you can show a success message to the user
+      } else {
+        console.error("Failed to send reminder");
+        // Optionally, you can show an error message to the user
+      }
+    } catch (error) {
+      console.error("Error sending reminder:", error);
+      // Optionally, you can show an error message to the user
     }
   };
 
@@ -181,14 +231,23 @@ const Appointment = () => {
     {
       field: "Note",
       headerName: "Note",
-      flex: 3,
+      flex: 2.5,
     },
     {
       field: "Action",
       headerName: "Action",
-      flex: 0.8,
+      flex: 1.8,
       renderCell: (params) => (
         <div style={{ display: "flex", justifyContent: "space-around" }}>
+          <Button
+            color="secondary"
+            variant="outlined"
+            disabled={isReminderDisabled(params.row.Date)}
+            onClick={() => handleRemindClick(params.row)}
+          >
+            Remind Them
+          </Button>
+
           <Button
             onClick={() => handleEditClick(params.row)}
             style={{ color: "yellowgreen" }}
@@ -205,6 +264,16 @@ const Appointment = () => {
       ),
     },
   ];
+
+  const isReminderDisabled = (appointmentDate) => {
+    const oneDayBefore = new Date(appointmentDate);
+    oneDayBefore.setDate(oneDayBefore.getDate() - 1);
+    const currentDate = new Date();
+    const oneDayBeforeCurrentDate = new Date(currentDate);
+    oneDayBeforeCurrentDate.setDate(oneDayBeforeCurrentDate.getDate() + 1); // Add one day to current date
+
+    return currentDate < oneDayBefore || currentDate >= oneDayBeforeCurrentDate;
+  };
 
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
@@ -239,57 +308,6 @@ const Appointment = () => {
           handleSubmit,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <Box display="flex" mt={"20px"}>
-              {/* First search bar */}
-              <Box display="flex">
-                <InputLabel
-                  className="text"
-                  htmlFor="search-bar-appointment-form"
-                  sx={{ mt: "10px", ml: "25px" }}
-                >
-                  From Date:
-                </InputLabel>
-                <TextField
-                  id="search-bar-appointment-date"
-                  className="text"
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                  }}
-                  variant="outlined"
-                  type="date"
-                  size="small"
-                  sx={{
-                    ml: "10px",
-                    width: "350px",
-                  }}
-                />
-              </Box>
-              {/* Second search bar */}
-              <Box display="flex">
-                <InputLabel
-                  className="text"
-                  htmlFor="search-bar-appointment-to-date"
-                  sx={{ mt: "10px", ml: "25px" }}
-                >
-                  To Date:
-                </InputLabel>
-                <TextField
-                  id="search-bar-litigant-name"
-                  className="text"
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                  }}
-                  variant="outlined"
-                  type="date"
-                  size="small"
-                  sx={{
-                    ml: "10px",
-                    width: "350px",
-                  }}
-                />
-              </Box>
-            </Box>
-
             {/* DataGrid */}
             <Box
               sx={{ mt: "10px" }}
@@ -432,6 +450,34 @@ const Appointment = () => {
           )}
         </Formik>
       </Dialog>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Appointment Deleted Successfully
+        </MuiAlert>
+      </Snackbar>
+      <Snackbar
+        open={openSnackbar1}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar1}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar1}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Appointment Edited Successfully
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };

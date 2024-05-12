@@ -78,8 +78,6 @@ const ProscutorDashboard = () => {
   const AssignedCount = fetchedCases.filter(
     (caseData) => caseData.first_name !== null
   ).length;
-  const civilcasePercentage = ((CivilCase / totalCount) * 100).toFixed(2);
-  const criminalcasePercentage = ((CriminalCase / totalCount) * 100).toFixed(2);
 
   const closedPercentage = ((closedCount / totalCount) * 100).toFixed(2);
   const runningPercentage = ((runningCount / totalCount) * 100).toFixed(2);
@@ -243,7 +241,7 @@ const ProscutorDashboard = () => {
         >
           <StatBox
             title={totalCount}
-            subtitle="total cases"
+            subtitle="Total Cases"
             progress={allPercentage / 100}
             increase={`+${allPercentage}%`}
             icon={

@@ -310,8 +310,6 @@ const Invoices = () => {
           rows={invoices}
           columns={columns}
           getRowId={(row) => row.invoice_id}
-          autoHeight
-          pageSize={10}
         />
       </Box>
     </Box>
