@@ -16,7 +16,6 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ViewProfilePages from "../profile/profile";
-import Notifications from "./notification";
 
 const Topbar = () => {
   const theme = useTheme();
@@ -73,7 +72,6 @@ const Topbar = () => {
           )}
         </IconButton>
 
-        <Notifications />
         <IconButton onClick={handleSettingsClick}>
           <PersonOutlinedIcon />
         </IconButton>
