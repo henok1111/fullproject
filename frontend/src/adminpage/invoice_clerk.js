@@ -6,6 +6,7 @@ import Sidebar from "./scenes/global/SidebarRegistrar";
 import Topbar from "./scenes/global/Topbar";
 import { Outlet, Route, Routes } from "react-router-dom"; // Import Outlet from react-router-dom
 import RegistrarDashboard from "./scenes/dashboard/admin";
+import InvoiceDashboard from "./scenes/dashboard/invoice_clerk";
 // ... (other imports)
 export default function Invoiclerk() {
   const [theme, colorMode] = useMode();
@@ -28,7 +29,7 @@ export default function Invoiclerk() {
             >
               {/* 64px is the height of the Topbar */}
               <Routes>
-                <Route index element={<RegistrarDashboard />} />
+                <Route index element={<InvoiceDashboard />} />
               </Routes>
               <Outlet />
             </div>
