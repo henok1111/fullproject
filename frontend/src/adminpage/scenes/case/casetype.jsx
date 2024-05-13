@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import Header from "../../components/Header";
 import {
-  Autocomplete,
   Box,
   Button,
   TextField,
@@ -11,6 +10,10 @@ import {
   DialogTitle,
   DialogActions,
   Snackbar,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
@@ -28,81 +31,30 @@ import MuiAlert from "@mui/material/Alert";
 const Casetype = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [inputValue, setInputValue] = useState("");
-  const [value, setValue] = useState(null);
-  const [opencasetype, setOpencasetype] = useState(false);
-  const [opencasesubtype, setOpencasesubtype] = useState(false);
-  const [casetype, setCasetype] = useState("");
-  const [CaseType, setCaseType] = useState("");
-  const [casetypeerror, setcasetypeerror] = useState(false);
   const [casesubtype, setCasesubtype] = useState("");
-  const [casesubtypeerror, setcasesubtypeerror] = useState(false);
   const [CaseTypes, setCaseTypes] = useState([]);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openSnackbar1, setOpenSnackbar1] = useState(false);
+
   const [caseSubTypeToDelete, setCaseSubTypeToDelete] = useState(null);
-
-  const columns = [
-    { field: "id", headerName: "Number", flex: 0.5 },
-    { field: "caseSubType", headerName: "Case Sub Types", flex: 2 },
-    { field: "caseType", headerName: "Case Type", flex: 2.3 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 0.5,
-      renderCell: (params) => (
-        <>
-          <IconButton aria-label="delete">
-            <DeleteIcon
-              onClick={() => handleDeleteClick(params.row.id)}
-              style={{ color: "#FD4653" }}
-            />
-          </IconButton>
-        </>
-      ),
-    },
-  ];
-
-  const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-  };
-
-  const handleaddcasetypebuttonClick = () => {
-    console.log("Adding case type button clicked");
-    setOpencasetype(true);
-  };
+  const [selectedCaseType, setSelectedCaseType] = useState("");
+  const [opencasesubtype, setOpencasesubtype] = useState(false); // Define opencasesubtype state variable
+  const [casesubtypeerror, setCasesubtypeerror] = useState(false);
 
   const handleaddcasesubtypebuttonClick = () => {
     console.log("Adding case subtype button clicked");
     setOpencasesubtype(true);
   };
 
-  const handleclosecasetype = () => {
-    console.log("Closing case type modal");
-    // Reset the state variables related to case type modal
-    setCasetype("");
-    setcasetypeerror(false);
-    setOpencasetype(false);
-  };
-
   const handleclosecasesubtype = () => {
     console.log("Closing case subtype modal");
     // Reset the state variables related to case subtype modal
     setCasesubtype("");
-    setcasesubtypeerror(false);
-    setValue(null);
-    setInputValue("");
+    setCasesubtypeerror(false);
+    setSelectedCaseType("");
     setOpencasesubtype(false);
   };
-
   const subtypeValidationSchema = Yup.object().shape({
     casesubtype: Yup.string().required("Case subtype Name is required"),
   });
@@ -117,18 +69,21 @@ const Casetype = () => {
         console.log("Validation successful. Sending request...");
         axios
           .post("http://localhost:8081/api/addcasesubtype", {
-            case_type: value.case_type,
+            case_type: selectedCaseType,
             sub_type_name: casesubtype,
           })
 
           .then((response) => {
             console.log("Case subtype saved successfully");
             handleclosecasesubtype();
+            fetchCaseTypes();
+            setOpenSnackbar1(true);
           })
           .catch((error) => {
             console.error("Error saving case subtype:", error);
           });
       })
+
       .catch((error) => {
         // If validation fails, set error states for invalid fields
         console.log("Validation failed:", error);
@@ -136,10 +91,11 @@ const Casetype = () => {
         error.inner.forEach((fieldError) => {
           validationErrors[fieldError.path] = fieldError.message;
         });
-        setcasesubtypeerror(validationErrors.casesubtype || false);
+        setCasesubtypeerror(validationErrors.casesubtype || false);
       });
   };
-  useEffect(() => {
+
+  const fetchCaseTypes = () => {
     axios
       .get("http://localhost:8081/api/getCaseTypeGrid")
       .then((response) => {
@@ -149,17 +105,33 @@ const Casetype = () => {
       .catch((error) => {
         console.error("Error fetching case types:", error);
       });
+  };
+
+  useEffect(() => {
+    // Call the fetchCaseTypes function
+    fetchCaseTypes();
   }, []);
 
   const handleCancelDelete = () => {
     setDeleteConfirmationOpen(false);
   };
+
   const handleCloseSnackbar = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-
     setOpenSnackbar(false);
+  };
+  const handleCloseSnackbar1 = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  const handleDeleteClick = (id) => {
+    setCaseSubTypeToDelete(id);
+    setDeleteConfirmationOpen(true);
   };
 
   const handleDeleteConfirmation = async () => {
@@ -186,14 +158,34 @@ const Casetype = () => {
         console.error("Failed to delete invoice:", response.statusText);
       }
       setOpenSnackbar(true);
+      fetchCaseTypes();
     } catch (error) {
       console.error("Error deleting invoice:", error);
     }
   };
-  const handleDeleteClick = (id) => {
-    setCaseSubTypeToDelete(id);
-    setDeleteConfirmationOpen(true);
-  };
+
+  const columns = [
+    // Define columns for DataGrid
+    { field: "id", headerName: "Number", flex: 0.5 },
+    { field: "caseSubType", headerName: "Case Sub Types", flex: 2 },
+    { field: "caseType", headerName: "Case Type", flex: 2.3 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 0.5,
+      renderCell: (params) => (
+        <>
+          <IconButton aria-label="delete">
+            <DeleteIcon
+              onClick={() => handleDeleteClick(params.row.id)}
+              style={{ color: "#FD4653" }}
+            />
+          </IconButton>
+        </>
+      ),
+    },
+  ];
+
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Case Type" subtitle="" />
@@ -213,33 +205,35 @@ const Casetype = () => {
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
         >
-          <Box sx={style}>
-            <Typography id="modal-modal-title" variant="h6" component="h2">
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography variant="h6" component="h2">
               Add Case Sub Type
             </Typography>
-            <Box>
-              <Autocomplete
-                value={value}
-                onChange={(event, newValue) => {
-                  setValue(newValue);
-                }}
-                inputValue={inputValue}
-                onInputChange={(event, newInputValue) => {
-                  setInputValue(newInputValue);
-                }}
-                options={CaseType}
-                getOptionLabel={(option) => option.case_type}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Select Case Type"
-                    variant="outlined"
-                  />
-                )}
-                openOnFocus
-                autoHighlight
-                sx={{ mt: "10px" }}
-              />
+            <Box mt="10px">
+              <FormControl fullWidth>
+                <InputLabel>Select Case Type</InputLabel>
+                <Select
+                  value={selectedCaseType}
+                  onChange={(e) => setSelectedCaseType(e.target.value)}
+                  fullWidth
+                  required
+                >
+                  <MenuItem value="civil">Civil</MenuItem>
+                  <MenuItem value="criminal">Criminal</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
             <Box mt="10px">
               <TextField
@@ -248,7 +242,7 @@ const Casetype = () => {
                 label="Enter Case Sub Type"
                 onChange={(e) => {
                   setCasesubtype(e.target.value);
-                  setcasesubtypeerror(false);
+                  setCasesubtypeerror(false);
                 }}
                 error={casesubtypeerror}
                 helperText={casesubtypeerror ? "Case Type is required" : ""}
@@ -308,7 +302,7 @@ const Casetype = () => {
       </Dialog>
       <Snackbar
         open={openSnackbar}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
@@ -320,11 +314,21 @@ const Casetype = () => {
           Case Sub Type Deleted Successfully
         </MuiAlert>
       </Snackbar>
-      <Box
-        sx={{ mt: "10px" }}
-        padding="5px"
-        backgroundColor={colors.blueAccent[900]}
+      <Snackbar
+        open={openSnackbar1}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar1}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
+        <MuiAlert
+          onClose={handleCloseSnackbar1}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Case Sub Type Added Successfully
+        </MuiAlert>
+      </Snackbar>
+      <Box mt="10px" padding="5px" backgroundColor={colors.blueAccent[900]}>
         <Box
           m="40px 0 0 0"
           height="115vh"

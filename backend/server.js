@@ -121,8 +121,8 @@ app.use(cors());
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "",
-  database: "courts",
+  password: "1234",
+  database: "court",
   Promise: bluebird,
   waitForConnections: true,
   connectionLimit: 10,
