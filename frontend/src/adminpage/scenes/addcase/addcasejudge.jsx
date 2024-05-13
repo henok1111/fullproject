@@ -7,13 +7,9 @@ import {
   Typography,
   IconButton,
   InputAdornment,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
 } from "@mui/material";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
+import MuiAlert from "@mui/material/Alert";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import {
   Document,
@@ -58,6 +54,15 @@ const AddCaseJudge = () => {
   const [decisionText, setDecisionText] = useState("");
   const [selectedCaseId, setSelectedCaseId] = useState(null);
   const [showPDF, setShowPDF] = React.useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   // Function to toggle showing the PDF
   const styles = StyleSheet.create({
@@ -80,7 +85,7 @@ const AddCaseJudge = () => {
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.section}>
-        <Text>
+          <Text>
             <div dangerouslySetInnerHTML={{ __html: judgeDecision }} />
           </Text>
         </View>
@@ -132,6 +137,7 @@ const AddCaseJudge = () => {
       } else {
         console.error("Failed to submit decision:", response.statusText);
       }
+      setOpenSnackbar(true);
     } catch (error) {
       console.error("Error submitting decision:", error);
     }
@@ -865,6 +871,7 @@ const AddCaseJudge = () => {
                         <Box mt={2} display="flex" justifyContent="flex-end">
                           <Button
                             variant="contained"
+                            color="secondary"
                             onClick={() =>
                               handleMakeDecisionClick(caseData.case_id)
                             }
@@ -879,7 +886,7 @@ const AddCaseJudge = () => {
                             <Box
                               sx={{
                                 "& .ck-editor__main .ck-content": {
-                                  background: `${colors.blueAccent[900]}70`,
+                                  background: `${colors.grey[400]}`,
                                   marginTop: "2px",
                                   boxShadow: "10px",
                                   borderRadius: "5px",
@@ -915,17 +922,20 @@ const AddCaseJudge = () => {
                               mt={2}
                               display="flex"
                               justifyContent="flex-end"
+                              gap="5px"
                             >
                               <Button
                                 variant="contained"
                                 onClick={handleSubmited}
                                 type="submit"
+                                color="secondary"
                               >
                                 Submit
                               </Button>
                               <Button
                                 variant="contained"
                                 onClick={handleCancelClick}
+                                color="error"
                               >
                                 Cancel
                               </Button>
@@ -994,6 +1004,7 @@ const AddCaseJudge = () => {
                       <Button
                         variant="contained"
                         onClick={() => toggleCaseDetails(caseData.case_id)}
+                        color="secondary"
                       >
                         {expandedCases[caseData.case_id]
                           ? "Hide Details"
@@ -1007,6 +1018,23 @@ const AddCaseJudge = () => {
           </Form>
         )}
       </Formik>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Decision Submitted Successfully
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };

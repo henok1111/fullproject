@@ -6,16 +6,25 @@ import Sidebar from "./scenes/global/SidebarRegistrar";
 import Topbar from "./scenes/global/Topbar";
 import { Outlet, Route, Routes } from "react-router-dom"; // Import Outlet from react-router-dom
 import RegistrarDashboard from "./scenes/dashboard/registrar";
+import { tokens } from "../theme";
 
 // ... (other imports)
 export default function Adminss() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
+  const colors = tokens(theme.palette.mode);
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+        <div
+          style={{
+            display: "flex",
+            height: "100vh",
+            backgroundColor: `${colors.blueAccent[900]}`,
+            overflow: "hidden",
+          }}
+        >
           <Sidebar isSidebar={isSidebar} role="registrar" privateImage="" />
           <div style={{ flexGrow: 1, overflowY: "auto" }}>
             <Topbar setIsSidebar={setIsSidebar} />

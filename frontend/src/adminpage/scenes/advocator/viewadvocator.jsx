@@ -312,7 +312,7 @@ const Advocator = () => {
             onSubmit={handleSubmit(handleEditFormSubmit)}
             id="edit-advocator-form"
           >
-            <Box sx={{ display: "flex", gap: "20px", alignItems: "center" }}>
+            <Box sx={{ gap: "20px", alignItems: "center" }}>
               <Controller
                 name="first_name"
                 control={control}
@@ -395,7 +395,7 @@ const Advocator = () => {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Mobile Number"
+                    label="Mobile Number (+2519XXXXXXXX)"
                     fullWidth
                     required
                     margin="normal"

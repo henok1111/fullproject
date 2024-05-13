@@ -8,14 +8,26 @@ import { Outlet, Route, Routes } from "react-router-dom"; // Import Outlet from 
 import RegistrarDashboard from "./scenes/dashboard/admin";
 import ProscutorDashboard from "./scenes/dashboard/proscutor";
 // ... (other imports)
+import { tokens } from "../theme";
+
 export default function Proscutor() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
+
+  const colors = tokens(theme.palette.mode);
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+        <div
+          style={{
+            display: "flex",
+            backgroundColor: `${colors.blueAccent[900]}`,
+            height: "100vh",
+            overflow: "hidden",
+          }}
+        >
           <Sidebar isSidebar={isSidebar} role="proscutor" privateImage="" />
           <div style={{ flexGrow: 1, overflowY: "auto" }}>
             <Topbar setIsSidebar={setIsSidebar} />

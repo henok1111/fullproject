@@ -14,7 +14,7 @@ const editAdvocate = async (db, req, res) => {
   try {
     // Update advocator in the database
     const updateAdvocateResult = await db.query(
-      "UPDATE advocators SET first_name = ?, mobile_number = ?, last_name = ?, gender = ?, email = ?, mobile_number = ?, address = ? WHERE advocator_id = ?",
+      "UPDATE advocators SET first_name = ?, middle_name = ?, last_name = ?, gender = ?, email = ?, mobile_number = ?, address = ? WHERE advocator_id = ?",
       [
         first_name,
         middle_name,

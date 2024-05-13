@@ -26,6 +26,9 @@ const Casetype = () => {
   const [serviceName, setServiceName] = useState("");
   const [amount, setAmount] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openSnackbar1, setOpenSnackbar1] = useState(false);
+  const [openSnackbar2, setOpenSnackbar2] = useState(false);
+
   const [serviceNameError, setServiceNameError] = useState(false);
   const [amountError, setAmountError] = useState(false);
   const [services, setServices] = useState([]);
@@ -145,6 +148,20 @@ const Casetype = () => {
 
     setOpenSnackbar(false);
   };
+  const handleCloseSnackbar1 = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar1(false);
+  };
+  const handleCloseSnackbar2 = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar2(false);
+  };
 
   const handleSave = () => {
     // Validate form fields
@@ -160,8 +177,8 @@ const Casetype = () => {
           .then((response) => {
             console.log("Service saved successfully");
             handlecloseaddservice();
-            setOpenSnackbar(true);
-            window.location.reload();
+            setOpenSnackbar2(true);
+            fetchServices();
           })
           .catch((error) => {
             console.error("Error saving service:", error);
@@ -260,7 +277,7 @@ const Casetype = () => {
         console.log(
           `service with ID ${selectedserviceToDelete.id} deleted successfully!`
         );
-        setOpenSnackbar(true);
+        setOpenSnackbar1(true);
         fetchServices();
       } else {
         console.error(
@@ -410,18 +427,27 @@ const Casetype = () => {
           onClose={handleCancelDelete}
           sx={{
             "& .MuiDialog-paper": {
-              backgroundColor: `${colors.blueAccent[100]}`, // Set your preferred background color
+              backgroundColor: `${colors.blueAccent[900]}`, // Set your preferred background color
             },
           }}
         >
-          <DialogTitle id="alert-dialog-title" color={"red"}>
+          <DialogTitle id="alert-dialog-title">
             {"Are you sure you want to delete this Service?"}
           </DialogTitle>
           <DialogActions>
-            <Button onClick={handleCancelDelete} color="primary">
+            <Button
+              onClick={handleCancelDelete}
+              variant="outlined"
+              color="error"
+            >
               Cancel
             </Button>
-            <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+            <Button
+              variant="outlined"
+              onClick={handleConfirmDelete}
+              color="success"
+              autoFocus
+            >
               Delete
             </Button>
           </DialogActions>
@@ -489,6 +515,34 @@ const Casetype = () => {
           sx={{ width: "100%" }}
         >
           Service edited successfully!
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={openSnackbar1}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar1}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar1}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Service Deleted successfully!
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={openSnackbar2}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar2}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar2}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Service Saved successfully!
         </Alert>
       </Snackbar>
     </Box>

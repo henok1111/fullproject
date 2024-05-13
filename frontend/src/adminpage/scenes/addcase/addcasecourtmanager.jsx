@@ -36,11 +36,19 @@ const AddCourtRegistrarCase = () => {
   const [criminalJudges, setCriminalJudges] = useState([]);
   const [civilJudges, setCivilJudges] = useState([]);
   const [selectedJudge, setSelectedJudge] = useState("");
-  const [selectedCaseId, setSelectedCaseId] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleClick = () => {
     navigate(`/registrar/caseform`);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
   };
 
   useEffect(() => {
@@ -162,6 +170,7 @@ const AddCourtRegistrarCase = () => {
 
         // Optionally, reset the selectedJudge state after submission
         setSelectedJudge("");
+        setOpenSnackbar(true);
       } catch (error) {
         console.error("Error submitting data:", error);
         // Handle error state if needed
@@ -778,6 +787,20 @@ const AddCourtRegistrarCase = () => {
           </Form>
         )}
       </Formik>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Judge Assigned Successfully
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };

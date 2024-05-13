@@ -19,7 +19,7 @@ export const AddAppointment = async (db, req, res) => {
       respondent_phone_numbers,
       user_id,
     } = req.body;
-    
+
     // Validate required fields
     if (
       !case_id ||
@@ -37,11 +37,11 @@ export const AddAppointment = async (db, req, res) => {
       });
     }
 
-  // Insert appointment data into the appointments table
-const [appointmentResults] = await db.query(
-  "INSERT INTO appointment (case_id, date, time, note, judge_id) VALUES (?, ?, ?, ?, ?)",
-  [case_id, date, time, note, user_id] // Assuming judge_id is the same as user_id
-);
+    // Insert appointment data into the appointments table
+    const [appointmentResults] = await db.query(
+      "INSERT INTO appointment (case_id, date, time, note, judge_id) VALUES (?, ?, ?, ?, ?)",
+      [case_id, date, time, note, user_id] // Assuming judge_id is the same as user_id
+    );
     const appointmentId = appointmentResults.insertId;
 
     // Process petitioner phone numbers
@@ -56,7 +56,7 @@ const [appointmentResults] = await db.query(
         // Send SMS to petitioner using Twilio
         try {
           await twilioClient.messages.create({
-            body: `Hello! You have a court appointment scheduled for ${date} at ${time} and  Note: ${note}.`,
+            body: `Hi There! You have a court appointment scheduled for ${date} at ${time} and  Note: ${note}.`,
             from: "+12513136308", // Your Twilio phone number
             to: phoneNumber,
           });
@@ -104,4 +104,3 @@ const [appointmentResults] = await db.query(
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-

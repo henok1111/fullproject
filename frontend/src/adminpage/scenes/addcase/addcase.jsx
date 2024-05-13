@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import { Form, Formik } from "formik";
 import * as yup from "yup";
 import SearchIcon from "@mui/icons-material/Search";
@@ -70,6 +71,7 @@ const AddCase = () => {
   const [showSubmitButton, setShowSubmitButton] = useState(false);
   const [showPDF, setShowPDF] = React.useState(false);
   // Function to toggle showing the PDF
+  const [openSnackbar1, setOpenSnackbar1] = useState(false);
   const styles = StyleSheet.create({
     page: {
       flexDirection: "row",
@@ -102,8 +104,26 @@ const AddCase = () => {
   const handleSnackbarOpen = () => {
     setSnackbarOpen(true);
   };
-  const [documentDescriptions, setDocumentDescriptions] = useState({}); // State variable to store document descriptions
-  const [documentFiles, setDocumentFiles] = useState({}); // State variable to store document files
+
+  const handleCloseSnackbar1 = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar1(false);
+  };
+  const [documentDescriptions, setDocumentDescriptions] = useState({});
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleOpenDialog = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
+
   const addDocumentRow = (caseId) => {
     // Find the case by its ID
     const foundCase = fetchedCases.find(
@@ -242,13 +262,6 @@ const AddCase = () => {
       ...prev,
       [caseId]: !prev[caseId],
     }));
-  };
-
-  // Function to handle editing a case
-  const handleEditCase = (caseId) => {
-    setSelectedCaseId(caseId); // Set the selected case ID
-    setIsEditFormOpen(true); // Open the CaseForm
-    setOpenCaseFormDialog(true); // Open the dialog box
   };
 
   const deleteCase = (caseId) => {
@@ -418,8 +431,8 @@ const AddCase = () => {
             )}
             <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
               <Dialog
-                open={openCaseFormDialog}
-                onClose={() => setOpenCaseFormDialog(false)}
+                open={isDialogOpen}
+                onClose={handleCloseDialog}
                 aria-labelledby="form-dialog-title"
                 fullWidth
                 maxWidth="md"
@@ -433,14 +446,23 @@ const AddCase = () => {
                 <DialogContent
                   style={{ backgroundColor: `${colors.blueAccent[900]}` }}
                 >
-                  {isEditFormOpen && <EditCase caseId={selectedCaseId} />}
+                  {isDialogOpen && (
+                    <EditCase
+                      caseId={selectedCaseId}
+                      onCloseDialog={handleCloseDialog}
+                      setOpenSnackbar1={setOpenSnackbar1}
+                    />
+                  )}
                 </DialogContent>
                 <DialogActions
                   style={{ backgroundColor: `${colors.blueAccent[900]}` }}
                 >
                   <Button
-                    onClick={() => setOpenCaseFormDialog(false)}
-                    color="info"
+                    type="button"
+                    variant="contained"
+                    color="error"
+                    sx={{ mt: "10px" }}
+                    onClick={handleCloseDialog}
                   >
                     Cancel
                   </Button>
@@ -458,9 +480,30 @@ const AddCase = () => {
                   open={snackbarOpen}
                   autoHideDuration={6000}
                   onClose={handleSnackbarClose}
-                  message="Case deleted successfully"
-                />
-                {/* Render CaseBoxes for each fetched case */}
+                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  <MuiAlert
+                    onClose={handleSnackbarClose}
+                    severity="success"
+                    sx={{ width: "100%" }}
+                  >
+                    Case Deleted Successfully
+                  </MuiAlert>
+                </Snackbar>
+                <Snackbar
+                  open={openSnackbar1}
+                  autoHideDuration={4000}
+                  onClose={handleCloseSnackbar1}
+                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  <MuiAlert
+                    onClose={handleCloseSnackbar1}
+                    severity="success"
+                    sx={{ width: "100%" }}
+                  >
+                    Case Edited Successfully
+                  </MuiAlert>
+                </Snackbar>
                 <>
                   {fetchedCases.map((caseData) => (
                     <Box
@@ -503,8 +546,8 @@ const AddCase = () => {
                           <Button
                             style={{ margin: "10px" }}
                             variant="contained"
-                            color="primary"
-                            onClick={() => handleEditCase(caseData.case_id)}
+                            color="secondary"
+                            onClick={handleOpenDialog}
                           >
                             Edit Case
                           </Button>
@@ -1294,7 +1337,12 @@ const AddCase = () => {
           >
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+          <Button
+            variant="outlined"
+            onClick={handleConfirmDelete}
+            color="error"
+            autoFocus
+          >
             Delete
           </Button>
         </DialogActions>

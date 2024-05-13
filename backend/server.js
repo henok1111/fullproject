@@ -87,6 +87,7 @@ import updateDocumentStatus from "./component/updatestatusofproscutordocument.js
 import CaseDecision from "./component/updatecasedecision.js";
 import markAsRead from "./component/markasread.js";
 import EditAdvocate from "./component/editadvocator.js";
+import SendReminder from "./component/sendReminder.js";
 const router = express.Router();
 
 app.use(express.json());
@@ -277,7 +278,9 @@ app.post("/api/addcasetype", async (req, res) => {
 app.post("/api/addinvoice", async (req, res) => {
   await InsertInvoiceAndItems(db, req, res);
 });
-
+app.post("/api/sendreminder", async (req, res) => {
+  await SendReminder(db, req, res);
+});
 app.post("/api/deleteinvoiceitem", async (req, res) => {
   await DeleteInvoiceItem(db, req, res);
 });

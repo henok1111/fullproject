@@ -58,7 +58,7 @@ const InvoiceDetail = () => {
     try {
       const itemsToAdd = invoiceRows.map((row) => ({
         service: row.service,
-        description: getDescriptionValue(invoiceRows.indexOf(row)),
+        description: row.description,
         amount: row.amount,
         paid_status: row.paidStatus || "Unpaid",
       }));
@@ -94,6 +94,8 @@ const InvoiceDetail = () => {
   const [descriptions, setDescriptions] = useState([""]);
   const { invoiceId } = useParams();
   console.log("Invoice ID:", invoiceId);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [overallStatus, setOverallStatus] = useState("No items");
 
   const navigate = useNavigate();
 
@@ -225,6 +227,28 @@ const InvoiceDetail = () => {
     setSelectedItemIndex(null);
     setDeleteConfirmationOpen(false);
   };
+
+  useEffect(() => {
+    // Calculate total amount whenever invoiceRows changes
+    const subtotal = invoiceRows.reduce(
+      (total, row) => total + parseFloat(row.amount),
+      0
+    );
+    setTotalAmount(subtotal + subtotal * 0.15); // Include tax
+
+    // Calculate overall status whenever invoiceRows changes
+    const paidItems = invoiceRows.filter((item) => item.paidStatus === "Paid");
+    const unpaidItems = invoiceRows.filter(
+      (item) => item.paidStatus === "Unpaid"
+    );
+    if (paidItems.length === invoiceRows.length) {
+      setOverallStatus("Paid");
+    } else if (unpaidItems.length === invoiceRows.length) {
+      setOverallStatus("Unpaid");
+    } else {
+      setOverallStatus("Partially Paid");
+    }
+  }, [invoiceRows]);
   const handleDeleteItem = async (itemId) => {
     try {
       const response = await fetch(
@@ -323,37 +347,41 @@ const InvoiceDetail = () => {
 
   const handleSaveButton = async () => {
     try {
-      // Calculate total amount
+      // Get the latest total amount and overall status
       const totalAmount = calculateTotalAmount();
-
-      // Get overall status
       const overallStatus = calculateOverallStatus();
 
-      // Send data to the backend
-      const response = await fetch(
-        `http://localhost:8081/api/editea`, // Adjust the endpoint URL
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            invoiceId: invoiceId,
-            totalAmount: totalAmount,
-            overallStatus: overallStatus,
-            caseId: invoiceDetail?.case_id,
-            Note: note,
-          }),
-        }
-      );
+      // Send data to the backend only if either totalAmount or overallStatus has changed
+      if (
+        totalAmount !== invoiceDetail.total_amount ||
+        overallStatus !== invoiceDetail.overall_status
+      ) {
+        const response = await fetch(
+          `http://localhost:8081/api/editea`, // Adjust the endpoint URL
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              invoiceId: invoiceId,
+              totalAmount: totalAmount,
+              overallStatus: overallStatus,
+              caseId: invoiceDetail?.case_id,
+              Note: note,
+            }),
+          }
+        );
 
-      // Check response status
-      if (response.ok) {
-        fetchInvoiceDetail();
-        console.log("Invoice data saved successfully!");
-        setOpenSnackbar(true);
+        if (response.ok) {
+          fetchInvoiceDetail();
+          console.log("Invoice data saved successfully!");
+          setOpenSnackbar(true);
+        } else {
+          console.error("Failed to save invoice data:", response.statusText);
+        }
       } else {
-        console.error("Failed to save invoice data:", response.statusText);
+        console.log("No changes detected. Skipping save operation.");
       }
     } catch (error) {
       console.error("Error saving invoice data:", error);
@@ -693,12 +721,14 @@ const InvoiceDetail = () => {
                       </Select>
                     </TableCell>
                     <TableCell>
-                      <TextField
-                        fullWidth
-                        onChange={(e) => handleDescriptionChange(e, 0)}
-                        multiline
-                        value={getDescriptionValue(index)}
-                      />
+                      <TableCell>
+                        <TextField
+                          fullWidth
+                          onChange={(e) => handleDescriptionChange(e, index)}
+                          multiline
+                          value={invoiceRows[index].description}
+                        />
+                      </TableCell>
                     </TableCell>
                     <TableCell>
                       <TextField

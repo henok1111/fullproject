@@ -12,9 +12,11 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Snackbar,
 } from "@mui/material";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { useTheme } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 
 import Header from "../../components/Header";
 import { tokens } from "../../../theme";
@@ -28,6 +30,7 @@ const ProscutorCases = () => {
   const [docIdToUpdate, setDocIdToUpdate] = useState(null);
   const [newStatusToUpdate, setNewStatusToUpdate] = useState(null);
   const [prosecutorId, setProsecutorID] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   // useEffect to fetch documents
   useEffect(() => {
@@ -62,6 +65,13 @@ const ProscutorCases = () => {
 
   const handleCancelToggle = () => {
     setDialogOpen(false);
+  };
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
   };
 
   // Function to handle switch toggle
@@ -99,6 +109,7 @@ const ProscutorCases = () => {
         "New status:",
         newStatus
       );
+      setOpenSnackbar(true);
     } catch (error) {
       console.error("Error updating document status:", error);
     }
@@ -262,6 +273,20 @@ const ProscutorCases = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Status Changed Successfully
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };
