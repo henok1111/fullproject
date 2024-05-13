@@ -377,6 +377,110 @@ const CaseForm = () => {
             <Box display="grid" gridRow="span 10" gap="2px" padding="20px">
               <Box
                 sx={{ backgroundColor: `${colors.primary[400]}75` }}
+                borderRadius="15px"
+                padding="30px"
+              >
+                <Typography color={colors.greenAccent[500]} variant="h3">
+                  Case Detail
+                </Typography>
+                <Box sx={{ display: "flex", gap: "20px" }}>
+                  <TextField
+                    name="caseNumber"
+                    label={`Case Number`} // Concatenate the text and case count
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    value={`Case Number: ${caseCount + 1}`} // Set the value
+                    disabled // Make the field disabled
+                  />
+
+                  <TextField
+                    id="caseType"
+                    select
+                    label="Case Type"
+                    value={values.caseDetails.caseType}
+                    onChange={(event) => {
+                      const selectedCaseType = event.target.value;
+                      setSelectedCaseType(selectedCaseType);
+                      setFieldValue("caseDetails.caseType", selectedCaseType);
+                      fetchCaseSubTypes(selectedCaseType);
+                    }}
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                  >
+                    {caseTypes.map((caseType) => (
+                      <MenuItem
+                        key={caseType.case_type}
+                        value={caseType.case_type}
+                      >
+                        {caseType.case_type}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+
+                  <TextField
+                    id="caseSubType"
+                    select
+                    label="Case Sub Type"
+                    value={values.caseDetails.caseSubType}
+                    onChange={(event) => {
+                      const selectedCaseSubType = event.target.value;
+                      setSelectedCaseSubType(selectedCaseSubType);
+                      // Update selected case sub
+                      console.log("case sub type ", selectedCaseSubType);
+                      setFieldValue(
+                        "caseDetails.caseSubType",
+                        event.target.value
+                      );
+                    }}
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    required
+                  >
+                    {caseSubTypes.map((subType) => (
+                      <MenuItem
+                        key={subType.sub_type_name}
+                        value={subType.sub_type_name}
+                      >
+                        {subType.sub_type_name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Box>
+                <Box sx={{ display: "flex" }}>
+                  <Typography variant="body1" sx={{ mt: "20px", ml: "10px" }}>
+                    Registration Date:
+                  </Typography>
+                  <TextField
+                    name="registrationDate"
+                    type="date"
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    value={registrationDate}
+                    onChange={handleRegistrationDateChange}
+                    sx={{ width: "30%" }}
+                  />
+                  <TextField
+                    required
+                    multiline
+                    rows={4}
+                    fullWidth
+                    id="description"
+                    name="description"
+                    label="Description"
+                    variant="outlined"
+                    value={description}
+                    onChange={handleDescriptionChange}
+                    onBlur={handleBlur} // Add onBlur event handler
+                    sx={{ mt: 2, ml: "20px" }}
+                  />
+                </Box>
+              </Box>
+              <Box
+                sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
                 borderRadius="20px"
                 padding="30px"
               >
@@ -614,155 +718,59 @@ const CaseForm = () => {
                   </Grid>
                 </Grid>
               </Box>
-              <Box
-                sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
-                borderRadius="15px"
-                padding="30px"
-              >
-                <Typography color={colors.greenAccent[500]} variant="h3">
-                  Case Detail
-                </Typography>
-                <Box sx={{ display: "flex", gap: "20px" }}>
-                  <TextField
-                    name="caseNumber"
-                    label={`Case Number`} // Concatenate the text and case count
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    value={`Case Number: ${caseCount + 1}`} // Set the value
-                    disabled // Make the field disabled
-                  />
 
-                  <TextField
-                    id="caseType"
-                    select
-                    label="Case Type"
-                    value={values.caseDetails.caseType}
-                    onChange={(event) => {
-                      const selectedCaseType = event.target.value;
-                      setSelectedCaseType(selectedCaseType);
-                      setFieldValue("caseDetails.caseType", selectedCaseType);
-                      fetchCaseSubTypes(selectedCaseType);
-                    }}
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                  >
-                    {caseTypes.map((caseType) => (
-                      <MenuItem
-                        key={caseType.case_type}
-                        value={caseType.case_type}
-                      >
-                        {caseType.case_type}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+              {/* Conditionally render the Box component */}
+              {selectedCaseType === "criminal" && (
+                <Box
+                  sx={{
+                    mt: "30px",
+                    backgroundColor: `${colors.primary[400]}75`,
+                    borderRadius: "15px",
+                    padding: "30px",
+                  }}
+                >
+                  <Typography color={colors.greenAccent[500]} variant="h3">
+                    FIR Detail
+                  </Typography>
+                  <Box sx={{ display: "flex" }}>
+                    <TextField
+                      name="policeStation"
+                      label="Police Station"
+                      variant="outlined"
+                      margin="normal"
+                      fullWidth
+                      required
+                      value={policeStation}
+                      onChange={handlePoliceStationChange}
+                    />
+                    <TextField
+                      name="FIRNumber"
+                      label="FIR Number"
+                      variant="outlined"
+                      margin="normal"
+                      fullWidth
+                      required
+                      sx={{ ml: "20px" }}
+                      value={FIRNumber}
+                      onChange={handleFIRNumberChange}
+                    />
+                    <Typography variant="body1" sx={{ mt: "20px", ml: "20px" }}>
+                      FIR Date:
+                    </Typography>
+                    <TextField
+                      name="FIRDate"
+                      type="date"
+                      variant="outlined"
+                      margin="normal"
+                      required
+                      sx={{ ml: "20px", width: "50%" }}
+                      value={FIRDate}
+                      onChange={handleFIRDateChange}
+                    />
+                  </Box>
+                </Box>
+              )}
 
-                  <TextField
-                    id="caseSubType"
-                    select
-                    label="Case Sub Type"
-                    value={values.caseDetails.caseSubType}
-                    onChange={(event) => {
-                      const selectedCaseSubType = event.target.value;
-                      setSelectedCaseSubType(selectedCaseSubType);
-                      // Update selected case sub
-                      console.log("case sub type ", selectedCaseSubType);
-                      setFieldValue(
-                        "caseDetails.caseSubType",
-                        event.target.value
-                      );
-                    }}
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    required
-                  >
-                    {caseSubTypes.map((subType) => (
-                      <MenuItem
-                        key={subType.sub_type_name}
-                        value={subType.sub_type_name}
-                      >
-                        {subType.sub_type_name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Box>
-                <Box sx={{ display: "flex" }}>
-                  <Typography variant="body1" sx={{ mt: "20px", ml: "10px" }}>
-                    Registration Date:
-                  </Typography>
-                  <TextField
-                    name="registrationDate"
-                    type="date"
-                    variant="outlined"
-                    margin="normal"
-                    required
-                    value={registrationDate}
-                    onChange={handleRegistrationDateChange}
-                    sx={{ width: "30%" }}
-                  />
-                  <TextField
-                    required
-                    multiline
-                    rows={4}
-                    fullWidth
-                    id="description"
-                    name="description"
-                    label="Description"
-                    variant="outlined"
-                    value={description}
-                    onChange={handleDescriptionChange}
-                    onBlur={handleBlur} // Add onBlur event handler
-                    sx={{ mt: 2, ml: "20px" }}
-                  />
-                </Box>
-              </Box>
-              <Box
-                sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
-                borderRadius="15px"
-                padding="30px"
-              >
-                <Typography color={colors.greenAccent[500]} variant="h3">
-                  FIR Detail
-                </Typography>
-                <Box sx={{ display: "flex" }}>
-                  <TextField
-                    name="policeStation"
-                    label="Police Station"
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    required
-                    value={policeStation} // Assign value from state
-                    onChange={handlePoliceStationChange} // Call appropriate handler function
-                  />
-                  <TextField
-                    name="FIRNumber"
-                    label="FIR Number"
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    required
-                    sx={{ ml: "20px" }}
-                    value={FIRNumber} // Assign value from state
-                    onChange={handleFIRNumberChange} // Call appropriate handler function
-                  />
-                  <Typography variant="body1" sx={{ mt: "20px", ml: "20px" }}>
-                    FIR Date:
-                  </Typography>
-                  <TextField
-                    name="FIRDate"
-                    type="date"
-                    variant="outlined"
-                    margin="normal"
-                    required
-                    sx={{ ml: "20px", width: "50%" }}
-                    value={FIRDate} // Assign value from state
-                    onChange={handleFIRDateChange} // Call appropriate handler function
-                  />
-                </Box>
-              </Box>
               <Box
                 sx={{ mt: "30px", backgroundColor: `${colors.primary[400]}75` }}
                 borderRadius="15px"

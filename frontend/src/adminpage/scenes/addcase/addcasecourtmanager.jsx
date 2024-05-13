@@ -189,7 +189,7 @@ const AddCourtRegistrarCase = () => {
 
         // Prepare the POST data with only the selected judge's ID
         const postData = {
-          selectedJudgeId: selectedJudge, // Change to selectedJudgeId
+          selectedJudgeId: selectedJudge,
           selectedCaseId: selectedCaseId,
         };
 
@@ -906,7 +906,7 @@ const AddCourtRegistrarCase = () => {
           severity="success"
           sx={{ width: "100%" }}
         >
-          your operetion is sucessfully done
+          your operation is sucessfully done
         </MuiAlert>
       </Snackbar>
     </Box>

@@ -78,90 +78,94 @@ const Calendar = () => {
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Appointment Calendar" />
-      <Box
-        backgroundColor={colors.primary[400]}
-        p={1}
-        mb={2}
-        borderRadius={4}
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-      >
-        <Typography variant="h5" color={colors.greenAccent[500]} mt={2}>
-          Today's Appointments
-        </Typography>
-        {todayAppointments.length === 0 ? (
-          <Typography variant="body1">No appointments today</Typography>
-        ) : (
-          <List>
-            {todayAppointments.map((appointment) => (
-              <ListItem
-                key={appointment.appointment_id}
-                sx={{
-                  backgroundColor: colors.greenAccent[500],
-                  margin: "10px 0",
-                  borderRadius: "2px",
-                }}
-              >
-                <ListItemText
-                  primary={`Case ${appointment.case_id}`}
-                  secondary={formatDate(new Date(appointment.date), {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                />
-                <Typography>{appointment.note}</Typography>
-              </ListItem>
-            ))}
-          </List>
-        )}
-      </Box>
-      {/* Display Tomorrow's Appointments */}
-      <Box
-        backgroundColor={colors.primary[400]}
-        p={1}
-        mb={2}
-        borderRadius={4}
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-      >
-        <Typography variant="h5" color={colors.greenAccent[500]} mt={2}>
-          Tomorrow's Appointments
-        </Typography>
-        {tomorrowAppointments.length === 0 ? (
-          <Typography variant="body1">No appointments tomorrow</Typography>
-        ) : (
-          <List>
-            {tomorrowAppointments.map((appointment) => (
-              <ListItem
-                key={appointment.appointment_id}
-                sx={{
-                  margin: "10px 0",
-                  borderRadius: "2px",
-                  display: "flex", // Set display to flex
-                  borderBottom: "10px solid",
-                  borderColor: `${colors.blueAccent[400]}`,
-                  borderBottomColor: `${colors.blueAccent[400]}`,
-                  borderBottomWidth: "5px",
-                }}
-              >
-                <ListItemText
-                  primary={`Case ${appointment.case_id}`}
-                  secondary={formatDate(new Date(appointment.date), {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                />
-                <Typography sx={{ marginLeft: "10px" }}>
-                  {appointment.note}
-                </Typography>
-              </ListItem>
-            ))}
-          </List>
-        )}
+      <Box display="flex" justifyContent="space-evenly" gap="20px">
+        <Box
+          backgroundColor={colors.primary[400]}
+          p={1}
+          mb={2}
+          borderRadius={4}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          width="100%"
+        >
+          <Typography variant="h5" color={colors.greenAccent[500]} mt={2}>
+            Today's Appointments
+          </Typography>
+          {todayAppointments.length === 0 ? (
+            <Typography variant="body1">No appointments today</Typography>
+          ) : (
+            <List>
+              {todayAppointments.map((appointment) => (
+                <ListItem
+                  key={appointment.appointment_id}
+                  sx={{
+                    backgroundColor: colors.greenAccent[500],
+                    margin: "10px 0",
+                    borderRadius: "2px",
+                  }}
+                >
+                  <ListItemText
+                    primary={`Case ${appointment.case_id}`}
+                    secondary={formatDate(new Date(appointment.date), {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  />
+                  <Typography>{appointment.note}</Typography>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
+        {/* Display Tomorrow's Appointments */}
+        <Box
+          backgroundColor={colors.primary[400]}
+          p={1}
+          mb={2}
+          borderRadius={4}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          width="100%"
+        >
+          <Typography variant="h5" color={colors.greenAccent[500]} mt={2}>
+            Tomorrow's Appointments
+          </Typography>
+          {tomorrowAppointments.length === 0 ? (
+            <Typography variant="body1">No appointments tomorrow</Typography>
+          ) : (
+            <List>
+              {tomorrowAppointments.map((appointment) => (
+                <ListItem
+                  key={appointment.appointment_id}
+                  sx={{
+                    margin: "10px 0",
+                    borderRadius: "2px",
+                    display: "flex", // Set display to flex
+                    borderBottom: "10px solid",
+                    borderColor: `${colors.blueAccent[400]}`,
+                    borderBottomColor: `${colors.blueAccent[400]}`,
+                    borderBottomWidth: "5px",
+                  }}
+                >
+                  <ListItemText
+                    primary={`Case ${appointment.case_id}`}
+                    secondary={formatDate(new Date(appointment.date), {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  />
+                  <Typography sx={{ marginLeft: "10px" }}>
+                    {appointment.note}
+                  </Typography>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
       </Box>
       <Typography
         variant="h3"

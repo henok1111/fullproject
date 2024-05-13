@@ -448,7 +448,7 @@ const Advocator = () => {
         }}
         sx={{
           width: "100%",
-          height: "600px", // Adjust the height as needed
+          height: "600px",
           "& .MuiDataGrid-root": {
             border: "none",
           },

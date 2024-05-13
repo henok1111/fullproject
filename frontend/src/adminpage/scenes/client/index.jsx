@@ -633,12 +633,7 @@ const Client = () => {
           loading={loading}
           checkboxSelection={false}
           disableSelectionOnClick
-          disableColumnMenu
-          disableColumnFilter
-          disableColumnSelector
-          disableDensitySelector
-          disableExport
-          autoHeight
+          rowsPerPageOptions={[10]}
           sx={{
             flexGrow: 1,
             "& .MuiDataGrid-root": {

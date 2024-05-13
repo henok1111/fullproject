@@ -9,6 +9,7 @@ import Header from "../../components/Header";
 import Calendar from "../calendar/calendar";
 import StatBox from "../../components/StatBox";
 import ProgressCircle from "../../components/ProgressCircle";
+import axios from "axios";
 import {
   GavelOutlined,
   GavelRounded,
@@ -18,6 +19,7 @@ import {
 import GeographyChart from "../../components/GeographyChart";
 import { useState, useEffect } from "react"; // Import useState and useEffect
 import { FaUsers } from "react-icons/fa";
+import BackupIcon from "@mui/icons-material/Backup";
 const CourtManagerDashboard = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -35,25 +37,6 @@ const CourtManagerDashboard = () => {
     inactive: 0,
   });
   const allPercentage = 100;
-  const judgePercentage = ((userCounts.judge / userCounts.all) * 100).toFixed(
-    2
-  );
-  const invoiceClerkPercentage = (
-    (fetchedCases.tota / fetchedCases.totalCount) *
-    100
-  ).toFixed(2);
-  const proscutorPercentage = (
-    (fetchedCases.proscuter / fetchedCases.totalCount) *
-    100
-  ).toFixed(2);
-  const registrarPercentage = (
-    (fetchedCases.registrar / fetchedCases.totalCount) *
-    100
-  ).toFixed(2);
-  const inactivePercentage = (
-    (fetchedCases.inactive / fetchedCases.totalCount) *
-    100
-  ).toFixed(2);
 
   const totalCount = fetchedCases.length;
   const closedCount = fetchedCases.filter(
@@ -128,6 +111,33 @@ const CourtManagerDashboard = () => {
     fetchJudge();
     fetchCaseCount();
   }, []);
+
+  const handleBackup = () => {
+    axios
+      .get("http://localhost:8081/api/backup", { responseType: "blob" })
+      .then((response) => {
+        // Create a blob from the response data
+        const blob = new Blob([response.data], {
+          type: "application/octet-stream",
+        });
+
+        // Create a URL for the blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a temporary anchor element
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "backup.sql"; // Set the filename for download
+        a.click();
+
+        // Clean up resources
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error("Error backing up database:", error);
+      });
+  };
+
   return (
     <Box padding="40px" backgroundColor={colors.blueAccent[900]}>
       {/* HEADER */}
@@ -138,6 +148,16 @@ const CourtManagerDashboard = () => {
         alignItems="center"
       >
         <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
+        <Box>
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<BackupIcon />}
+            onClick={handleBackup}
+          >
+            Back Up Data
+          </Button>
+        </Box>
       </Box>
 
       {/* GRID & CHARTS */}

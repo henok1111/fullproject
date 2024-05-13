@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import mysql from "mysql2/promise";
+import mysqldump from "mysqldump";
 import bluebird from "bluebird";
 import multer from "multer";
 import path from "path";
@@ -413,6 +414,37 @@ app.get("/api/getCaseSubType", async (req, res) => {
 });
 app.get("/api/getcasecout", async (req, res) => {
   await GetCaseCount(req, res);
+});
+app.get("/api/backup", async (req, res) => {
+  try {
+    // Perform the database backup
+    const dump = await mysqldump({
+      connection: {
+        host: "localhost",
+        user: "root",
+        password: "1234",
+        database: "court",
+      },
+    });
+
+    // Convert backup data to string
+    const backupString = JSON.stringify(dump.dump);
+
+    // Write the backup data to a file
+    const backupFilePath = path.join(process.cwd(), "backup.sql");
+    fs.writeFileSync(backupFilePath, backupString);
+
+    // Set response headers for file download
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Disposition", "attachment; filename=backup.sql");
+
+    // Send the backup file as response
+    res.sendFile(backupFilePath);
+  } catch (error) {
+    console.error("Database backup failed:", error);
+    // Send response indicating failure
+    res.status(500).send("Database backup failed. Please try again later.");
+  }
 });
 
 app.listen(PORT, () => {
