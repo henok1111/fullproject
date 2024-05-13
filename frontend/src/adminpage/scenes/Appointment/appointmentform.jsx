@@ -81,6 +81,7 @@ const Appointmentform = () => {
       );
 
       setPetitioners(petitionersResponse.data);
+      console.log(petitionersResponse.data);
       setRespondents(respondentsResponse.data);
     } catch (error) {
       console.error("Error fetching case details:", error);
@@ -120,17 +121,21 @@ const Appointmentform = () => {
 
       // Extract phone numbers from the fetched petitioner and respondent data
       const petitionerPhoneNumbers = petitioners
-        .map((petitioner) => petitioner.mobile_number)
+        .map((petitioner) => petitioner.petitioner_mobile_number)
         .join(", ");
       const respondentPhoneNumbers = respondents
-        .map((respondent) => respondent.mobile_number)
+        .map((respondent) => respondent.respondent_mobile_number)
+        .join(", ");
+      const advocatorPhoneNumber = respondents
+        .map((respondent) => respondent.advocate_mobile_number)
         .join(", ");
 
       const appointmentData = {
-        user_id: userId, // Include userId
+        user_id: userId,
         case_id: selectedCase.case_id,
-        petitioner_phone_numbers: petitionerPhoneNumbers, // Include petitioner's phone numbers
-        respondent_phone_numbers: respondentPhoneNumbers, // Include respondent's phone numbers
+        petitioner_phone_numbers: petitionerPhoneNumbers,
+        respondent_phone_numbers: respondentPhoneNumbers,
+        advocate_phone_number: advocatorPhoneNumber,
         date: date,
         time: time,
         note: note,
@@ -223,14 +228,36 @@ const Appointmentform = () => {
                     <TableCell>Name</TableCell>
                     <TableCell>Phone Number</TableCell>
                     <TableCell>Email</TableCell>
+                    {petitioners.some(
+                      (petitioner) => petitioner.advocate_email !== null
+                    ) && (
+                      <>
+                        <TableCell>Advocate Name</TableCell>
+                        <TableCell>Advocate Phone Number</TableCell>
+                        <TableCell>Advocate Email</TableCell>
+                      </>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {petitioners.map((petitioner, index) => (
                     <TableRow key={index}>
-                      <TableCell>{petitioner.first_name}</TableCell>
-                      <TableCell>{petitioner.mobile_number}</TableCell>
-                      <TableCell>{petitioner.email}</TableCell>
+                      <TableCell>{petitioner.petitioner_first_name}</TableCell>
+                      <TableCell>
+                        {petitioner.petitioner_mobile_number}
+                      </TableCell>
+                      <TableCell>{petitioner.petitioner_email}</TableCell>
+                      {petitioner.advocate_email !== null && (
+                        <>
+                          <TableCell>
+                            {petitioner.advocate_first_name}
+                          </TableCell>
+                          <TableCell>
+                            {petitioner.advocate_mobile_number}
+                          </TableCell>
+                          <TableCell>{petitioner.advocate_email}</TableCell>
+                        </>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -249,14 +276,36 @@ const Appointmentform = () => {
                     <TableCell>Name</TableCell>
                     <TableCell>Phone Number</TableCell>
                     <TableCell>Email</TableCell>
+                    {respondents.some(
+                      (respondent) => respondent.advocate_email !== null
+                    ) && (
+                      <>
+                        <TableCell>Advocate Name</TableCell>
+                        <TableCell>Advocate Phone Number</TableCell>
+                        <TableCell>Advocate Email</TableCell>
+                      </>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {respondents.map((respondent, index) => (
                     <TableRow key={index}>
-                      <TableCell>{respondent.first_name}</TableCell>
-                      <TableCell>{respondent.mobile_number}</TableCell>
-                      <TableCell>{respondent.email}</TableCell>
+                      <TableCell>{respondent.respondent_first_name}</TableCell>
+                      <TableCell>
+                        {respondent.respondent_mobile_number}
+                      </TableCell>
+                      <TableCell>{respondent.respondent_email}</TableCell>
+                      {respondent.advocate_email !== null && (
+                        <>
+                          <TableCell>
+                            {respondent.advocate_first_name}
+                          </TableCell>
+                          <TableCell>
+                            {respondent.advocate_mobile_number}
+                          </TableCell>
+                          <TableCell>{respondent.advocate_email}</TableCell>
+                        </>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -264,6 +313,7 @@ const Appointmentform = () => {
             </TableContainer>
           </Box>
         )}
+
         <Box display="flex" gap="20px" mt="10px">
           <Typography variant="body1" sx={{ mt: "20px", ml: "20px" }}>
             Date:

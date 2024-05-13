@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import {
   Box,
@@ -11,6 +11,7 @@ import {
   FormControl,
   FormLabel,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import * as yup from "yup";
 import Header from "../../components/Header";
 import { tokens } from "../../../theme";
@@ -57,6 +58,7 @@ const createUserObject = (values) => {
 const AddAdvocator = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const formik = useFormik({
     validationSchema,
@@ -72,6 +74,14 @@ const AddAdvocator = () => {
     },
     onSubmit: (values) => handleSubmit(values, formik),
   });
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const handleSubmit = async (values, formik) => {
     try {
@@ -131,6 +141,7 @@ const AddAdvocator = () => {
       } else {
         console.error("Failed to submit form data");
       }
+      setOpenSnackbar(true);
     } catch (error) {
       console.error("Error submitting form data:", error);
     }
@@ -299,11 +310,19 @@ const AddAdvocator = () => {
         </Box>
       </form>
       <Snackbar
-        open={false}
-        autoHideDuration={6000}
-        onClose={() => {}}
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      />
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Advocate Added Successfully
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };

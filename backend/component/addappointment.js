@@ -2,8 +2,8 @@ import twilio from "twilio";
 
 // Initialize Twilio client with your account SID and auth token
 const twilioClient = twilio(
-  "AC355399ab03efa713c60be640368cd77e",
-  "61072e2c48690b73798c81c499334b95"
+  "AC06500f35156c83f1a8297367f3a22f07",
+  "62969b77719f9b837311749893a6900a"
 );
 
 export const AddAppointment = async (db, req, res) => {
@@ -17,10 +17,10 @@ export const AddAppointment = async (db, req, res) => {
       note,
       petitioner_phone_numbers,
       respondent_phone_numbers,
+      advocate_phone_number,
       user_id,
     } = req.body;
-
-    // Validate required fields
+    console.log(req.body);
     if (
       !case_id ||
       !date ||
@@ -28,6 +28,7 @@ export const AddAppointment = async (db, req, res) => {
       !note ||
       !petitioner_phone_numbers ||
       !respondent_phone_numbers ||
+      !advocate_phone_number ||
       !user_id
     ) {
       console.error("Missing required fields:", req.body);
@@ -57,7 +58,7 @@ export const AddAppointment = async (db, req, res) => {
         try {
           await twilioClient.messages.create({
             body: `Hi There! You have a court appointment scheduled for ${date} at ${time} and  Note: ${note}.`,
-            from: "+12513136308", // Your Twilio phone number
+            from: "+13309648109", // Your Twilio phone number
             to: phoneNumber,
           });
           console.log(`SMS sent successfully to petitioner ${phoneNumber}`);
@@ -83,7 +84,7 @@ export const AddAppointment = async (db, req, res) => {
         try {
           await twilioClient.messages.create({
             body: `Hello! You have a court appointment scheduled for ${date} at ${time} Note: ${note}.`,
-            from: "+12512572537", // Your Twilio phone number
+            from: "+13309648109", // Your Twilio phone number
             to: phoneNumber,
           });
           console.log(`SMS sent successfully to respondent ${phoneNumber}`);
@@ -92,6 +93,23 @@ export const AddAppointment = async (db, req, res) => {
             `Error sending SMS to respondent ${phoneNumber}:`,
             error
           );
+        }
+      })
+    );
+
+    const advocatePhoneNumberArray = advocate_phone_number.split(", ");
+    await Promise.all(
+      advocatePhoneNumberArray.map(async (phoneNumber) => {
+        // Send SMS to advocate using Twilio
+        try {
+          await twilioClient.messages.create({
+            body: `Hello! You have a court appointment scheduled for ${date} at ${time} Note: ${note}.`,
+            from: "+13309648109", // Your Twilio phone number
+            to: phoneNumber,
+          });
+          console.log(`SMS sent successfully to advocate ${phoneNumber}`);
+        } catch (error) {
+          console.error(`Error sending SMS to advocate ${phoneNumber}:`, error);
         }
       })
     );

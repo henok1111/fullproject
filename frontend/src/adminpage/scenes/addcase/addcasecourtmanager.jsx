@@ -20,11 +20,8 @@ import {
   MenuItem,
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
-
 const initialValues = {};
-
 const checkoutSchema = yup.object().shape({});
-
 const AddCourtRegistrarCase = () => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -39,7 +36,6 @@ const AddCourtRegistrarCase = () => {
   const [selectedJudge, setSelectedJudge] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-
   const handleClick = () => {
     navigate(`/registrar/caseform`);
   };
@@ -181,7 +177,53 @@ const AddCourtRegistrarCase = () => {
       console.error("No judge or case selected");
     }
   };
+  const handleSubmitcc = async (selectedCaseId) => {
+    // Make sure selectedJudge and selectedCaseId have values before submitting
+    if (selectedJudge && selectedCaseId) {
+      try {
+        // Log the selected judge's value
+        console.log("Selected Judge:", selectedJudge);
 
+        // Log the selected case ID
+        console.log("Selected Case ID:", selectedCaseId);
+
+        // Prepare the POST data with only the selected judge's ID
+        const postData = {
+          selectedJudgeId: selectedJudge, // Change to selectedJudgeId
+          selectedCaseId: selectedCaseId,
+        };
+
+        // Perform the API POST request with the selected judge's ID
+        const response = await fetch("http://localhost:8081/api/judgeassign", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(postData),
+        });
+
+        setSubmitSuccess(true);
+        // Check if the request was successful
+        if (!response.ok) {
+          throw new Error("Failed to submit data");
+        }
+
+        // Handle success response
+        const data = await response.json();
+        console.log("Submitted data:", data);
+
+        // Optionally, reset the selectedJudge state after submission
+        setSelectedJudge("");
+        setOpenSnackbar(true);
+      } catch (error) {
+        console.error("Error submitting data:", error);
+        // Handle error state if needed
+      }
+    } else {
+      // Handle case where no judge or case is selected
+      console.error("No judge or case selected");
+    }
+  };
   return (
     <Box padding="20px" backgroundColor={colors.blueAccent[900]}>
       <Header title="Case Management" subtitle="" />
@@ -278,7 +320,24 @@ const AddCourtRegistrarCase = () => {
                         >
                           Case Number {caseData.case_id}
                         </Typography>
+
+                        <Typography
+                          marginBottom={2}
+                          style={{
+                            fontWeight: "bold",
+                            color: colors.greenAccent[300],
+                          }}
+                          variant="h3"
+                          color="#5bc0de"
+                          flexGrow={1} // Grow to fill available space
+                        >
+                          Case Status{" "}
+                          <span style={{ color: colors.blueAccent[500] }}>
+                            {caseData.case_status}
+                          </span>
+                        </Typography>
                       </Box>
+
                       <Grid container spacing={0}>
                         <Grid
                           item
@@ -426,6 +485,54 @@ const AddCourtRegistrarCase = () => {
                                 )}
                               </>
                             )}
+
+                            {caseData.first_name !== null &&
+                              caseData.case_status === "running" && (
+                                // Render select dropdown to choose a judge
+                                <>
+                                  <TextField
+                                    select
+                                    label="Transfer Case"
+                                    value={selectedJudge}
+                                    onChange={(e) =>
+                                      setSelectedJudge(e.target.value)
+                                    }
+                                    variant="outlined"
+                                    fullWidth
+                                    style={{ marginTop: "10px" }}
+                                  >
+                                    {caseData.case_type === "criminal"
+                                      ? criminalJudges.map((judge) => (
+                                          <MenuItem
+                                            key={judge.id}
+                                            value={judge.id}
+                                          >
+                                            {`${judge.id}  ${judge.first_name} ${judge.last_name}`}
+                                          </MenuItem>
+                                        ))
+                                      : civilJudges.map((judge) => (
+                                          <MenuItem
+                                            key={judge.id}
+                                            value={judge.id}
+                                          >
+                                            {`${judge.id}  ${judge.first_name} ${judge.last_name}`}
+                                          </MenuItem>
+                                        ))}
+                                  </TextField>
+
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() =>
+                                      handleSubmitcc(caseData.case_id)
+                                    }
+                                    style={{ marginTop: "10px" }}
+                                  >
+                                    Submit
+                                  </Button>
+                                </>
+                              )}
+
                             {caseData.is_paid === "Paid" && (
                               <>
                                 {caseData.first_name === null ? (
@@ -799,7 +906,7 @@ const AddCourtRegistrarCase = () => {
           severity="success"
           sx={{ width: "100%" }}
         >
-          Judge Assigned Successfully
+          your operetion is sucessfully done
         </MuiAlert>
       </Snackbar>
     </Box>
