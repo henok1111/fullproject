@@ -19,7 +19,6 @@ import {
   InputAdornment,
   MenuItem,
 } from "@mui/material";
-import { io } from "socket.io-client";
 
 const initialValues = {};
 
@@ -39,7 +38,6 @@ const AddCourtRegistrarCase = () => {
   const [selectedJudge, setSelectedJudge] = useState("");
   const [selectedCaseId, setSelectedCaseId] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const socket = io.connect("http://localhost:3001");
 
   const handleClick = () => {
     navigate(`/registrar/caseform`);
@@ -164,9 +162,6 @@ const AddCourtRegistrarCase = () => {
 
         // Optionally, reset the selectedJudge state after submission
         setSelectedJudge("");
-        socket.emit("send_notification", {
-          Notification: "new case has been assigned",
-        });
       } catch (error) {
         console.error("Error submitting data:", error);
         // Handle error state if needed
