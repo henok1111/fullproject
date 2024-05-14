@@ -248,8 +248,6 @@ const AddCase = () => {
     if (!openCaseFormDialog && isEditFormClosed) {
       fetchCaseCount();
     }
-    const intervalId = setInterval(fetchCaseCount, 3000);
-    return () => clearInterval(intervalId);
   }, [openCaseFormDialog, isEditFormClosed]);
 
   const toggleCaseDetails = (caseId) => {
@@ -1130,8 +1128,9 @@ const AddCase = () => {
                         <Grid item boxShadow={10}>
                           <Box mt={2}>
                             <Button
+                              type="button"
                               variant="contained"
-                              color="primary"
+                              color="secondary"
                               onClick={() => addDocumentRow(caseData.case_id)}
                             >
                               Add Document
@@ -1300,6 +1299,7 @@ const AddCase = () => {
                       </div>
                       <Button
                         variant="contained"
+                        color="secondary"
                         onClick={() => toggleCaseDetails(caseData.case_id)}
                       >
                         {expandedCases[caseData.case_id]

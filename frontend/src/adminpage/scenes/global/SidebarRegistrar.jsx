@@ -245,7 +245,7 @@ const Sidebar = ({ role, name, userId }) => {
     registrar: [
       { title: "Dashboard", to: "", icon: <HomeOutlinedIcon /> },
       {
-        title: "proscutor Files",
+        title: "Proscutor Files",
         to: "casethatcomefromproscutor",
         icon: <AttachFileIcon />,
       },

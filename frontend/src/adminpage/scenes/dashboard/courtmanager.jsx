@@ -155,7 +155,7 @@ const CourtManagerDashboard = () => {
             startIcon={<BackupIcon />}
             onClick={handleBackup}
           >
-            Back Up Data
+            Back Up DataBase
           </Button>
         </Box>
       </Box>
@@ -179,7 +179,7 @@ const CourtManagerDashboard = () => {
         >
           <StatBox
             title={totalCount}
-            subtitle="total cases"
+            subtitle="Total cases"
             progress={allPercentage / 100}
             increase={`+${allPercentage}%`}
             icon={
